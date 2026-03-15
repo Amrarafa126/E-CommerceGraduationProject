@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>E_Commerce.Core</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\E-Commerce.Data\E-Commerce.Data.csproj" />
+    <ProjectReference Include="..\E-Commerce.Infrustructure\E-Commerce.Infrustructure.csproj" />
+    <ProjectReference Include="..\E-Commerce.Service\E-Commerce.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Category\Commands\Handlers\" />
+    <Folder Include="Features\Category\Commands\Models\" />
+    <Folder Include="Features\Category\Commands\Vaildations\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Mapping\Categoris\CommandMapping\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+		<PackageReference Include="MediatR" Version="14.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
+		<PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="10.0.3" />
+	</ItemGroup>
+
+</Project>
