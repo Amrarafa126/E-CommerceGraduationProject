@@ -1,5 +1,4 @@
-﻿
-using E_Commerce.Data.Entity;
+﻿using E_Commerce.Data.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,20 +10,6 @@ namespace E_Commerce.Infrustructure.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
-
-            builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.UserName)
-                   .HasMaxLength(200);
-
-            builder.Property(x => x.Email)
-                   .HasMaxLength(200);
-
-            builder.Property(x => x.PasswordHash)
-                   .HasMaxLength(500);
-
-            builder.Property(x => x.Role)
-                   .HasMaxLength(50);
 
             builder.HasOne(x => x.Company)
                    .WithMany(x => x.Users)

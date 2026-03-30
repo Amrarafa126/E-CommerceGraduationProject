@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using E_Commerce.Data.Entity;
+﻿using E_Commerce.Data.Entity;
+using E_Commerce.Data.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+
 
 namespace E_Commerce.Infrustructure.Context
 {
-    public class AppDBContext : DbContext
+    public class AppDBContext : IdentityDbContext<User>
     {
+        public AppDBContext()
+        {
+            
+        }
         public AppDBContext(DbContextOptions options) : base(options)
         {
 

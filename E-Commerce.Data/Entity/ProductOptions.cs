@@ -9,9 +9,13 @@ namespace E_Commerce.Data.Entity
 {
     public class ProductOption
     {
+        public ProductOption()
+        {
+            Values = new HashSet<ProductOptionValue>();
+        }
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public int ProductId { get; set; }
         [ForeignKey("ProductId")]

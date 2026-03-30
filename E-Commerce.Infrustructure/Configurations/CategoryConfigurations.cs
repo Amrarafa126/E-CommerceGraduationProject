@@ -18,12 +18,13 @@ namespace E_Commerce.Infrustructure.Configurations
 
 
 
-            //builder.HasOne(c => c.Parent)
-            //    .WithMany(c => c.Children)
-            //    .HasForeignKey(c => c.ParentId)
-            //    .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(c => c.CategoryParent)
+                .WithMany(c => c.CategoryChildren)
+                .HasForeignKey(c => c.ParentId)
+                .IsRequired(false);
+               // .OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasIndex(x => x.ParentId);
+            builder.HasIndex(x => x.ParentId);
         }
     }
 }

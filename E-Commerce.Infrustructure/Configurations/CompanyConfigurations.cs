@@ -31,7 +31,7 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(x => x.Description)
                    .HasMaxLength(1000);
 
-            builder.Property(x => x.IsVerified)
+            builder.Property(x => x.VerificationStatus)
                    .HasDefaultValue(false);
 
 

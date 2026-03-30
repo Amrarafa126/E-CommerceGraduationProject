@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using E_Commerce.Data.Entity;
-using Microsoft.Extensions.Localization;
+﻿
 
 namespace E_Commerce.Core.BaseResponse
 
@@ -43,6 +37,15 @@ namespace E_Commerce.Core.BaseResponse
                 StatusCode = System.Net.HttpStatusCode.Unauthorized,
                 Succeeded = true,
                 Message = "UnAuthorized"
+            };
+        }
+        public Response<T> UnprocessableEntity<T>(string Message = null)
+        {
+            return new Response<T>()
+            {
+                StatusCode = System.Net.HttpStatusCode.UnprocessableEntity,
+                Succeeded = false,
+                Message = Message == null ? "Unprocessable Entity" : Message
             };
         }
         public Response<T> BadRequest<T>(string Message = null)

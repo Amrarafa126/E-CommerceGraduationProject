@@ -13,7 +13,6 @@ namespace E_Commerce.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -21,7 +20,8 @@ namespace E_Commerce.Api
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<AppDBContext>(op =>
             op.UseSqlServer(builder.Configuration.GetConnectionString("dbcontext")));
-            builder.Services.AddInfrustructureDependencies().AddServiceDependencies().AddCoreDependencies();
+            builder.Services.AddInfrustructureDependencies().AddServiceDependencies().AddCoreDependencies().AddServiceRegisteration();
+            builder.Services.AddHttpContextAccessor();
 
 
             #region AllowCORS
@@ -55,7 +55,7 @@ namespace E_Commerce.Api
             app.UseAuthorization();
 
             app.UseCors(CORS);
-
+            app.UseStaticFiles();
 
             app.MapControllers();
 

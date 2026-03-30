@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using E_Commerce.Data.Identity;
 
 namespace E_Commerce.Data.Entity
 {
@@ -15,7 +16,7 @@ namespace E_Commerce.Data.Entity
         [ForeignKey("ProductId")]
         public Product? Product { get; set; }
 
-        public int UserId { get; set; }
+        public string? UserId { get; set; }
         [ForeignKey("UserId")]
         public User? User { get; set; }
 

@@ -14,5 +14,11 @@ namespace E_Commerce.Infrustructure.Repository
         {
             products = dbContext.Set<Product>();
         }
+
+        public async Task<List<Product>> GetProductListAsync()
+        {
+            var Product = await products.Include(x =>x.Images).ToListAsync();
+            return Product;
+        }
     }
 }

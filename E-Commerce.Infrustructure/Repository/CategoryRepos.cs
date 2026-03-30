@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using E_Commerce.Data.Entity;
+﻿using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Infrustructure.InfrustructureBases;
 using E_Commerce.Infrustructure.Interfase;
@@ -21,7 +16,8 @@ namespace E_Commerce.Infrustructure.Repository
 
         public async Task<List<Category>> GetCategoryListAsync()
         {
-            return await categories./*Include(d => d.Parent).*/ToListAsync();
+            var category = await categories.Where(x=>x.ParentId == null).Include(x => x.CategoryChildren).ToListAsync();
+            return category;
         }
     }
     }

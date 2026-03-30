@@ -7,6 +7,8 @@ namespace E_Commerce.Core.Mapping.Categoris
         public CategoryProfile()
         {
             GetCategoryListMapping();
+            AddCategoryMapping();
+            EditCategoryMapping();
         }
     }
 }

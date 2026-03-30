@@ -14,11 +14,40 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Category\Commands\Handlers\" />
-    <Folder Include="Features\Category\Commands\Models\" />
-    <Folder Include="Features\Category\Commands\Vaildations\" />
+    <Folder Include="Features\Categorys\Commands\Vaildations\" />
     <Folder Include="Behaviors\" />
-    <Folder Include="Mapping\Categoris\CommandMapping\" />
+    <Folder Include="Features\Companies\Commands\Vaildations\" />
+    <Folder Include="Features\Companies\Queries\Handlers\" />
+    <Folder Include="Features\Companies\Queries\Models\" />
+    <Folder Include="Features\Companies\Queries\Response\" />
+    <Folder Include="Features\ProductImages\Commands\Vaildations\" />
+    <Folder Include="Features\ProductImages\Queries\Handlers\" />
+    <Folder Include="Features\ProductImages\Queries\Models\" />
+    <Folder Include="Features\ProductImages\Queries\Response\" />
+    <Folder Include="Features\ProductOptions\Commands\Vaildations\" />
+    <Folder Include="Features\ProductOptions\Queries\Handlers\" />
+    <Folder Include="Features\ProductOptions\Queries\Models\" />
+    <Folder Include="Features\ProductOptions\Queries\Response\" />
+    <Folder Include="Features\ProductOptionValues\Commands\Vaildations\" />
+    <Folder Include="Features\ProductOptionValues\Queries\Handlers\" />
+    <Folder Include="Features\ProductOptionValues\Queries\Models\" />
+    <Folder Include="Features\ProductOptionValues\Queries\Response\" />
+    <Folder Include="Features\ProductPriceTiers\Commands\Vaildations\" />
+    <Folder Include="Features\ProductPriceTiers\Queries\Handlers\" />
+    <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
+    <Folder Include="Features\ProductPriceTiers\Queries\Response\" />
+    <Folder Include="Features\Products\Commands\Vaildations\" />
+    <Folder Include="Features\ProductVariants\Commands\Handlers\" />
+    <Folder Include="Features\ProductVariants\Commands\Models\" />
+    <Folder Include="Features\ProductVariants\Commands\Vaildations\" />
+    <Folder Include="Features\ProductVariants\Queries\Handlers\" />
+    <Folder Include="Features\ProductVariants\Queries\Models\" />
+    <Folder Include="Features\ProductVariants\Queries\Response\" />
+    <Folder Include="Mapping\Companies\QueriesMapping\" />
+    <Folder Include="Mapping\ProductImage\QueriesMapping\" />
+    <Folder Include="Mapping\ProductOptions\QueriesMapping\" />
+    <Folder Include="Mapping\ProductOptionValues\QueriesMapping\" />
+    <Folder Include="Mapping\ProductPriceTiers\QueriesMapping\" />
   </ItemGroup>
 
 	<ItemGroup>

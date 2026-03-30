@@ -16,8 +16,13 @@ namespace E_Commerce.Infrustructure
         {
             service.AddTransient<ICategoryRepos, CategoryRepos>();
             service.AddTransient<IProductRepos, ProductRepos>();
+            service.AddTransient<ICompanyRepos, CompanyRepos>();
+            service.AddTransient<IProductImageRepos, ProductImageRepos>();
+            service.AddTransient<IProductOptionsRepos, ProductOptionsRepos>();
+            service.AddTransient<IProductOptionValuesRepos, ProductOptionValuesRepos>();
+            service.AddTransient<IProductPriceTierRepos, ProductPriceTierRepos>();
 
-          
+
             service.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
             return service;
         }

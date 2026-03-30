@@ -13,7 +13,7 @@ namespace E_Commerce.Data.Entity
 
         public int ProductId { get; set; }
         [ForeignKey("ProductId")]
-        public Product Product { get; set; }
+        public Product? Product { get; set; }
 
         public int MinQuantity { get; set; }
 

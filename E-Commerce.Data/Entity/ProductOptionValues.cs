@@ -11,7 +11,7 @@ namespace E_Commerce.Data.Entity
     {
         public int Id { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         public int ProductOptionId { get; set; }
         [ForeignKey("ProductOptionId")]
