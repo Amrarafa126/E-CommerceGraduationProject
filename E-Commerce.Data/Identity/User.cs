@@ -9,6 +9,7 @@ namespace E_Commerce.Data.Identity
         public User() {
            Orders = new HashSet<Order>();
             Reviews = new HashSet<Review>();
+            UserRefreshTokens = new HashSet<UserRefreshToken>();
         }
       
         public int CompanyId { get; set; }
@@ -17,5 +18,7 @@ namespace E_Commerce.Data.Identity
 
         public ICollection<Order>? Orders { get; set; }
         public ICollection<Review>? Reviews { get; set; }
+        public virtual ICollection<UserRefreshToken> UserRefreshTokens { get; set; }
+
     }
 }

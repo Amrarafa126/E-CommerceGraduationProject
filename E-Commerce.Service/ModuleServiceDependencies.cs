@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using E_Commerce.Service.Interfase;
 using E_Commerce.Service.Repostoiry;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace E_Commerce.Service
@@ -21,6 +23,10 @@ namespace E_Commerce.Service
             service.AddTransient<IProductOptionService, ProductOptionService>();
             service.AddTransient<IProductOptionValueService, ProductOptionValueService>();
             service.AddTransient<IProductPriceTierService , ProductPriceTierService>();
+            service.AddTransient<IApplicationUserService, ApplicationUserService>();
+            service.AddTransient<IEmailsService, EmailsService>();
+            service.AddTransient<IAuthenticationService, AuthenticationService>();
+            service.AddTransient<IVariantService, VariantService>();
 
             return service;
         }

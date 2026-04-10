@@ -8,16 +8,14 @@ namespace E_Commerce.Infrustructure.Context
 {
     public class AppDBContext : IdentityDbContext<User>
     {
-        public AppDBContext()
-        {
-            
-        }
-        public AppDBContext(DbContextOptions options) : base(options)
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
 
         }
-         #region dbset in database
-         public DbSet<Category> categories { get; set; }
+
+      
+        #region dbset in database
+        public DbSet<Category> categories { get; set; }
          public DbSet<Product> products { get; set; }
          public DbSet<Order> orders { get; set; }
          public DbSet<OrderItem> orderItems { get; set; }

@@ -19,8 +19,8 @@ namespace E_Commerce.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<AppDBContext>(op =>
-            op.UseSqlServer(builder.Configuration.GetConnectionString("dbcontext")));
-            builder.Services.AddInfrustructureDependencies().AddServiceDependencies().AddCoreDependencies().AddServiceRegisteration();
+            op.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddInfrustructureDependencies().AddServiceDependencies().AddCoreDependencies().AddServiceRegisteration(builder.Configuration);
             builder.Services.AddHttpContextAccessor();
 
 
@@ -52,6 +52,7 @@ namespace E_Commerce.Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(CORS);

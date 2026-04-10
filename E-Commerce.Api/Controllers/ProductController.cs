@@ -4,6 +4,7 @@ using E_Commerce.Core.Features.ProductOptionValues.Commands.Models;
 using E_Commerce.Core.Features.ProductPriceTiers.Commands.Models;
 using E_Commerce.Core.Features.Products.Commands.Models;
 using E_Commerce.Core.Features.Products.Queries.Models;
+using E_Commerce.Core.Features.ProductVariants.Commands.Models;
 using MediatR;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Http;
@@ -54,6 +55,16 @@ namespace E_Commerce.Api.Controllers
         {
             command.ProductId = id;
             return Ok(await _mediator.Send(command));
+        }
+        [HttpPost("generate-variants/{productId}")]
+        public async Task<IActionResult> GenerateVariants(int productId)
+        {
+            var result = await _mediator.Send(new GenerateVariantsCommand
+            {
+                ProductId = productId
+            });
+
+            return Ok(result);
         }
     }
 }
