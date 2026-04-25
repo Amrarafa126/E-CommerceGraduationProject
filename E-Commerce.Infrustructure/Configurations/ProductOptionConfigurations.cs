@@ -6,26 +6,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-    public class ProductOptionConfigurations : IEntityTypeConfiguration<ProductOption>
+    public class ProductOptionConfiguration : IEntityTypeConfiguration<ProductOption>
     {
         public void Configure(EntityTypeBuilder<ProductOption> builder)
         {
             builder.ToTable("ProductOptions");
+            builder.HasKey(o => o.Id);
+            builder.Property(o => o.Name).IsRequired().HasMaxLength(100);
 
-            builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.Name)
-                   .HasMaxLength(200)
-                   .IsRequired();
-
-            builder.HasMany(x => x.Values)
-                   .WithOne(x => x.Option)
-                   .HasForeignKey(x => x.ProductOptionId);
-                   //.OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasIndex(x => x.ProductId);
+            builder.HasMany(o => o.Values)
+                .WithOne(v => v.ProductOption)
+                .HasForeignKey(v => v.ProductOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
-
-       
     }
 }

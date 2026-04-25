@@ -10,9 +10,9 @@ namespace E_Commerce.Core.Mapping.ProductImage
     {
         public void AddProductImagesCommandMapping()
         {
-            CreateMap<AddProductImagesCommand, Data.Entity.ProductImage>()
-                .ForMember(dest => dest.IsMain, opt => opt.MapFrom(src => false))
-                .ForMember(d => d.ImageUrl, o => o.Ignore());
+            //CreateMap<AddProductImagesCommand, Data.Entity.ProductImage>()
+            //    .ForMember(dest => dest.IsMain, opt => opt.MapFrom(src => false))
+            //    .ForMember(d => d.ImageUrl, o => o.Ignore());
 
 
         }

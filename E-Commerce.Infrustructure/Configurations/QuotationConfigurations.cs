@@ -10,37 +10,27 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace E_Commerce.Infrustructure.Configurations
 {
   
-    public class QuotationConfigurations : IEntityTypeConfiguration<Quotation>
+    public class QuotationConfigurations : IEntityTypeConfiguration<RfqQuotation>
         {
-         public void Configure(EntityTypeBuilder<Quotation> builder)
+         public void Configure(EntityTypeBuilder<RfqQuotation> builder)
          {
-              
-            builder.HasKey(x => x.Id);
+            //builder.ToTable("RfqQuotations");
+            //    builder.HasKey(q => q.Id);
+            //    builder.Property(q => q.QuotationNumber).IsRequired().HasMaxLength(50);
+            //    builder.Property(q => q.TotalAmount).HasPrecision(18, 4);
+            //    builder.Property(q => q.Currency).IsRequired().HasMaxLength(3);
+            //    builder.Property(q => q.Notes).HasMaxLength(2000);
+            //    builder.Property(q => q.Status).HasConversion<string>().HasMaxLength(20);
+    
+            //    builder.HasIndex(q => q.QuotationNumber).IsUnique();
+    
+            //    builder.HasOne(q => q.Rfq)
+            //        .WithMany(r => r.Quotations)
+            //        .HasForeignKey(q => q.RfqId)
+            //        .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(x => x.Price)
-                       .HasColumnType("decimal(18,2)")
-                       .IsRequired();
 
-            builder.Property(x => x.Message)
-                       .HasMaxLength(1000);
-
-            builder.Property(x => x.CreatedAt)
-                   .HasDefaultValueSql("GETDATE()")
-                   .ValueGeneratedOnAdd();
-
-            builder.HasOne(x => x.RFQ)
-                   .WithMany(x => x.Quotations)
-                   .HasForeignKey(x => x.RFQId);
-            // .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.Supplier)
-                   .WithMany()
-                   .HasForeignKey(x => x.SupplierId);
-                      // .OnDelete(DeleteBehavior.Restrict); 
-
-                builder.HasIndex(x => x.RFQId);
-                builder.HasIndex(x => x.SupplierId);
-          }
+        }
       
     }
  }

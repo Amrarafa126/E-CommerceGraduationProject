@@ -9,22 +9,21 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-    public class CategoryConfigurations : IEntityTypeConfiguration<Category>
+    public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
+            builder.ToTable("Categories");
             builder.HasKey(c => c.Id);
-            builder.Property(n => n.NameCategory).HasMaxLength(100).IsRequired();
 
+            builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
+            builder.Property(c => c.Description).HasMaxLength(1000);
 
-
-            builder.HasOne(c => c.CategoryParent)
-                .WithMany(c => c.CategoryChildren)
-                .HasForeignKey(c => c.ParentId)
+            builder.HasOne(c => c.ParentCategory)
+                .WithMany(c => c.SubCategories)
+                .HasForeignKey(c => c.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
-               // .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasIndex(x => x.ParentId);
         }
     }
 }

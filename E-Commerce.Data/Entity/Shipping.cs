@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
-    public class Shipping
+    public class Shipping : BaseEntity
     {
-        public int Id { get; set; }
-
-        public int OrderId { get; set; }
+        public Guid OrderId { get; set; }
         [ForeignKey("OrderId")]
         public Order? Order { get; set; }
 

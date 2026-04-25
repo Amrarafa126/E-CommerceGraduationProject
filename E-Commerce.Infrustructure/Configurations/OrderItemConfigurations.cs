@@ -5,36 +5,27 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-  
-        public class OrderItemConfigurations : IEntityTypeConfiguration<OrderItem>
+
+    public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
+    {
+        public void Configure(EntityTypeBuilder<OrderItem> builder)
         {
-            public void Configure(EntityTypeBuilder<OrderItem> builder)
-            {
-                builder.HasKey(x => x.OrderItemId);
+            builder.ToTable("OrderItems");
+            builder.HasKey(i => i.Id);
+            builder.Property(i => i.ProductName).IsRequired().HasMaxLength(300);
+            builder.Property(i => i.VariantSKU).HasMaxLength(100);
+            builder.Property(i => i.UnitPrice).HasPrecision(18, 4);
 
-                builder.Property(x => x.Quantity)
-                       .IsRequired();
+            builder.HasOne(i => i.Product)
+                .WithMany()
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                builder.Property(x => x.Price)
-                       .HasColumnType("decimal(18,1)")
-                       .IsRequired();
-
-            builder.HasOne(x => x.Order)
-                   .WithMany(x => x.orderItems)
-                   .HasForeignKey(x => x.OrderId);
-            // .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.ProductVariant)
-               .WithMany(x => x.OrderItems)
-               .HasForeignKey(x => x.ProductVariantId);
-                  // .OnDelete(DeleteBehavior.Restrict);
-
-      
-                builder.HasIndex(x => x.OrderId);
-                builder.HasIndex(x => x.ProductVariantId);
-            }
-
-      
+            builder.HasOne(i => i.ProductVariant)
+                .WithMany()
+                .HasForeignKey(i => i.ProductVariantId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
         }
+    }
 }
-

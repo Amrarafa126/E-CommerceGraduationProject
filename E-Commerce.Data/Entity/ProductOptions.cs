@@ -7,20 +7,18 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
-    public class ProductOption
+    public class ProductOption : BaseEntity
     {
-        public ProductOption()
-        {
-            Values = new HashSet<ProductOptionValue>();
-        }
-        public int Id { get; set; }
+        public string Name { get; private set; } = string.Empty;
+        public int DisplayOrder { get; private set; }
+        public Guid ProductId { get; private set; }
+        public Product Product { get; private set; } = null!;
+        public ICollection<ProductOptionValue> Values { get; private set; } = new List<ProductOptionValue>();
 
-        public string? Name { get; set; }
+        private ProductOption() { }
 
-        public int ProductId { get; set; }
-        [ForeignKey("ProductId")]
-        public Product? Product { get; set; }
-
-        public ICollection<ProductOptionValue>? Values { get; set; }
+        public static ProductOption Create(Guid productId, string name, int order = 0)
+            => new() { ProductId = productId, Name = name, DisplayOrder = order };
     }
 }
+

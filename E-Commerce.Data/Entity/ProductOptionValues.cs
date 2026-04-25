@@ -7,14 +7,20 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
-    public class ProductOptionValue
+    public class ProductOptionValue : BaseEntity
     {
-        public int Id { get; set; }
+        public string Value { get; private set; } = string.Empty;
+        public Guid ProductOptionId { get; private set; }
+        public ProductOption ProductOption { get; private set; } = null!;
+        public ICollection<ProductVariantOptionValue> VariantOptionValues { get; private set; } = new List<ProductVariantOptionValue>();
 
-        public string? Value { get; set; }
+        private ProductOptionValue() { }
 
-        public int ProductOptionId { get; set; }
-        [ForeignKey("ProductOptionId")]
-        public ProductOption? Option { get; set; }
+        public static ProductOptionValue Create(Guid optionId, string value)
+            => new()
+            {
+                ProductOptionId = optionId,
+                Value = value,
+            };
     }
 }

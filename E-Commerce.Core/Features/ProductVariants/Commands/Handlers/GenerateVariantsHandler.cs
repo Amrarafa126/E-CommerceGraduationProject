@@ -1,6 +1,10 @@
-﻿using E_Commerce.Core.BaseResponse;
+﻿using AutoMapper;
+using E_Commerce.Core.BaseResponse;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.ProductVariants.Commands.Models;
+using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.Context;
+using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,41 +12,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
 {
-    public class GenerateVariantsHandler : ResponseHandler, IRequestHandler<GenerateVariantsCommand, Response<string>>
+    public class AddProductVariantHandler(IUnitOfWork uow, IMapper mapper)
+    : IRequestHandler<AddProductVariantCommand, ApiResponse<ProductVariantDto>>
     {
-        private readonly AppDBContext _context;
-        private readonly IVariantService _variantService;
-
-        public GenerateVariantsHandler(
-            AppDBContext context,
-            IVariantService variantService)
+        public async Task<ApiResponse<ProductVariantDto>> Handle(AddProductVariantCommand req, CancellationToken ct)
         {
-            _context = context;
-            _variantService = variantService;
-        }
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-        public async Task<Response<string>> Handle(GenerateVariantsCommand request,CancellationToken cancellationToken)
-        {
-            var product = await _context.products
-                .Include(p => p.ProductOptions)
-                    .ThenInclude(o => o.Values)
-                .Include(p => p.productVariants)
-                    .ThenInclude(v => v.VariantValues)
-                .FirstOrDefaultAsync(p => p.Id == request.ProductId);
+            // Check SKU uniqueness within product
+            if (product.productVariants.Any(v => v.SKU == req.SKU))
+                throw new ConflictException($"SKU '{req.SKU}' already exists in this product.");
 
-            if (product == null)
-                return  NotFound<string>("Product not found");
+            var variant = ProductVariant.Create(product.Id, req.SKU, req.Price, req.StockQuantity);
 
+            foreach (var optionValueId in req.OptionValueIds)
+            {
+                variant.OptionValues.Add(ProductVariantOptionValue.Create(variant.Id, optionValueId));
+            }
 
-            var variants = _variantService.BuildVariants(product);
+            product.productVariants.Add(variant);
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
 
-            if (!variants.Any())
-                return Success<string>("No new variants generated");
-
-            await _context.productVariants.AddRangeAsync(variants);
-            await _context.SaveChangesAsync();
-
-            return Success<string>("Variants Generated Successfully");
+            return ApiResponse<ProductVariantDto>.Created(mapper.Map<ProductVariantDto>(variant));
         }
     }
 }

@@ -15,18 +15,21 @@ namespace E_Commerce.Service
     {
         public static IServiceCollection AddServiceDependencies(this IServiceCollection service)
         {
-            service.AddTransient<ICategoryService, CategoryService>();
-            service.AddTransient<IProductService, ProductService>();
-            service.AddTransient<IFileService, FileService>();
-            service.AddTransient<ICompanyService, CompanyService>();
-            service.AddTransient<IProductImageService , ProductImageService>();
-            service.AddTransient<IProductOptionService, ProductOptionService>();
-            service.AddTransient<IProductOptionValueService, ProductOptionValueService>();
-            service.AddTransient<IProductPriceTierService , ProductPriceTierService>();
+        //    service.AddTransient<ICategoryService, CategoryService>();
+        //    service.AddTransient<IProductService, ProductService>();
+        //    service.AddTransient<IFileService, FileService>();
+        //    service.AddTransient<ICompanyService, CompanyService>();
+        //    service.AddTransient<IProductImageService , ProductImageService>();
+        //    service.AddTransient<IProductOptionService, ProductOptionService>();
+        //    service.AddTransient<IProductOptionValueService, ProductOptionValueService>();
+            //service.AddTransient<IProductPriceTierService , ProductPriceTierService>();
             service.AddTransient<IApplicationUserService, ApplicationUserService>();
             service.AddTransient<IEmailsService, EmailsService>();
             service.AddTransient<IAuthenticationService, AuthenticationService>();
-            service.AddTransient<IVariantService, VariantService>();
+            //service.AddTransient<IVariantService, VariantService>();
+            service.AddTransient<ICurrentUserService, CurrentUserService>();
+            service.AddTransient<IPasswordService, PasswordService>();
+            service.AddSingleton<ITokenService, JwtTokenService>();
 
             return service;
         }

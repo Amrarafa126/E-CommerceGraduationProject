@@ -12,8 +12,8 @@ namespace E_Commerce.Core.Mapping.Categoris
     {
         public void EditCategoryMapping()
         {
-            CreateMap<EditCategoryCommand, Category>()
-                .ForMember(x => x.ParentId, opt => opt.MapFrom(src => src.ParentId));
+            //CreateMap<EditCategoryCommand, Category>()
+            //    .ForMember(x => x.ParentId, opt => opt.MapFrom(src => src.ParentId));
         }
     }
 

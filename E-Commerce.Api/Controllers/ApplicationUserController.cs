@@ -1,9 +1,6 @@
 ﻿using E_Commerce.Api.Base;
 using E_Commerce.Core.Features.ApplicationUser.Commands.Models;
 using E_Commerce.Core.Features.ApplicationUser.Queries.Models;
-using MediatR;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers

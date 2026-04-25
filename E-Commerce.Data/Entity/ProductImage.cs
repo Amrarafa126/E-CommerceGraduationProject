@@ -7,20 +7,43 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
-    public class ProductImage
+    public class ProductImage : BaseEntity
     {
-        public ProductImage()
+        private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+        private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+        public string Url { get; private set; } = string.Empty;
+        public string OriginalFileName { get; private set; } = string.Empty;
+        public string ContentType { get; private set; } = string.Empty;
+        public long FileSizeBytes { get; private set; }
+        public string? AltText { get; private set; }
+        public int DisplayOrder { get; private set; }
+        public Guid ProductId { get; private set; }
+        public Product Product { get; private set; } = null!;
+
+        private ProductImage() { }
+
+        public static ProductImage Create(Guid productId, string url, string originalFileName,
+            string contentType, long fileSizeBytes, int displayOrder, string? altText = null)
         {
-            
+            var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(ext))
+                throw new ArgumentException($"File type '{ext}' is not allowed. Use: jpg, png, webp.");
+
+            if (fileSizeBytes > MaxFileSizeBytes)
+                throw new ArgumentException($"File size exceeds {MaxFileSizeBytes / 1024 / 1024}MB limit.");
+
+            return new ProductImage
+            {
+                ProductId = productId,
+                Url = url,
+                OriginalFileName = originalFileName,
+                ContentType = contentType,
+                FileSizeBytes = fileSizeBytes,
+                DisplayOrder = displayOrder,
+                AltText = altText
+            };
         }
-        public int Id { get; set; }
 
-        public string? ImageUrl { get; set; }
-
-        public bool IsMain { get; set; }
-
-        public int ProductId { get; set; }
-        [ForeignKey("ProductId")]
-        public Product? Product { get; set; }
     }
 }

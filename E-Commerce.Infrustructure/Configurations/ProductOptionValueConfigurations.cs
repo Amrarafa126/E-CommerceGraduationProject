@@ -10,24 +10,13 @@ namespace E_Commerce.Infrustructure.Configurations
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class ProductOptionValueConfigurations : IEntityTypeConfiguration<ProductOptionValue>
+    public class ProductOptionValueConfiguration : IEntityTypeConfiguration<ProductOptionValue>
     {
         public void Configure(EntityTypeBuilder<ProductOptionValue> builder)
         {
             builder.ToTable("ProductOptionValues");
-
-            builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.Value)
-                   .HasMaxLength(100)
-                   .IsRequired();
-
-            builder.HasOne(x => x.Option)
-                   .WithMany(x => x.Values)
-                   .HasForeignKey(x => x.ProductOptionId);
-                 //  .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasIndex(x => x.ProductOptionId);
+            builder.HasKey(v => v.Id);
+            builder.Property(v => v.Value).IsRequired().HasMaxLength(100);
         }
     }
 }
