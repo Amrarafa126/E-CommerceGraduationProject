@@ -14,11 +14,8 @@ namespace E_Commerce.Core.Features.Companies.Commands.Handlers
     public class CompanyHandlersCommands(IUnitOfWork uow, IPasswordService pwd, ITokenService tok, IMapper mapper) : 
         IRequestHandler<RegisterSellerCommand,ApiResponse<string>>
     {
-     
       
-
-       
-       public async Task<ApiResponse<string>>Handle(RegisterSellerCommand req, CancellationToken ct)
+      public async Task<ApiResponse<string>>Handle(RegisterSellerCommand req, CancellationToken ct)
         {
 
             if (await uow.Users.ExistsAsync(u => u.Email == req.Email.ToLower(), ct))
