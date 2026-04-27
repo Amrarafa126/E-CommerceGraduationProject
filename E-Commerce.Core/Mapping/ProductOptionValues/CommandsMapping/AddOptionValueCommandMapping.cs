@@ -1,4 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductOptionValues.Commands.Models;
+﻿using E_Commerce.Core.Features.ProductOptionValues;
+using E_Commerce.Core.Features.ProductOptionValues.Commands.Models;
 using E_Commerce.Data.Entity;
 
 namespace E_Commerce.Core.Mapping.ProductOptionValues
@@ -7,7 +8,7 @@ namespace E_Commerce.Core.Mapping.ProductOptionValues
     {
         public void AddOptionValueCommandMapping()
         {
-            CreateMap<AddOptionValueCommand, ProductOptionValue>();
+            CreateMap<ProductOptionValue, ProductOptionValueDto>();
         }
     }
 }

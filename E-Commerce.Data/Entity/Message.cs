@@ -1,21 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using E_Commerce.Data.Identity;
+
 
 namespace E_Commerce.Data.Entity
 {
-    public class Message
+    public class Message : BaseEntity
     {
-        public int Id { get; set; }
+        public Guid ConversationId { get; private set; }
+        public Conversation Conversation { get; private set; } = null!;
+        public Guid SenderId { get; private set; }
+        public User Sender { get; private set; } = null!;
+        public string Content { get; private set; } = string.Empty;
+        public bool IsRead { get; private set; }
+        public DateTime? ReadAt { get; private set; }
+        public string? AttachmentUrl { get; private set; }
+        public MessageType Type { get; private set; } = MessageType.Text;
 
-        public int SenderId { get; set; }
+        private Message() { }
 
-        public int ReceiverId { get; set; }
+        public static Message Create(Guid conversationId, Guid senderId, string content,
+            string? attachmentUrl = null, MessageType type = MessageType.Text) => new()
+            {
+                ConversationId = conversationId,
+                SenderId = senderId,
+                Content = content,
+                AttachmentUrl = attachmentUrl,
+                Type = type
+            };
 
-        public string Content { get; set; }
-
-        public DateTime SentAt { get; set; }
+        public void MarkAsRead()
+        {
+            IsRead = true;
+            ReadAt = DateTime.UtcNow;
+            MarkAsUpdated();
+        }
     }
+
+    public enum MessageType { Text, Image, File, ProductLink }
 }

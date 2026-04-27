@@ -1,85 +1,36 @@
-﻿
-
-namespace E_Commerce.Core.BaseResponse
-
+﻿public class ApiResponse<T>
 {
-    public class ResponseHandler
-    {
+    public bool Success { get; init; }
+    public string Message { get; init; } = string.Empty;
+    public T? Data { get; init; }
+    public List<string> Errors { get; init; } = new();
+    public int StatusCode { get; init; }
 
-        public ResponseHandler()
-        {
+    public static ApiResponse<T> Ok(T data, string message = "Operation successful.")
+        => new() { Success = true, Data = data, Message = message, StatusCode = 200 };
 
-        }
-        public Response<T> Deleted<T>()
-        {
-            return new Response<T>()
-            {
-                StatusCode = System.Net.HttpStatusCode.OK,
-                Succeeded = true,
-                Message = "Deleted Successfully"
-            };
-        }
-        public Response<T> Success<T>(T entity, object Meta = null)
-        {
-            return new Response<T>()
-            {
-                Data = entity,
-                StatusCode = System.Net.HttpStatusCode.OK,
-                Succeeded = true,
-                Message = "Added Successfully",
-                Meta = Meta
-            };
-        }
-        public Response<T> Unauthorized<T>()
-        {
-            return new Response<T>()
-            {
-                StatusCode = System.Net.HttpStatusCode.Unauthorized,
-                Succeeded = true,
-                Message = "UnAuthorized"
-            };
-        }
-        public Response<T> UnprocessableEntity<T>(string Message = null)
-        {
-            return new Response<T>()
-            {
-                StatusCode = System.Net.HttpStatusCode.UnprocessableEntity,
-                Succeeded = false,
-                Message = Message == null ? "Unprocessable Entity" : Message
-            };
-        }
-        public Response<T> BadRequest<T>(string Message = null)
-        {
-            return new Response<T>()
-            {
-                StatusCode = System.Net.HttpStatusCode.BadRequest,
-                Succeeded = false,
-                Message = Message == null ? "Bad Request" : Message
-            };
-        }
+    public static ApiResponse<T> Created(T data, string message = "Resource created successfully.")
+        => new() { Success = true, Data = data, Message = message, StatusCode = 201 };
 
-        public Response<T> NotFound<T>(string message = null)
-        {
-            return new Response<T>()
-            {
-                StatusCode = System.Net.HttpStatusCode.NotFound,
-                Succeeded = false,
-                Message = message == null ? "Not Found" : message
-            };
-        }
+    public static ApiResponse<T> Fail(string message, int statusCode = 400, List<string>? errors = null)
+        => new() { Success = false, Message = message, StatusCode = statusCode, Errors = errors ?? new() };
 
-        public Response<T> Created<T>(T entity, object Meta = null)
-        {
-            return new Response<T>()
-            {
-                Data = entity,
-                StatusCode = System.Net.HttpStatusCode.Created,
-                Succeeded = true,
-                Message = "Created",
-                Meta = Meta
-            };
-        }
-    }
+    public static ApiResponse<T> NotFound(string message = "Resource not found.")
+        => new() { Success = false, Message = message, StatusCode = 404 };
+
+    public static ApiResponse<T> Unauthorized(string message = "Unauthorized access.")
+        => new() { Success = false, Message = message, StatusCode = 401 };
+
+    public static ApiResponse<T> Forbidden(string message = "Access denied.")
+        => new() { Success = false, Message = message, StatusCode = 403 };
+
+    public static ApiResponse<T> ValidationFail(List<string> errors, string message = "Validation failed.")
+        => new() { Success = false, Message = message, StatusCode = 422, Errors = errors };
 }
 
+public class ApiResponse : ApiResponse<object>
+{
+    public static ApiResponse<object> Ok(string message = "Operation successful.")
+        => new() { Success = true, Message = message, StatusCode = 200 };
+}
 

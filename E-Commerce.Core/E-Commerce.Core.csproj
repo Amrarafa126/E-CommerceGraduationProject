@@ -14,8 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\ApplicationUser\Commands\Validations\" />
+    <Folder Include="Features\Authentication\Commands\Vaildations\" />
+    <Folder Include="Features\Authentication\Queries\Handlers\" />
+    <Folder Include="Features\Authentication\Queries\Models\" />
+    <Folder Include="Features\Authentication\Queries\Response\" />
     <Folder Include="Features\Categorys\Commands\Vaildations\" />
-    <Folder Include="Behaviors\" />
     <Folder Include="Features\Companies\Commands\Vaildations\" />
     <Folder Include="Features\Companies\Queries\Handlers\" />
     <Folder Include="Features\Companies\Queries\Models\" />
@@ -37,17 +41,18 @@
     <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Response\" />
     <Folder Include="Features\Products\Commands\Vaildations\" />
-    <Folder Include="Features\ProductVariants\Commands\Handlers\" />
-    <Folder Include="Features\ProductVariants\Commands\Models\" />
     <Folder Include="Features\ProductVariants\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />
     <Folder Include="Features\ProductVariants\Queries\Response\" />
+    <Folder Include="Mapping\ApplicationUser\Queries\" />
     <Folder Include="Mapping\Companies\QueriesMapping\" />
     <Folder Include="Mapping\ProductImage\QueriesMapping\" />
     <Folder Include="Mapping\ProductOptions\QueriesMapping\" />
     <Folder Include="Mapping\ProductOptionValues\QueriesMapping\" />
     <Folder Include="Mapping\ProductPriceTiers\QueriesMapping\" />
+    <Folder Include="Mapping\ProductVariant\Command\" />
+    <Folder Include="Mapping\ProductVariant\Queries\" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -57,6 +62,7 @@
 		<PackageReference Include="MediatR" Version="14.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
 		<PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="10.0.3" />
+		<PackageReference Include="RavenDB.Client" Version="7.2.1" />
 	</ItemGroup>
 
 </Project>

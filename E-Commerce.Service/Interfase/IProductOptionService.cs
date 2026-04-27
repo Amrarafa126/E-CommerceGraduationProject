@@ -10,7 +10,7 @@ namespace E_Commerce.Service.Interfase
     public interface IProductOptionService
     
      {
-           public Task<string> AddProductOptionAsync(ProductOption productOption);
+           public Task<string> AddProductOptionAsync(ProductOption productOption , CancellationToken ct );
            // Task<string> EditProductOptionAsync(int id, string name);
             //Task<string> DeleteProductOptionAsync(int id);
     }

@@ -12,8 +12,8 @@ namespace E_Commerce.Core.Mapping.Categoris
     {
         public void AddCategoryMapping()
         {
-            CreateMap<AddCategoryCommand, Category>().
-                ForMember(x => x.ParentId, opt => opt.MapFrom(src => src.ParentId));
+            //CreateMap<AddCategoryCommand, Category>().
+            //    ForMember(x => x.ParentId, opt => opt.MapFrom(src => src.ParentId));
 
         }
 

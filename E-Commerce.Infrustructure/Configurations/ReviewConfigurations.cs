@@ -5,36 +5,26 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace E_Commerce.Infrustructure.Configurations
 {
 
-public class ReviewConfigurations : IEntityTypeConfiguration<Review>
-{
-    public void Configure(EntityTypeBuilder<Review> builder)
+    public class ProductReviewConfiguration : IEntityTypeConfiguration<ProductReview>
     {
-        builder.ToTable("Reviews");
+        public void Configure(EntityTypeBuilder<ProductReview> builder)
+        {
+            builder.ToTable("ProductReviews");
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.Title).IsRequired().HasMaxLength(200);
+            builder.Property(r => r.Comment).IsRequired().HasMaxLength(2000);
+            builder.Property(r => r.SupplierReply).HasMaxLength(1000);
 
-        builder.HasKey(x => x.ReviewId);
+            builder.HasOne(r => r.Product).WithMany()
+                .HasForeignKey(r => r.ProductId).
+                OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.Rating)
-               .IsRequired();
+            builder.HasOne(r => r.Buyer).WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.BuyerId).OnDelete(DeleteBehavior.Restrict);           
 
-        builder.Property(x => x.Comment)
-               .HasMaxLength(2000);
+            builder.HasIndex(r => new { r.ProductId, r.BuyerId }).IsUnique();
 
-        builder.Property(x => x.CreatedAt)
-               .HasDefaultValueSql("GETDATE()");
-
-            builder.HasOne(x => x.Product)
-                   .WithMany(x => x.Reviews)
-                   .HasForeignKey(x => x.ProductId);
-            //.OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.User)
-                   .WithMany(x => x.Reviews)
-                   .HasForeignKey(x => x.UserId);
-              // .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(x => x.ProductId);
-        builder.HasIndex(x => x.UserId);
-        builder.HasIndex(x => new { x.ProductId, x.UserId }).IsUnique();
+            builder.HasQueryFilter(r => !r.IsDeleted);
         }
-}
+    }
 }

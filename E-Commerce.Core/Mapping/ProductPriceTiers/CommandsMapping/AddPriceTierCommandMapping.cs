@@ -1,4 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductPriceTiers.Commands.Models;
+﻿using E_Commerce.Core.Features.ProductPriceTiers;
+using E_Commerce.Core.Features.ProductPriceTiers.Commands.Models;
 using E_Commerce.Data.Entity;
 
 namespace E_Commerce.Core.Mapping.ProductPriceTiers
@@ -7,7 +8,7 @@ namespace E_Commerce.Core.Mapping.ProductPriceTiers
     {
       public void AddPriceTierCommandMapping()
       {
-            CreateMap<AddPriceTierCommand, ProductPriceTier>();
-      }
+            CreateMap<ProductPriceTier, PriceTierDto>();
+        }
     }
 }

@@ -1,54 +1,31 @@
 ﻿using AutoMapper;
 using E_Commerce.Core.BaseResponse;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.ProductPriceTiers.Commands.Models;
 using E_Commerce.Data.Entity;
-using E_Commerce.Infrustructure.Context;
-using E_Commerce.Service.Interfase;
+using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
 {
-    public class ProductPriceTierHandlersComand : ResponseHandler, IRequestHandler<AddPriceTierCommand, Response<string>>
+    public class AddPriceTierHandler(IUnitOfWork uow, IMapper mapper)
+      : IRequestHandler<AddPriceTierCommand, ApiResponse<PriceTierDto>>
     {
-        IProductPriceTierService ProductPriceTierService;
-        IMapper mapper;
-        AppDBContext context;
-        public ProductPriceTierHandlersComand(IProductPriceTierService productPriceTierService , IMapper mapper , AppDBContext appDBContext)
+        public async Task<ApiResponse<PriceTierDto>> Handle(AddPriceTierCommand req, CancellationToken ct)
         {
-            ProductPriceTierService = productPriceTierService;
-            this.mapper = mapper;
-            context = appDBContext;
+            var product = await uow.Products.GetByIdAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-        }
+            var tier = ProductPriceTier.Create(product.Id, req.MinQuantity, req.UnitPrice, req.MaxQuantity);
+            product.PriceTiers.Add(tier);
 
-        public async Task<Response<string>> Handle(AddPriceTierCommand request, CancellationToken cancellationToken)
-        {
-            var tiers = await context.productPriceTiers
-                                .Where(x => x.ProductId == request.ProductId)
-                                .ToListAsync();
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
 
-            bool overlap = tiers.Any(t =>
-                request.MinQuantity <= t.MaxQuantity &&
-                request.MaxQuantity >= t.MinQuantity
-            );
-
-            if (overlap)
-                throw new Exception("Price tier overlaps with existing tier");
-
-            bool duplicate = tiers.Any(t =>
-                               t.MinQuantity == request.MinQuantity &&
-                               t.MaxQuantity == request.MaxQuantity);
-            if (duplicate)
-                throw new Exception("Duplicate price tier");
-
-            if (request.MinQuantity >= request.MaxQuantity)
-                return BadRequest<string>("MinQuantity must be less than MaxQuantity");
-            var ProductPriceTierMapper = mapper.Map<ProductPriceTier>(request);
-            var result = await ProductPriceTierService.AddPriceTierAsync(ProductPriceTierMapper);
-            if (result == null)
-                return UnprocessableEntity<string>();
-            return Success(result);
+            return ApiResponse<PriceTierDto>.Created(mapper.Map<PriceTierDto>(tier));
         }
     }
+
+
 }

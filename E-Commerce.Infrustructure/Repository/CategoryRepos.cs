@@ -14,11 +14,16 @@ namespace E_Commerce.Infrustructure.Repository
             categories = dbContext.Set<Category>();
         }
 
-        public async Task<List<Category>> GetCategoryListAsync()
+        public Task<List<Category>> GetCategoryListAsync()
         {
-            var category = await categories.Where(x=>x.ParentId == null).Include(x => x.CategoryChildren).ToListAsync();
-            return category;
+            throw new NotImplementedException();
         }
+
+        //public async Task<List<Category>> GetCategoryListAsync()
+        //{
+        //    var category = await categories.Where(x=>x.ParentId == null).Include(x => x.CategoryChildren).ToListAsync();
+        //    return category;
+        //}
     }
     }
 

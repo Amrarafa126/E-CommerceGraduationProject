@@ -1,5 +1,6 @@
 ﻿using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
+using E_Commerce.Data.ValueObjects;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,16 +9,14 @@ namespace E_Commerce.Infrustructure.Context
 {
     public class AppDBContext : IdentityDbContext<User>
     {
-        public AppDBContext()
-        {
-            
-        }
-        public AppDBContext(DbContextOptions options) : base(options)
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
 
         }
-         #region dbset in database
-         public DbSet<Category> categories { get; set; }
+
+      
+        #region dbset in database
+        public DbSet<Category> categories { get; set; }
          public DbSet<Product> products { get; set; }
          public DbSet<Order> orders { get; set; }
          public DbSet<OrderItem> orderItems { get; set; }
@@ -29,13 +28,19 @@ namespace E_Commerce.Infrustructure.Context
          public DbSet<ProductOptionValue> productOptionValues { get; set; }
          public DbSet<ProductPriceTier> productPriceTiers { get; set; }
          public DbSet<ProductVariant> productVariants { get; set; }
-         public DbSet<ProductVariantValue> productVariantValues { get; set; }
-         public DbSet<Quotation> quotations { get; set; }
-         public DbSet<Review> reviews { get; set; }
-         public DbSet<Rfq> rfqs { get; set; }
+         public DbSet<ProductVariantOptionValue> productVariantValues { get; set; }
+         public DbSet<RfqQuotation> rfqQuotations { get; set; }
+         public DbSet<ProductReview> productReviews { get; set; }
+         public DbSet<RfqRequest> rfqRequests { get; set; }
          public DbSet<Role> roles { get; set; }
          public DbSet<Shipping> shippings { get; set; }
          public DbSet<User> users { get; set; }
+        public DbSet<Conversation> conversations { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Address> addresses { get; set; }
+        public DbSet<ContactInfo> contactInfos { get; set; }    
+
+
 
         #endregion
 

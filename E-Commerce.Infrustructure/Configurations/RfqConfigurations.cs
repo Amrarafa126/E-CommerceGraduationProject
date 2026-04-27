@@ -11,9 +11,9 @@ namespace E_Commerce.Infrustructure.Configurations
 {
   
  
-        public class RfqConfigurations : IEntityTypeConfiguration<Rfq>
+        public class RfqConfigurations : IEntityTypeConfiguration<RfqRequest>
         {
-            public void Configure(EntityTypeBuilder<Rfq> builder)
+            public void Configure(EntityTypeBuilder<RfqRequest> builder)
             {
                
                 builder.HasKey(x => x.Id);
@@ -29,9 +29,9 @@ namespace E_Commerce.Infrustructure.Configurations
                        .HasDefaultValueSql("GETDATE()")
                        .ValueGeneratedOnAdd();
 
-            builder.HasMany(x => x.Quotations)
-                   .WithOne(x => x.RFQ)
-                   .HasForeignKey(x => x.RFQId);
+            //builder.HasMany(x => x.rf)
+            //       .WithOne(x => x.RFQ)
+            //       .HasForeignKey(x => x.RFQId);
                      //  .OnDelete(DeleteBehavior.Restrict);
 
                 // Indexes

@@ -2,35 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class ProductVariantConfigurations : IEntityTypeConfiguration<ProductVariant>
+public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVariant>
 {
     public void Configure(EntityTypeBuilder<ProductVariant> builder)
     {
         builder.ToTable("ProductVariants");
+        builder.HasKey(v => v.Id);
+        builder.Property(v => v.SKU).IsRequired().HasMaxLength(100);
+        builder.Property(v => v.Price).HasPrecision(18, 4);
 
-        builder.HasKey(x => x.Id);
+        builder.HasIndex(v => new { v.ProductId, v.SKU }).IsUnique();
 
-        builder.Property(x => x.SKU)
-               .HasMaxLength(100);
-
-        builder.Property(x => x.Price)
-               .HasColumnType("decimal(18,2)")
-               .IsRequired();
-
-        builder.Property(x => x.StockQuantity)
-               .IsRequired();
-
-        builder.HasOne(x => x.Product)
-               .WithMany(x => x.productVariants)
-               .HasForeignKey(x => x.ProductId);
-        //  .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.OrderItems)
-               .WithOne(x => x.ProductVariant)
-               .HasForeignKey(x => x.ProductVariantId);
-              // .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(x => x.ProductId);
-        builder.HasIndex(x => x.SKU);
+        builder.HasMany(v => v.OptionValues)
+            .WithOne(ov => ov.ProductVariant)
+            .HasForeignKey(ov => ov.ProductVariantId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

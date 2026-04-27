@@ -24,5 +24,20 @@ namespace E_Commerce.Infrustructure.Repository
             return companies.ToListAsync();
 
         }
+
+        public Task<(IEnumerable<Company> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Company?> GetWithMembersAsync(Guid companyId, CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Company?> GetWithProductsAsync(Guid companyId, CancellationToken ct = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
