@@ -7,5 +7,6 @@ namespace E_Commerce.Core.Features.Categorys.Queries.Models
 {
     public class GetListCategoryQueries : IRequest<Response<List<GetListCategoryResponse>>>
     {
+        //////////
     }
 }
