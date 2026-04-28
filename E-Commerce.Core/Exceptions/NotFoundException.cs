@@ -12,7 +12,7 @@
     {
         public IReadOnlyDictionary<string, string[]> Errors { get; }
 
-        public ValidationException()
+        public ValidationException(IEnumerable<string> enumerable)
             : base("One or more validation failures have occurred.")
         {
             Errors = new Dictionary<string, string[]>();
@@ -24,6 +24,15 @@
             Errors = failures
                 .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
                 .ToDictionary(g => g.Key, g => g.ToArray());
+        }
+
+        public ValidationException(string message) : base(message)
+        {
+
+        }
+
+        public ValidationException()
+        {
         }
     }
 

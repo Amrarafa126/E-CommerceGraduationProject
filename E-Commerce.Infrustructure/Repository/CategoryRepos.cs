@@ -6,24 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class CategoryRepos : GenericRepositoryAsync<Category>, ICategoryRepos
-    {
-        DbSet<Category> categories;
-        public CategoryRepos(AppDBContext dbContext) : base(dbContext)
-        {
-            categories = dbContext.Set<Category>();
-        }
+    public class CategoryRepos(AppDBContext Db) : GenericRepositoryAsync<Category>(Db), ICategoryRepos
+    { 
+       public async Task<IEnumerable<Category>> GetRootsWithChildrenAsync(CancellationToken ct = default)
+       => await Db.categories.AsNoTracking()
+           .Where(c => c.ParentCategoryId == null)
+           .Include(c => c.SubCategories).ThenInclude(sc => sc.Products)
+           .OrderBy(c => c.Name)
+           .ToListAsync(ct);
 
-        public Task<List<Category>> GetCategoryListAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        //public async Task<List<Category>> GetCategoryListAsync()
-        //{
-        //    var category = await categories.Where(x=>x.ParentId == null).Include(x => x.CategoryChildren).ToListAsync();
-        //    return category;
-        //}
+        public Task<Category?> GetWithChildrenAsync(Guid id, CancellationToken ct = default)
+            => Db.categories
+                .Include(c => c.ParentCategory)
+                .Include(c => c.SubCategories).ThenInclude(sc => sc.SubCategories)
+                .Include(c => c.SubCategories).ThenInclude(sc => sc.Products)
+                .FirstOrDefaultAsync(c => c.Id == id, ct);
+      
     }
-    }
+ }
 

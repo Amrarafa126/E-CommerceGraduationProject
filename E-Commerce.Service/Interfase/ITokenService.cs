@@ -1,13 +1,12 @@
 ﻿using E_Commerce.Data.Identity;
-using System.Security.Claims;
 
 
 namespace E_Commerce.Service.Interfase
 {
     public interface ITokenService
     {
-        string GenerateAccessToken(User user);
+        string GenerateAccessToken(User user, IEnumerable<string> roles);
         string GenerateRefreshToken();
-        ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
+        System.Security.Claims.ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
     }
 }

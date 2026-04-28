@@ -8,22 +8,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Mapping\Companies\QueriesMapping\**" />
+    <Compile Remove="Mapping\ProductVariant\**" />
+    <EmbeddedResource Remove="Mapping\Companies\QueriesMapping\**" />
+    <EmbeddedResource Remove="Mapping\ProductVariant\**" />
+    <None Remove="Mapping\Companies\QueriesMapping\**" />
+    <None Remove="Mapping\ProductVariant\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\E-Commerce.Data\E-Commerce.Data.csproj" />
     <ProjectReference Include="..\E-Commerce.Infrustructure\E-Commerce.Infrustructure.csproj" />
     <ProjectReference Include="..\E-Commerce.Service\E-Commerce.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Authentication\Commands\Vaildations\" />
     <Folder Include="Features\Authentication\Queries\Handlers\" />
     <Folder Include="Features\Authentication\Queries\Models\" />
     <Folder Include="Features\Authentication\Queries\Response\" />
-    <Folder Include="Features\Categorys\Commands\Vaildations\" />
     <Folder Include="Features\Companies\Commands\Vaildations\" />
     <Folder Include="Features\Companies\Queries\Handlers\" />
     <Folder Include="Features\Companies\Queries\Models\" />
     <Folder Include="Features\Companies\Queries\Response\" />
-    <Folder Include="Features\Shipping\" />
     <Folder Include="Features\ProductImages\Commands\Vaildations\" />
     <Folder Include="Features\ProductImages\Queries\Handlers\" />
     <Folder Include="Features\ProductImages\Queries\Models\" />
@@ -32,10 +38,6 @@
     <Folder Include="Features\ProductOptions\Queries\Handlers\" />
     <Folder Include="Features\ProductOptions\Queries\Models\" />
     <Folder Include="Features\ProductOptions\Queries\Response\" />
-    <Folder Include="Features\ProductOptionValues\Commands\Vaildations\" />
-    <Folder Include="Features\ProductOptionValues\Queries\Handlers\" />
-    <Folder Include="Features\ProductOptionValues\Queries\Models\" />
-    <Folder Include="Features\ProductOptionValues\Queries\Response\" />
     <Folder Include="Features\ProductPriceTiers\Commands\Vaildations\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Handlers\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
@@ -45,13 +47,6 @@
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />
     <Folder Include="Features\ProductVariants\Queries\Response\" />
-    <Folder Include="Mapping\Companies\QueriesMapping\" />
-    <Folder Include="Mapping\ProductImage\QueriesMapping\" />
-    <Folder Include="Mapping\ProductOptions\QueriesMapping\" />
-    <Folder Include="Mapping\ProductOptionValues\QueriesMapping\" />
-    <Folder Include="Mapping\ProductPriceTiers\QueriesMapping\" />
-    <Folder Include="Mapping\ProductVariant\Command\" />
-    <Folder Include="Mapping\ProductVariant\Queries\" />
   </ItemGroup>
 
 	<ItemGroup>

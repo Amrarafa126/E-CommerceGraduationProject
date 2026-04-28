@@ -1,30 +1,42 @@
-﻿//using AutoMapper;
-//using E_Commerce.Core.BaseResponse;
-//using E_Commerce.Core.Features.Categorys.Queries.Models;
-//using E_Commerce.Core.Features.Categorys.Queries.Response;
-//using E_Commerce.Service.Interfase;
-//using MediatR;
+﻿using AutoMapper;
+using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Features.Categorys.Queries.Models;
+using E_Commerce.Data.Entity;
+using E_Commerce.Infrustructure.InterFaseUnitOfWork;
+using MediatR;
 
-//namespace E_Commerce.Core.Features.Categorys.Queries.Handlers
-//{
-//    public class CategoryHandlerQueries : ResponseHandler ,IRequestHandler<GetListCategoryQueries, Response<List<GetListCategoryResponse>>>
-//    {
-//        ICategoryService CategoryService;
-//        IMapper mapper;
-//        public CategoryHandlerQueries(IMapper mapper , ICategoryService CategoryService)
-//        {
-//            this.mapper = mapper;
-//            this.CategoryService = CategoryService;
+namespace E_Commerce.Core.Features.Categorys.Queries.Handlers
+{
+    public class CategoryHandlerQueries(IUnitOfWork uow)
+    : IRequestHandler<GetCategoriesQuery, ApiResponse<List<CategoryDto>>>,
+         IRequestHandler<GetCategoryByIdQuery, ApiResponse<CategoryDto>>
+    {
+        public async Task<ApiResponse<List<CategoryDto>>> Handle(GetCategoriesQuery req, CancellationToken ct)
+        {
+            var roots = await uow.Category.GetRootsWithChildrenAsync(ct);
+            var dtos = roots.Select(c => new CategoryDto(
+                c.Id, c.Name, c.Description,
+                c.ParentCategoryId, null,
+                c.SubCategories.Select(sc => new CategoryChildDto(
+                    sc.Id, sc.Name,  sc.Description, 
+                    sc.Products.Count)).ToList())).ToList();
+            return ApiResponse<List<CategoryDto>>.Ok(dtos);
+        }
 
-//        }
-//        public async Task<Response<List<GetListCategoryResponse>>> Handle(GetListCategoryQueries request, CancellationToken cancellationToken)
-//        {
-//            var CategoryList = await CategoryService.GetCategoryListAsync();
-//            var categorylistMapper = mapper.Map<List<GetListCategoryResponse>>(CategoryList);
-//            var res = Success(categorylistMapper);
-//            res.Meta = new { Count = categorylistMapper.Count() };
-//            return res;
-//        }
-//    }
-//}
+        public async Task<ApiResponse<CategoryDto>> Handle(GetCategoryByIdQuery req, CancellationToken ct)
+        {
+            var cat = await uow.Category.GetWithChildrenAsync(req.CategoryId, ct)
+                ?? throw new NotFoundException(nameof(Category), req.CategoryId);
+
+            return ApiResponse<CategoryDto>.Ok(new CategoryDto(
+                cat.Id, cat.Name,  cat.Description,
+                cat.ParentCategoryId,
+                cat.ParentCategory?.Name,
+                cat.SubCategories.Select(sc => new CategoryChildDto(
+                    sc.Id, sc.Name, sc.Description, 
+                    sc.Products.Count)).ToList()));
+        }
+
+    }
+}
 

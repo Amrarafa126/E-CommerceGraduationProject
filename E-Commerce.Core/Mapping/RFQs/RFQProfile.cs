@@ -7,7 +7,7 @@ namespace E_Commerce.Core.Mapping.RFQs
     {
         public RFQProfile()
         {
-
+            AddRFQMapping();
         }
     }
 }

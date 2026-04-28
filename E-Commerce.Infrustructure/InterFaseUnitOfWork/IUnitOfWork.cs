@@ -11,6 +11,7 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
     {
         IUserRepos Users { get; }
         ICompanyRepos Companies { get; }
+        ICategoryRepos Category { get; }
         IProductRepos Products { get; }
         IOrderRepos Orders { get; }
         IOrderItemRepos orderItemRepos { get; }
@@ -28,6 +29,7 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         IConversationRepos Conversations { get; }
         IMessageRepos Messages { get; }
         IProductReviewRepos Reviews { get; }
+        IShippingRepos shipping {  get; }
         //   IDashboardRepository Dashboard { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);

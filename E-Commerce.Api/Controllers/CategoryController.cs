@@ -19,27 +19,27 @@ namespace E_Commerce.Api.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetCategoryList()
         {
-            var Response = await _mediator.Send(new GetListCategoryQueries());
+            var Response = await _mediator.Send(new GetCategoriesQuery());
             return Ok(Response);
         }
         [HttpPost("add")]
-        public async Task<IActionResult> AddCategory(AddCategoryCommand command)
+        public async Task<IActionResult> AddCategory(CreateCategoryCommand command)
         {
             var Response = await _mediator.Send(command);
             return Ok(Response);
         }
-        [HttpPut("edit")]
-        public async Task<IActionResult> EditCategory(EditCategoryCommand command)
-        {
-            var Response = await _mediator.Send(command);
-            return Ok(Response);
-        }
-        [HttpDelete("delete{id}")]
-        public async Task<IActionResult> DeleteCategory([FromRoute] int id)
-        {
-            var Response = await _mediator.Send(new DeleteCategoryCommand(id));
-            return Ok(Response);
-        }
+        //[HttpPut("edit")]
+        //public async Task<IActionResult> EditCategory(EditCategoryCommand command)
+        //{
+        //    var Response = await _mediator.Send(command);
+        //    return Ok(Response);
+        //}
+        //[HttpDelete("delete{id}")]
+        //public async Task<IActionResult> DeleteCategory([FromRoute] int id)
+        //{
+        //    var Response = await _mediator.Send(new DeleteCategoryCommand(id));
+        //    return Ok(Response);
+        //}
 
     }
 }

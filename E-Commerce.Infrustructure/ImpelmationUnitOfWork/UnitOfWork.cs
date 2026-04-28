@@ -29,6 +29,9 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         private IConversationRepos? _conversations;
         private IMessageRepos? _messages;
         private IProductReviewRepos? _reviews;
+        private IShippingRepos? _shipping;
+        private ICategoryRepos? _categories;
+        
 
         //private IDashboardRepository? _dashboard;
 
@@ -50,6 +53,9 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         public IMessageRepos Messages => _messages ??= new MessageRepos(context);
         public IProductReviewRepos Reviews => _reviews ??= new ProductReviewRepos(context);
         public IProductOptionsRepos ProductOptions => productOptions ??= new ProductOptionsRepos(context);
+        public IShippingRepos shipping => _shipping ??= new ShippingRepos(context);
+        public ICategoryRepos Category => _categories ??= new CategoryRepos(context);
+
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)
             => await context.SaveChangesAsync(ct);
 

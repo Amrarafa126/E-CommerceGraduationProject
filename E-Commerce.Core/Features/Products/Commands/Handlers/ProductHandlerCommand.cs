@@ -4,6 +4,7 @@ using E_Commerce.Core.BaseResponse;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Products.Commands.Models;
 using E_Commerce.Data.Entity;
+using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
@@ -22,7 +23,7 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
             if (currentUser.UserId == null) throw new UnauthorizedException();
 
             var user = await uow.Users.GetWithCompanyAsync(currentUser.UserId.Value, ct)
-                ?? throw new NotFoundException(nameof(ApplicationUser), currentUser.UserId.Value);
+                ?? throw new NotFoundException(nameof(User), currentUser.UserId.Value);
 
             if (user.CompanyId == null)
                 throw new BusinessException("You must belong to a company to add products.");

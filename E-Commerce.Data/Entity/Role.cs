@@ -7,12 +7,28 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
-    public class Role : IdentityRole
+    public class Role : IdentityRole<Guid>
     {
-        public int Id { get; set; }
-        public Role()
+        public string? Description { get; set; }
+
+        public Role() : base() { }
+
+        public Role(string roleName, string? description = null)
+            : base(roleName)
         {
-            
+            Id = Guid.NewGuid();
+            Description = description;
+            NormalizedName = roleName.ToUpperInvariant();
+        }
+
+        // ── Role name constants (matches UserRole enum) ────────────────
+        public static class Names
+        {
+            public const string Admin = "Admin";
+            public const string Supplier = "Supplier";
+            public const string Buyer = "Buyer";
+
+            public static readonly string[] All = [Admin, Supplier, Buyer];
         }
     }
 }

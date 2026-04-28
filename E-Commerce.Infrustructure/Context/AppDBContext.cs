@@ -1,20 +1,24 @@
 ﻿using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
 using E_Commerce.Data.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace E_Commerce.Infrustructure.Context
 {
-    public class AppDBContext : IdentityDbContext<User>
+    public class AppDBContext(DbContextOptions<AppDBContext> options)
+      : IdentityDbContext<
+           User,          // TUser
+           Role,          // TRole
+          Guid,                     // TKey  — Guid instead of the default string
+          IdentityUserClaim<Guid>,
+          IdentityUserRole<Guid>,
+          IdentityUserLogin<Guid>,
+          IdentityRoleClaim<Guid>,
+          IdentityUserToken<Guid>>(options)
     {
-        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
-        {
-
-        }
-
-      
         #region dbset in database
         public DbSet<Category> categories { get; set; }
          public DbSet<Product> products { get; set; }
@@ -38,7 +42,9 @@ namespace E_Commerce.Infrustructure.Context
         public DbSet<Conversation> conversations { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Address> addresses { get; set; }
-        public DbSet<ContactInfo> contactInfos { get; set; }    
+        public DbSet<ContactInfo> contactInfos { get; set; }   
+        public DbSet<ShippingEvent> shippingEvents { get; set; }
+        public DbSet<OrderStatusHistory> orderStatusHistories {get; set; }
 
 
 

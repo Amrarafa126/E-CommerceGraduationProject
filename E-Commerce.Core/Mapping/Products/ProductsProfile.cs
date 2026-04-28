@@ -8,7 +8,6 @@ namespace E_Commerce.Core.Mapping.Products
         public ProductsProfile()
         {
             AddProductMapping();
-            GetListProductMapping();
         }
     }
 }

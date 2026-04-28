@@ -10,8 +10,8 @@ namespace E_Commerce.Infrustructure.Interfase
 {
     public interface ICategoryRepos : IGenericRepositoryAsync<Category>
     {
-        public  Task<List<Category>> GetCategoryListAsync();
-      
+        Task<IEnumerable<Category>> GetRootsWithChildrenAsync(CancellationToken ct = default);
+        Task<Category?> GetWithChildrenAsync(Guid categoryId, CancellationToken ct = default);
 
     }
 }
