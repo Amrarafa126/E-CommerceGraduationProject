@@ -32,20 +32,13 @@ namespace E_Commerce.Data.Status
     public enum OrderStatus
     {
         Pending = 1,
-        Confirmed = 2,
+        Paid = 2,
         Processing = 3,
         Shipped = 4,
         Delivered = 5,
-        Cancelled = 6,
-        Refunded = 7
-    }
-
-    public enum PaymentStatus
-    {
-        Unpaid = 1,
-        Paid = 2,
-        PartiallyPaid = 3,
-        Refunded = 4
+        Completed = 6,
+        Cancelled = 7,
+        Refunded = 8
     }
     public enum PayoutStatus
     {
@@ -64,5 +57,23 @@ namespace E_Commerce.Data.Status
         Quoted = 6,
         Closed = 7
     }
+
+
+    public enum ShippingStatus
+    {
+        Pending = 1,
+        ReadyForPickup = 2,
+        InTransit = 3,
+        OutForDelivery = 4,
+        Delivered = 5,
+        Failed = 6,
+        Returned = 7
+    }
+    public enum ShippingMethod { Standard = 1, Express = 2, Overnight = 3, Pickup = 4 }
+
+    public enum PaymentStatus { Pending = 1, Paid = 2, Failed = 3, Refunded = 4, PartiallyRefunded = 5 }
+    public enum PaymentMethod { Card = 1, Wallet = 2, CashOnDelivery = 3, BankTransfer = 4 }
+
+
 
 }

@@ -6,5 +6,7 @@ namespace E_Commerce.Infrustructure.Interfase
 {
     public interface IWalletRepos : IGenericRepositoryAsync<Wallet>
     {
+        Task<Wallet?> GetByCompanyAsync(Guid companyId, CancellationToken ct = default);
+
     }
 }

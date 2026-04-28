@@ -1,0 +1,14 @@
+﻿using AutoMapper;
+using E_Commerce.Infrustructure.InterFaseUnitOfWork;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace E_Commerce.Core.Features.RFQ.Queries.Models
+{
+    public record GetRfqByIdQuery(Guid RfqId) : IRequest<ApiResponse<RfqRequestDto>>;
+    
+}

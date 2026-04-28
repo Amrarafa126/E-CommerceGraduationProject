@@ -24,9 +24,9 @@ namespace E_Commerce.Core.Wrappers
             TotalCount = count;
         }
 
-        public static PaginatedResult<T> Success(List<T> data, int count, int page, int pageSize)
+        public static PaginatedResult<T> Success(IEnumerable<T> data, int count, int page, int pageSize)
         {
-            return new(true, data, null, count, page, pageSize);
+            return new(true, data.ToList(), null, count, page, pageSize);
         }
 
         public int CurrentPage { get; set; }

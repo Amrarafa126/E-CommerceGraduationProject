@@ -20,6 +20,8 @@ namespace E_Commerce.Data.Entity
         public bool IsVerifiedPurchase { get; private set; }
         public string? SupplierReply { get; private set; }
         public DateTime? RepliedAt { get; private set; }
+        public ICollection<ReviewImage> Images { get; private set; } = new List<ReviewImage>();
+
 
         private ProductReview() { }
 

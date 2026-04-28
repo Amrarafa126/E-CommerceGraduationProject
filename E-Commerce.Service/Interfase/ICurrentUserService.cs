@@ -10,6 +10,9 @@ namespace E_Commerce.Service.Interfase
     {
         Guid? UserId { get; }
         string? Email { get; }
-        string? Role { get; }
+        string? Role { get; }          
+        Guid? OwnedCompanyId { get; }       
+        Guid? EmployerCompanyId { get; }      
+        bool IsAuthenticated { get; }
     }
 }

@@ -10,5 +10,10 @@ namespace E_Commerce.Infrustructure.Interfase
 {
     public interface IOrderRepos : IGenericRepositoryAsync<Order>
     {
+        Task<Order?> GetWithFullDetailsAsync(Guid orderId, CancellationToken ct = default);
+        Task<(IEnumerable<Order> Items, int Total)> GetByBuyerPagedAsync(
+            Guid buyerId, int page, int pageSize, CancellationToken ct = default);
+        Task<(IEnumerable<Order> Items, int Total)> GetBySellerPagedAsync(
+            Guid companyId, int page, int pageSize, CancellationToken ct = default);
     }
 }

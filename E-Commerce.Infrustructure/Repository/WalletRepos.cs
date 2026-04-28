@@ -11,13 +11,9 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class WalletRepos : GenericRepositoryAsync<Wallet>, IWalletRepos
+    public class WalletRepos(AppDBContext Db) : GenericRepositoryAsync<Wallet>(Db), IWalletRepos
     {
-        DbSet<Wallet> wallets;
-
-        public WalletRepos(AppDBContext context) : base(context)
-        {
-            wallets = context.Wallets;
-        }
+        public Task<Wallet?> GetByCompanyAsync(Guid companyId, CancellationToken ct = default)
+       => Db.Wallets.FirstOrDefaultAsync(w => w.CompanyId == companyId, ct);
     }
 }

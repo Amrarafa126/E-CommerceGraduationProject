@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\ApplicationUser\Commands\Validations\" />
     <Folder Include="Features\Authentication\Commands\Vaildations\" />
     <Folder Include="Features\Authentication\Queries\Handlers\" />
     <Folder Include="Features\Authentication\Queries\Models\" />
@@ -24,6 +23,7 @@
     <Folder Include="Features\Companies\Queries\Handlers\" />
     <Folder Include="Features\Companies\Queries\Models\" />
     <Folder Include="Features\Companies\Queries\Response\" />
+    <Folder Include="Features\Shipping\" />
     <Folder Include="Features\ProductImages\Commands\Vaildations\" />
     <Folder Include="Features\ProductImages\Queries\Handlers\" />
     <Folder Include="Features\ProductImages\Queries\Models\" />
@@ -45,7 +45,6 @@
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />
     <Folder Include="Features\ProductVariants\Queries\Response\" />
-    <Folder Include="Mapping\ApplicationUser\Queries\" />
     <Folder Include="Mapping\Companies\QueriesMapping\" />
     <Folder Include="Mapping\ProductImage\QueriesMapping\" />
     <Folder Include="Mapping\ProductOptions\QueriesMapping\" />
