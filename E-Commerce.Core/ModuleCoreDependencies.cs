@@ -13,25 +13,29 @@ namespace E_Commerce.Core
 {
     public static class ModuleCoreDependencies
     {
-        public static IServiceCollection AddCoreDependencies(this IServiceCollection service)
+        public static IServiceCollection AddCoreDependencies(this IServiceCollection services)
         {
 
 
-            service.AddAutoMapper(Assembly.GetExecutingAssembly());
+            var assembly = Assembly.GetExecutingAssembly();
 
+            // AutoMapper
+            services.AddAutoMapper(assembly);
 
-           service.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            // FluentValidation
+            services.AddValidatorsFromAssembly(assembly);
 
-            service.AddMediatR(cfg =>
+            // MediatR
+            services.AddMediatR(cfg =>
             {
-             // cfg.RegisterServicesFromAssembly(Assembly);
+                cfg.RegisterServicesFromAssembly(assembly);
+
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
             });
-            // 
-            // service.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            return service;
+
+            return services;
         }
 
 

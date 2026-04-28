@@ -1,6 +1,9 @@
-﻿using E_Commerce.Core.Features.Categorys.Commands.Models;
+﻿using E_Commerce.Core.Features.Categorys;
+using E_Commerce.Core.Features.Categorys.Commands.Models;
 using E_Commerce.Core.Features.Categorys.Queries.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,38 +11,35 @@ namespace E_Commerce.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class CategoryController(ISender mediator) : ControllerBase
     {
-        IMediator _mediator;
+        
 
-        public CategoryController(IMediator mediator)
+        [HttpGet("Get-All-Categories")]
+        [ProducesResponseType(typeof(ApiResponse<List<CategoryDto>>), 200)]
+        public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            _mediator = mediator;
+            var r = await mediator.Send(new GetCategoriesQuery(), ct);
+            return StatusCode(r.StatusCode, r);
         }
-        [HttpGet("list")]
-        public async Task<IActionResult> GetCategoryList()
-        {
-            var Response = await _mediator.Send(new GetCategoriesQuery());
-            return Ok(Response);
-        }
-        [HttpPost("add")]
-        public async Task<IActionResult> AddCategory(CreateCategoryCommand command)
-        {
-            var Response = await _mediator.Send(command);
-            return Ok(Response);
-        }
-        //[HttpPut("edit")]
-        //public async Task<IActionResult> EditCategory(EditCategoryCommand command)
-        //{
-        //    var Response = await _mediator.Send(command);
-        //    return Ok(Response);
-        //}
-        //[HttpDelete("delete{id}")]
-        //public async Task<IActionResult> DeleteCategory([FromRoute] int id)
-        //{
-        //    var Response = await _mediator.Send(new DeleteCategoryCommand(id));
-        //    return Ok(Response);
-        //}
 
+        [HttpGet("Get-By-Id/Category/{id:guid}")]
+        [ProducesResponseType(typeof(ApiResponse<CategoryDto>), 200)]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new GetCategoryByIdQuery(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+     
+        [HttpPost("Create-Category")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<CategoryDto>), 201)]
+        public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new CreateCategoryCommand(
+                dto.Name, dto.Description, dto.ParentCategoryId), ct);
+            return StatusCode(r.StatusCode, r);
+        }
     }
 }

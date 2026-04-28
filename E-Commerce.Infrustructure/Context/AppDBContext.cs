@@ -9,12 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace E_Commerce.Infrustructure.Context
 {
     public class AppDBContext(DbContextOptions<AppDBContext> options)
-      : IdentityDbContext<
-           User,          // TUser
-           Role,          // TRole
-          Guid,                     // TKey  — Guid instead of the default string
-          IdentityUserClaim<Guid>,
-          IdentityUserRole<Guid>,
+      : IdentityDbContext<User,Role,Guid,IdentityUserClaim<Guid>,IdentityUserRole<Guid>,
           IdentityUserLogin<Guid>,
           IdentityRoleClaim<Guid>,
           IdentityUserToken<Guid>>(options)

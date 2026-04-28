@@ -1,24 +1,82 @@
-﻿using E_Commerce.Core.Features.Companies.Commands.Models;
+﻿using E_Commerce.Core.Features.Companies;
+using E_Commerce.Core.Features.Companies.Commands.Models;
+using E_Commerce.Core.Features.Companies.Queries.Models;
+using E_Commerce.Core.Wrappers;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class CompanyController : ControllerBase
+    [Route("api/v1/companies")]
+    [Produces("application/json")]
+    public class CompanyController(ISender mediator) : ControllerBase
     {
-        IMediator _mediator;
-        public CompanyController(IMediator mediator)
+
+        [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<CompanySummaryDto>>), 200)]
+        public async Task<IActionResult> GetAll(
+       [FromQuery] string? search,
+       [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+       CancellationToken ct = default)
         {
-            _mediator = mediator;
+            var r = await mediator.Send(new GetCompaniesQuery(search, page, pageSize), ct);
+            return StatusCode(r.StatusCode, r);
         }
-        [HttpPost("Add Company")]
-        public async Task<IActionResult> AddCompany(AddCompanyCommands addCompanyCommands)
+
+        /// <summary>Get company by ID (includes wallet balances for owner).</summary>
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
-            var result = await _mediator.Send(addCompanyCommands);
-            return Ok("Success Add Company");
+            var r = await mediator.Send(new GetCompanyByIdQuery(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Get the authenticated seller's own company.</summary>
+        [HttpGet("my")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
+        public async Task<IActionResult> GetMine(CancellationToken ct)
+        {
+            var r = await mediator.Send(new GetMyCompanyQuery(), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Update company info (Seller owner or Admin only).</summary>
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyDto dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new UpdateCompanyCommand(
+                id, dto.Name, dto.Description,
+                dto.Street, dto.City, dto.State, dto.Country, dto.PostalCode,
+                dto.ContactEmail, dto.ContactPhone,
+                dto.YearEstablished, dto.EmployeesCount), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Approve a company (Admin only).</summary>
+        [HttpPost("{id:guid}/approve")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
+        public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new ApproveCompanyCommand(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Suspend a company (Admin only).</summary>
+        [HttpPost("{id:guid}/suspend")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
+        public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new SuspendCompanyCommand(id), ct);
+            return StatusCode(r.StatusCode, r);
         }
 
     }

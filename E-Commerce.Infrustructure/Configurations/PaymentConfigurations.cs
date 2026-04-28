@@ -11,25 +11,21 @@ namespace E_Commerce.Infrustructure.Configurations
         public void Configure(EntityTypeBuilder<Payment> builder)
         {
             builder.ToTable("Payments");
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.Amount).HasPrecision(18, 4);
+            builder.Property(p => p.AmountRefunded).HasPrecision(18, 4);
+            builder.Property(p => p.Currency).IsRequired().HasMaxLength(3);
+            builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(30);
+            builder.Property(p => p.Method).HasConversion<string>().HasMaxLength(30);
+            builder.Property(p => p.GatewayTransactionId).HasMaxLength(200);
+            builder.Property(p => p.GatewayReference).HasMaxLength(200);
+            builder.Property(p => p.GatewayRawResponse).HasMaxLength(4000);
+            builder.Property(p => p.FailureReason).HasMaxLength(500);
+            builder.Property(p => p.CardLast4).HasMaxLength(4);
+            builder.Property(p => p.CardBrand).HasMaxLength(30);
 
-            builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.Amount)
-                   .HasColumnType("decimal(18,2)")
-                   .IsRequired();
-
-            builder.Property(x => x.Method)
-                   .HasMaxLength(100);
-
-            builder.Property(x => x.PaidAt)
-                   .HasDefaultValueSql("GETDATE()");
-
-            builder.HasOne(x => x.Order)
-                   .WithMany()
-                   .HasForeignKey(x => x.OrderId);
-                  // .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasIndex(x => x.OrderId);
+            builder.HasIndex(p => p.OrderId).IsUnique();
+            builder.HasIndex(p => p.GatewayTransactionId);
         }
     }
 }

@@ -10,14 +10,7 @@ namespace E_Commerce.Data.Entity
 {
     public class Product : BaseEntity
     {
-        //public Product()
-        //{
-        //        Images = new HashSet<ProductImage>();
-        //        PriceTiers = new HashSet<ProductPriceTier>();
-        //        Reviews = new HashSet<Review>();
-        //        productVariants = new HashSet<ProductVariant>();
-        //    ProductOptions = new HashSet<ProductOption>();
-
+      
         private const int MaxImages = 6;
         public string? Name { get; set; }
         public string? Description { get; set; }

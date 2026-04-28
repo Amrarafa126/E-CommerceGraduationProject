@@ -1,7 +1,4 @@
-﻿
-using System.Text.Json.Serialization;
-using E_Commerce.Core.BaseResponse;
-using MediatR;
+﻿using MediatR;
 
 namespace E_Commerce.Core.Features.ProductOptions.Commands.Models
 {

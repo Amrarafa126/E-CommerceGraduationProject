@@ -18,7 +18,16 @@ namespace E_Commerce.Data.Entity
         private ProductOption() { }
 
         public static ProductOption Create(Guid productId, string name, int order = 0)
-            => new() { ProductId = productId, Name = name, DisplayOrder = order };
+            => new() { ProductId = productId, Name = name.Trim(), DisplayOrder = order };
+
+        public void Update(string name, int displayOrder)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Option name cannot be empty.");
+
+            Name = name.Trim();
+            DisplayOrder = displayOrder;
+        }
     }
 }
 

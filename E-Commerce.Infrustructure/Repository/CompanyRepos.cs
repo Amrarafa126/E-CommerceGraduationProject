@@ -11,33 +11,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class CompanyRepos : GenericRepositoryAsync<Company>, ICompanyRepos
+    public class CompanyRepos(AppDBContext Db) : GenericRepositoryAsync<Company>(Db), ICompanyRepos
     {
-        DbSet<Company> companies;
-        public CompanyRepos(AppDBContext dbContext) : base(dbContext)
-        {
-            companies = dbContext.Set<Company>();
-        }
+    
+        public Task<Company?> GetWithDetailsAsync(Guid id, CancellationToken ct = default)
+          => Db.companies
+              .Include(c => c.Owner)
+              .Include(c => c.Wallet)
+              .Include(c => c.Employees)
+              .FirstOrDefaultAsync(c => c.Id == id, ct);
 
-        public Task<List<Company>> GetCompanyListAsync()
+        public Task<Company?> GetByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)
+            => Db.companies.Include(c => c.Wallet)
+                .FirstOrDefaultAsync(c => c.OwnerUserId == ownerUserId, ct);
+        public async Task<(IEnumerable<Company> Items, int Total)> GetPagedAsync(
+            int page, int pageSize, string? search = null, CancellationToken ct = default)
         {
-            return companies.ToListAsync();
-
-        }
-
-        public Task<(IEnumerable<Company> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Company?> GetWithMembersAsync(Guid companyId, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Company?> GetWithProductsAsync(Guid companyId, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
+            var q = Db.companies.AsNoTracking().AsQueryable();
+            if (!string.IsNullOrWhiteSpace(search))
+                q = q.Where(c => c.CompanyName.Contains(search) || c.Description.Contains(search));
+            var total = await q.CountAsync(ct);
+            var items = await q.OrderByDescending(c => c.CreatedAt)
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+            return (items, total);
         }
     }
 }

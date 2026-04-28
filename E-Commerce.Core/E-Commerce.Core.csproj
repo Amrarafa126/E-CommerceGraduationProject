@@ -8,10 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Companies\Queries\Response\**" />
     <Compile Remove="Mapping\Companies\QueriesMapping\**" />
     <Compile Remove="Mapping\ProductVariant\**" />
+    <EmbeddedResource Remove="Features\Companies\Queries\Response\**" />
     <EmbeddedResource Remove="Mapping\Companies\QueriesMapping\**" />
     <EmbeddedResource Remove="Mapping\ProductVariant\**" />
+    <None Remove="Features\Companies\Queries\Response\**" />
     <None Remove="Mapping\Companies\QueriesMapping\**" />
     <None Remove="Mapping\ProductVariant\**" />
   </ItemGroup>
@@ -26,10 +29,6 @@
     <Folder Include="Features\Authentication\Queries\Handlers\" />
     <Folder Include="Features\Authentication\Queries\Models\" />
     <Folder Include="Features\Authentication\Queries\Response\" />
-    <Folder Include="Features\Companies\Commands\Vaildations\" />
-    <Folder Include="Features\Companies\Queries\Handlers\" />
-    <Folder Include="Features\Companies\Queries\Models\" />
-    <Folder Include="Features\Companies\Queries\Response\" />
     <Folder Include="Features\ProductImages\Commands\Vaildations\" />
     <Folder Include="Features\ProductImages\Queries\Handlers\" />
     <Folder Include="Features\ProductImages\Queries\Models\" />
@@ -42,7 +41,6 @@
     <Folder Include="Features\ProductPriceTiers\Queries\Handlers\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Response\" />
-    <Folder Include="Features\Products\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />

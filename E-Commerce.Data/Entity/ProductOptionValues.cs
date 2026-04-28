@@ -10,6 +10,7 @@ namespace E_Commerce.Data.Entity
     public class ProductOptionValue : BaseEntity
     {
         public string Value { get; private set; } = string.Empty;
+        public int DisplayOrder {  get; set; } = 0;
         public Guid ProductOptionId { get; private set; }
         public ProductOption ProductOption { get; private set; } = null!;
         public ICollection<ProductVariantOptionValue> VariantOptionValues { get; private set; } = new List<ProductVariantOptionValue>();

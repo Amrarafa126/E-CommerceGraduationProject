@@ -18,8 +18,14 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
     UserManager<User> userManager,
     IUnitOfWork uow,
     ITokenService tok,
-    IMapper mapper) :
-        IRequestHandler<RegisterSellerCommand, ApiResponse<AuthResponseDto>>
+    IMapper mapper,
+    ICurrentUserService cu) :
+        IRequestHandler<RegisterSellerCommand, ApiResponse<AuthResponseDto>>,
+        IRequestHandler<RegisterBuyerCommand, ApiResponse<AuthResponseDto>>,
+        IRequestHandler<LoginCommand, ApiResponse<AuthResponseDto>>,
+        IRequestHandler<RefreshTokenCommand, ApiResponse<AuthResponseDto>>,
+        IRequestHandler<LogoutCommand, ApiResponse<object>>
+
     {
         public async Task<ApiResponse<AuthResponseDto>> Handle(RegisterSellerCommand req, CancellationToken ct)
         {
@@ -74,6 +80,115 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                     mapper.Map<UserDto>(user)));
             }
             catch { await uow.RollbackTransactionAsync(ct); throw; }
+        }
+
+        public async Task<ApiResponse<AuthResponseDto>> Handle(
+       RegisterBuyerCommand req, CancellationToken ct)
+        {
+            var user = User.CreateBuyer(
+                req.Email, req.FirstName, req.LastName, req.PhoneNumber);
+
+            // Identity creates user and hashes the password
+            var result = await userManager.CreateAsync(user, req.Password);
+            if (!result.Succeeded)
+                throw new ValidationException(
+                    result.Errors.Select(e => e.Description));
+
+            // Assign "Buyer" Identity role
+            await userManager.AddToRoleAsync(user, Role.Names.Buyer);
+
+            var refresh = tok.GenerateRefreshToken();
+            user.SetRefreshToken(refresh, DateTime.UtcNow.AddDays(30));
+            await userManager.UpdateAsync(user);
+
+            var roles = await userManager.GetRolesAsync(user);
+            var access = tok.GenerateAccessToken(user, roles);
+
+            return ApiResponse<AuthResponseDto>.Created(new AuthResponseDto(
+                access, refresh, DateTime.UtcNow.AddMinutes(60),
+                mapper.Map<UserDto>(user)));
+        }
+
+        public async Task<ApiResponse<AuthResponseDto>> Handle(
+       LoginCommand req, CancellationToken ct)
+        {
+            // Find user by email (normalised lookup)
+            var user = await userManager.FindByEmailAsync(req.Email);
+
+            if (user is null || user.IsDeleted || !user.IsActive)
+                throw new UnauthorizedException("Invalid email or password.");
+
+            // Check for lockout
+            if (await userManager.IsLockedOutAsync(user))
+                throw new UnauthorizedException(
+                    "Account is locked out due to multiple failed login attempts. " +
+                    "Try again in 15 minutes.");
+
+            // Identity verifies the hashed password
+            var valid = await userManager.CheckPasswordAsync(user, req.Password);
+            if (!valid)
+            {
+                await userManager.AccessFailedAsync(user); // increment lockout counter
+                throw new UnauthorizedException("Invalid email or password.");
+            }
+
+            // Reset failed-access counter on success
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            var refresh = tok.GenerateRefreshToken();
+            user.SetRefreshToken(refresh, DateTime.UtcNow.AddDays(30));
+            await userManager.UpdateAsync(user);
+
+            var roles = await userManager.GetRolesAsync(user);
+            var access = tok.GenerateAccessToken(user, roles);
+
+            return ApiResponse<AuthResponseDto>.Ok(new AuthResponseDto(
+                access, refresh, DateTime.UtcNow.AddMinutes(60),
+                mapper.Map<UserDto>(user)));
+        }
+
+        public async Task<ApiResponse<AuthResponseDto>> Handle(
+      RefreshTokenCommand req, CancellationToken ct)
+        {
+            var principal = tok.GetPrincipalFromExpiredToken(req.AccessToken)
+                ?? throw new UnauthorizedException("Invalid access token.");
+
+            var userIdStr = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedException("Invalid token claims.");
+
+            var user = await uow.Users.GetByIdAsync(userId, ct)
+                ?? throw new UnauthorizedException("User not found.");
+
+            if (user.RefreshToken != req.RefreshToken ||
+                user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                throw new UnauthorizedException("Refresh token is invalid or expired.");
+
+            var newRefresh = tok.GenerateRefreshToken();
+            user.SetRefreshToken(newRefresh, DateTime.UtcNow.AddDays(30));
+            await userManager.UpdateAsync(user);
+
+            var roles = await userManager.GetRolesAsync(user);
+            var access = tok.GenerateAccessToken(user, roles);
+
+            return ApiResponse<AuthResponseDto>.Ok(new AuthResponseDto(
+                access, newRefresh, DateTime.UtcNow.AddMinutes(60),
+                mapper.Map<UserDto>(user)));
+        }
+
+        public async Task<ApiResponse<object>> Handle(LogoutCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null)
+                return ApiResponse<object>.Fail("Unauthorized.", 401);
+
+            var user = await userManager.FindByIdAsync(cu.UserId.ToString()!);
+            if (user == null)
+                return ApiResponse<object>.Fail("User not found.", 404);
+
+            user.ClearRefreshToken();
+            await userManager.UpdateAsync(user);
+
+            return ApiResponse<object>.Ok("Logged out successfully.");
         }
     }
 

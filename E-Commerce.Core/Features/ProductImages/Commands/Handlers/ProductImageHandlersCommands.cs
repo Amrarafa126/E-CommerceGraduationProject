@@ -1,110 +1,81 @@
 ﻿
-//using AutoMapper;
-//using E_Commerce.Core.BaseResponse;
-//using E_Commerce.Core.Features.Categorys.Commands.Models;
-//using E_Commerce.Core.Features.ProductImages.Commands.Models;
-//using E_Commerce.Data.Entity;
-//using E_Commerce.Service.Interfase;
-//using E_Commerce.Service.Repostoiry;
-//using MediatR;
-//using Microsoft.AspNetCore.Http;
+using AutoMapper;
+using E_Commerce.Core.BaseResponse;
+using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Features.Categorys.Commands.Models;
+using E_Commerce.Core.Features.ProductImages.Commands.Models;
+using E_Commerce.Data.Entity;
+using E_Commerce.Infrustructure.InterFaseUnitOfWork;
+using E_Commerce.Service.Interfase;
+using E_Commerce.Service.Repostoiry;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 
-//namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
-//{
-//    public class ProductImageHandlersCommands : ResponseHandler, IRequestHandler<AddProductImagesCommand, Response<string>>
-//                                                               , IRequestHandler<DeleteProductImageCommand, Response<string>>
-//                                                               , IRequestHandler<UpdateProductImageCommand, Response<string>>
-//    {
-//        private readonly IFileService _fileService;
-//        IProductService productService;
-//        IProductImageService ProductImageService;
-//        IMapper mapper;
+namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
+{
+    public class ProductImageHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IFileStorageService storage)
+    : IRequestHandler<UploadProductImageCommand, ApiResponse<ProductImageDto>>,
+         IRequestHandler<DeleteProductImageCommand, ApiResponse<object>>
+    {
+        private const int MaxImages = 6;
 
-//        public ProductImageHandlersCommands(IFileService fileService,
-//                                            IProductService productService,
-//                                            IProductImageService productImageService,
-//                                            IMapper mapper)
-//        {
-//            _fileService = fileService;
-//            this.productService = productService;
-//            ProductImageService = productImageService;
-//            this.mapper = mapper;
-//        }
-//        public async Task<Response<string>> Handle(AddProductImagesCommand request, CancellationToken cancellationToken)
-//        {
+        public async Task<ApiResponse<ProductImageDto>> Handle(
+            UploadProductImageCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null) throw new UnauthorizedException();
 
-//            if (request.Images == null || !request.Images.Any())
-//                return BadRequest<string>("No images uploaded");
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-//            var product = await productService.GetByIdAsync(request.ProductId);
+            // OwnedCompanyId from JWT — no extra DB call needed
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")//////////////////////////////////////////////////////
+                throw new ForbiddenException("You can only upload images to your own products.");
 
-//            if (product == null)
-//                return NotFound<string>("Product not found");
+            if (product.ActiveImageCount >= MaxImages)
+                throw new BusinessException($"A product can have at most {MaxImages} images.");
 
-//            var imageUrls = await _fileService.UploadProductImages(
-//                "images/products",
-//                request.Images
-//            );
+            await using var stream = req.File.OpenReadStream();
+            var url = await storage.UploadAsync(
+                stream, req.File.FileName, $"products/{product.Id}", ct);
 
+            var image = ProductImage.Create(
+                product.Id, url, req.File.FileName,
+                req.File.ContentType, req.File.Length,
+                req.DisplayOrder, req.AltText);
 
-//            var images = imageUrls.Select(url => new ProductImage
-//            {
-//                ImageUrl = url,
-//                ProductId = product.Id,
-//                IsMain = false
+            product.AddImage(image);
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
 
-//            }).ToList();
+            return ApiResponse<ProductImageDto>.Created(new ProductImageDto(
+                image.Id, image.Url, image.OriginalFileName,
+                image.FileSizeBytes, image.AltText, image.DisplayOrder));
+        
+        }
 
-//            if (!(product.Images?.Any() ?? false) && images.Any())
-//            {
-//                images.First().IsMain = true;
-//            }
+        public async Task<ApiResponse<object>> Handle(
+        DeleteProductImageCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null) throw new UnauthorizedException();
 
-//            await ProductImageService.AddProductImageAsync(images);
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-//            return Success("Images added successfully");
-//        }
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
+                throw new ForbiddenException("You can only delete images from your own products.");
 
-//        public async Task<Response<string>> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
-//        {
-//            var image = await ProductImageService.GetByIdAsync(request.Id);
-//            if (image == null)
-//                return NotFound<string>("Image not found");
-//            var result = await ProductImageService.DeleteProductImageAsync(image);
-//            if (result == null)
-//                return BadRequest<string>("Failed to delete image");
-//            return Success("Image deleted successfully");
-//        }
+            var image = product.Images.FirstOrDefault(i => i.Id == req.ImageId)
+                ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
-//        public async Task<Response<string>> Handle(UpdateProductImageCommand request, CancellationToken cancellationToken)
-//        {
-//            var image = await ProductImageService.GetByIdAsync(request.ImageId);
-//            if (image == null)
-//                return NotFound<string>("Image not found");
-//            // var ProductImageMapper = mapper.Map(request, image);
-//            // var result = await ProductImageService.EditProductImageAsync(ProductImageMapper);
-//            var urls = await _fileService.UploadProductImages(
-//            "images/products",
-//          new List<IFormFile> { request.NewImage! });
+            await storage.DeleteAsync(image.Url, ct);
+            product.RemoveImage(req.ImageId);
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
 
-//            image.ImageUrl = urls.First();
+            return ApiResponse<object>.Ok("Image deleted successfully.");
+        }
+    }
 
-//            await ProductImageService.EditProductImageAsync(image);
-
-//            return Success("Image updated successfully");
-//        }
-//    }
-//}
+}
 
 
-//// 🔥 تحويل لـ Entity
-////var images = imageUrls.Select(url => new ProductImage
-////{
-////    ImageUrl = imageUrls,
-////    ProductId = request.ProductId,
-////    IsMain = false
-////}).ToList();
-
-////// 🔐 Multi-Tenancy
-////if (product.CompanyId != _currentUserService.CompanyId)
-////    return Unauthorized<string>();

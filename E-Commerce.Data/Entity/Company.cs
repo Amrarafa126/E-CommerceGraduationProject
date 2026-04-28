@@ -50,8 +50,7 @@ namespace E_Commerce.Data.Entity
         }
 
         public void Update(string name, string description, Address address,
-            ContactInfo contactInfo, int yearEstablished, int employeesCount,
-            string? website, string? taxNumber)
+            ContactInfo contactInfo, int yearEstablished, int employeesCount)
         {
             CompanyName = name; Description = description; Address = address;
             ContactInfo = contactInfo; YearEstablished = yearEstablished;
