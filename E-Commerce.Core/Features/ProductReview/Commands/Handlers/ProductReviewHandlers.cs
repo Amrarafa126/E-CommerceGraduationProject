@@ -113,7 +113,7 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Handlers
             var user = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct)!;
 
             // Must be a supplier who owns this product's company
-            if (user?.CompanyId != product?.CompanyId && currentUser.Role != "Admin")
+            if (user?.OwnedCompanyId != product?.CompanyId && currentUser.Role != "Admin")
                 throw new ForbiddenException("Only the product's supplier can reply to reviews.");
 
             review.AddSupplierReply(req.Reply);

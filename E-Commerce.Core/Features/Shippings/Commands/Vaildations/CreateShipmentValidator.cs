@@ -1,4 +1,4 @@
-﻿using E_Commerce.Core.Features.Shipping.Commands.Models;
+﻿using E_Commerce.Core.Features.Shippings.Commands.Models;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

@@ -11,6 +11,6 @@ namespace E_Commerce.Core.Features.ProductOptions
 
     public record AddProductOptionDto(string Name, int DisplayOrder = 0, List<string>? Values = null);
 
-    public record ProductOptionValueDto(Guid Id, string Value, string? DisplayLabel, int DisplayOrder);
+    public record ProductOptionValueDto(Guid Id, string Value, int DisplayOrder);
 
 }

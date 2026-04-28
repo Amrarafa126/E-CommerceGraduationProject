@@ -17,22 +17,16 @@ namespace E_Commerce.Api.Controllers
             _mediator = mediator;
         }
         [HttpPost("Add-Product-Images")]
-        public async Task<IActionResult> AddProductImages([FromForm] AddProductImagesCommand command)
+        public async Task<IActionResult> AddProductImages([FromForm] UploadProductImageCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);
         }
-        [HttpDelete("Delete-Product-Image{id}")]
-        public async Task<IActionResult> DeleteProductImage([FromRoute] int id)
-        {
-            var result = await _mediator.Send(new DeleteProductImageCommand(id));
-            return Ok(result);
-        }
-        [HttpPut("Edit-Product-Image")]
-        public async Task<IActionResult> EditProductImage(UpdateProductImageCommand command)
-        {
-            var Response = await _mediator.Send(command);
-            return Ok(Response);
-        }
+        //[HttpDelete("Delete-Product-Image{id}")]
+        //public async Task<IActionResult> DeleteProductImage([FromRoute] int id)
+        //{
+        //    var result = await _mediator.Send(new DeleteProductImageCommand(id));
+        //    return Ok(result);
+        //}
     }
 }

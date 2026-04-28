@@ -8,13 +8,6 @@ using MediatR;
 
 namespace E_Commerce.Core.Features.ProductImages.Commands.Models
 {
-    public class DeleteProductImageCommand : IRequest<Response<string>>
-    {
-        public int Id { get; set; }
-        public DeleteProductImageCommand(int id)
-        {
-            Id = id;
-
-        }
-    }
+    public record DeleteProductImageCommand(Guid ProductId, Guid ImageId)
+     : IRequest<ApiResponse<object>>;
 }

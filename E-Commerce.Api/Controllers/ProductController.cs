@@ -20,18 +20,18 @@ namespace E_Commerce.Api.Controllers
     {
         IMediator mediator;
 
-        [HttpPost]
-        [Authorize(Roles = "Supplier")]
-        [ProducesResponseType(typeof(ApiResponse<ProductDto>), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Create(
-        [FromBody] CreateProductDto dto,
-        CancellationToken ct)
-        {
-            var result = await mediator.Send(new AddProductModelComands(
-                dto.Name, dto.Description, dto.CategoryId,
-                dto.MinimumOrderQuantity, dto.BasePrice, dto.currency), ct);
-            return StatusCode(result.StatusCode, result);
-        }
+        //[HttpPost]
+        //[Authorize(Roles = "Supplier")]
+        //[ProducesResponseType(typeof(ApiResponse<ProductDto>), StatusCodes.Status201Created)]
+        //public async Task<IActionResult> Create(
+        //[FromBody] CreateProductDto dto,
+        //CancellationToken ct)
+        //{
+        // //   var result = await mediator.Send(new AddProductModelComands(
+        //        dto.Name, dto.Description, dto.CategoryId,
+        //        dto.MinimumOrderQuantity, dto.BasePrice, dto.currency), ct);
+        //    return StatusCode(result.StatusCode, result);
+        //}
         [HttpPost("{id:guid}/options")]
         [Authorize(Roles = "Supplier")]
         [ProducesResponseType(typeof(ApiResponse<ProductOptionDto>), StatusCodes.Status201Created)]

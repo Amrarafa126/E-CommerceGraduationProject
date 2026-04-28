@@ -59,7 +59,7 @@ namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
                 ?? throw new NotFoundException(nameof(RfqRequest), req.RfqRequestId);
 
             var user = await uow.Users.GetByIdAsync(cu.UserId.Value, ct)!;
-            if (user?.CompanyId != rfq.SellerCompanyId && cu.Role != "Supplier")
+            if (user?.OwnedCompanyId != rfq.SellerCompanyId && cu.Role != "Supplier")
                 throw new ForbiddenException("Only the seller company can submit quotes.");
 
             if (rfq.Status == RfqStatus.Cancelled || rfq.Status == RfqStatus.Accepted)

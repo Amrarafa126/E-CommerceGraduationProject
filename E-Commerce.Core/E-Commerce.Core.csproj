@@ -42,7 +42,6 @@
     <Folder Include="Features\ProductPriceTiers\Queries\Handlers\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Response\" />
-    <Folder Include="Features\Products\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />

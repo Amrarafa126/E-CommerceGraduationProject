@@ -29,10 +29,10 @@ namespace E_Commerce.Core.Features.Chats.Oueries.Handlers
             IEnumerable<Conversation> items;
             int total;
 
-            if (user.CompanyId != null)
+            if (user.OwnedCompanyId != null)
             {
                 (items, total) = await uow.Conversations.GetByCompanyAsync(
-                    user.CompanyId, req.Page, req.PageSize, ct);
+                    user.OwnedCompanyId.Value, req.Page, req.PageSize, ct);
             }
             else
             {
@@ -71,7 +71,7 @@ namespace E_Commerce.Core.Features.Chats.Oueries.Handlers
 
             var user = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct)!;
             bool isBuyer = conversation.BuyerId == currentUser.UserId.Value;
-            bool isCompanyMember = user?.CompanyId == conversation.CompanyId;
+            bool isCompanyMember = user?.OwnedCompanyId == conversation.CompanyId;
 
             if (!isBuyer && !isCompanyMember)
                 throw new ForbiddenException("Access denied to this conversation.");

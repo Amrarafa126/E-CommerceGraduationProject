@@ -79,7 +79,7 @@ namespace E_Commerce.Core.Features.Chats.Commands.Handlers
                 ?? throw new NotFoundException(nameof(User), currentUser.UserId.Value);
 
             bool isBuyer = conversation.BuyerId == currentUser.UserId.Value;
-            bool isCompanyMember = user.CompanyId == conversation.CompanyId;
+            bool isCompanyMember = user.OwnedCompanyId == conversation.CompanyId;
 
             if (!isBuyer && !isCompanyMember)
                 throw new ForbiddenException("You are not a participant in this conversation.");

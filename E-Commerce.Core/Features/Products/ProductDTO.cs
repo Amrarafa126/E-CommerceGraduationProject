@@ -2,6 +2,7 @@
 using E_Commerce.Core.Features.ProductOptions;
 using E_Commerce.Core.Features.ProductPriceTiers;
 using E_Commerce.Core.Features.ProductVariants;
+using E_Commerce.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,12 +21,45 @@ namespace E_Commerce.Core.Features.Products
     public record CreateProductDto(string Name, string Description, Guid CategoryId,
     int MinimumOrderQuantity, decimal BasePrice, string currency);
 
-    public record ProductSummaryDto(Guid Id, string Name, string? Description,
-    string? MainImageUrl, decimal BasePrice, string Currency, int MinimumOrderQuantity,
-    string Status, Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName,
-    double AverageRating, int ReviewCount, DateTime CreatedAt);
+    public record ProductSummaryDto(Guid Id, string Name ,string? MainImageUrl, decimal BasePrice, string Currency, 
+        int MinimumOrderQuantity, string Status, Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName,
+        double AverageRating, int ReviewCount, DateTime CreatedAt);
+
+
     public record UpdateProductDto(string Name, string Description, Guid CategoryId, int MinimumOrderQuantity, 
         decimal BasePrice);
+
+    internal static class ProductMapper
+    {
+        internal static ProductDto Map(Product p) => new(
+            p.Id, p.Name, p.Description ,p.MainImageUrl,
+            p.BasePrice, p.Currency, p.MinimumOrderQuantity, p.Status.ToString(),
+            p.CompanyId, p.Company?.CompanyName, p.CategoryId, p.Category?.Name,
+            p.AverageRating, p.ReviewCount,
+            p.Images.Where(i => !i.IsDeleted).OrderBy(i => i.DisplayOrder)
+                .Select(i => new ProductImageDto(
+                    i.Id, i.Url, i.OriginalFileName, i.FileSizeBytes, i.AltText, i.DisplayOrder))
+                .ToList(),
+            p.ProductOptions.OrderBy(o => o.DisplayOrder)
+                .Select(o => new ProductOptionDto(
+                    o.Id, o.Name, o.DisplayOrder,
+                    o.Values.OrderBy(v => v.DisplayOrder)
+                        .Select(v => new ProductOptionValueDto(v.Id, v.Value, v.DisplayOrder))
+                        .ToList()))
+                .ToList(),
+            p.productVariants.Select(v => new ProductVariantDto(
+                v.Id, v.SKU, v.Price, v.StockQuantity, v.IsActive,
+                v.OptionValues.Select(ov => new VariantOptionValueDto(
+                    ov.ProductOptionValue.Id,
+                    ov.ProductOptionValue.Value,
+                    ov.ProductOptionValue.ProductOption.Name)).ToList()))
+                .ToList(),
+            p.PriceTiers.OrderBy(t => t.MinQuantity)
+                .Select(t => new PriceTierDto(t.Id, t.MinQuantity, t.MaxQuantity, t.UnitPrice))
+                .ToList(),
+            p.CreatedAt, p.UpdatedAt);
+    }
+
 
 }
 
