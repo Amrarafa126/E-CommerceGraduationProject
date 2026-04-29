@@ -17,8 +17,7 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         IOrderItemRepos orderItemRepos { get; }
         IWalletRepos Wallets { get; }
         IProductOptionValuesRepos ProductOptionValues { get; }
-            IProductOptionsRepos ProductOptions { get; }
-
+        IProductOptionsRepos ProductOptions { get; }
         IProductImageRepos productImage { get; }
         IProductPriceTierRepos productPrice { get; }
         IProductVariantsRepos productVariantsRepos { get; }
@@ -30,6 +29,9 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         IMessageRepos Messages { get; }
         IProductReviewRepos Reviews { get; }
         IShippingRepos shipping {  get; }
+        IPaymentRepos payment { get; }
+        IPayoutRepos payout { get; }    
+        
         //   IDashboardRepository Dashboard { get; }
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);

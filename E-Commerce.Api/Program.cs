@@ -38,9 +38,6 @@ namespace E_Commerce.Api
             });
 
             #endregion
-
-
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

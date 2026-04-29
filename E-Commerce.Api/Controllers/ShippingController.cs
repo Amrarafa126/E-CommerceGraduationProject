@@ -1,0 +1,61 @@
+﻿using E_Commerce.Core.Features.Shippings;
+using E_Commerce.Core.Features.Shippings.Commands.Models;
+using E_Commerce.Core.Features.Shippings.Queries.Models;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace E_Commerce.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ShippingController(ISender mediator) : ControllerBase
+    {
+        [HttpPost]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 201)]
+        public async Task<IActionResult> Create([FromBody] CreateShipmentDto dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new CreateShipmentCommand(
+                dto.OrderId, dto.RecipientName, dto.AddressLine1,
+                dto.City, dto.State, dto.Country, dto.PostalCode,
+                dto.Method, dto.ShippingCost, dto.AddressLine2,
+                dto.PhoneNumber, dto.EstimatedDeliveryDate), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 200)]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new GetShipmentDetailsQuery(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpGet("order/{orderId:guid}")]
+        [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 200)]
+        public async Task<IActionResult> GetByOrder(Guid orderId, CancellationToken ct)
+        {
+            var r = await mediator.Send(new GetShipmentByOrderQuery(orderId), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>
+        /// Update shipment status. Allowed transitions:
+        /// Pending → ReadyForPickup → InTransit (requires CarrierName + TrackingNumber)
+        /// → OutForDelivery → Delivered (releases seller wallet funds) | Failed | Returned
+        /// </summary>
+        [HttpPatch("{id:guid}/status")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 200)]
+        public async Task<IActionResult> UpdateStatus(
+            Guid id, [FromBody] UpdateShipmentStatusDto dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new UpdateShipmentStatusCommand(
+                id, dto.Status, dto.CarrierName, dto.TrackingNumber,
+                dto.TrackingUrl, dto.FailureReason), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+    }
+}

@@ -31,6 +31,8 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         private IProductReviewRepos? _reviews;
         private IShippingRepos? _shipping;
         private ICategoryRepos? _categories;
+        private IPaymentRepos? _payment;
+        private IPayoutRepos? _payout;
         
 
         //private IDashboardRepository? _dashboard;
@@ -55,6 +57,8 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         public IProductOptionsRepos ProductOptions => productOptions ??= new ProductOptionsRepos(context);
         public IShippingRepos shipping => _shipping ??= new ShippingRepos(context);
         public ICategoryRepos Category => _categories ??= new CategoryRepos(context);
+        public IPaymentRepos payment => _payment ??= new PaymentRepos(context);
+        public IPayoutRepos payout => _payout ??= new PayoutRepos(context);
 
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)
             => await context.SaveChangesAsync(ct);
