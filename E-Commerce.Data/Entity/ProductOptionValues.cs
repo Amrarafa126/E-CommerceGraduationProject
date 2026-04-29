@@ -21,7 +21,15 @@ namespace E_Commerce.Data.Entity
             => new()
             {
                 ProductOptionId = optionId,
-                Value = value,
+                Value = value.Trim(),
             };
+
+        public void Update(string value, int displayOrder)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Value cannot be empty.");
+            Value = value.Trim();
+            DisplayOrder = displayOrder;
+        }
     }
 }

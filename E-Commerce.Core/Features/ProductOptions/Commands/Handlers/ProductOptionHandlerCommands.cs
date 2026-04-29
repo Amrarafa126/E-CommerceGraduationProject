@@ -14,7 +14,8 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
    
         public class ProductOptionHandlerCommands(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu)
      : IRequestHandler<AddProductOptionCommand, ApiResponse<ProductOptionDto>>,
-        IRequestHandler<DeleteProductOptionCommand, ApiResponse<object>>
+        IRequestHandler<DeleteProductOptionCommand, ApiResponse<object>>,
+         IRequestHandler<UpdateProductOptionCommand, ApiResponse<ProductOptionDto>>
     {
             public async Task<ApiResponse<ProductOptionDto>> Handle(AddProductOptionCommand req, CancellationToken ct)
             {
@@ -79,6 +80,28 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<object>.Ok("Option and all its values deleted successfully.");
+        }
+
+        public async Task<ApiResponse<ProductOptionDto>> Handle(UpdateProductOptionCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null)
+                throw new UnauthorizedException();
+
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
+
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
+                throw new ForbiddenException("You are not allowed to modify this product.");
+
+            var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
+                ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
+
+            option.Update(req.Name, req.DisplayOrder);
+
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<ProductOptionDto>.Ok(mapper.Map<ProductOptionDto>(option));
         }
     }
  }

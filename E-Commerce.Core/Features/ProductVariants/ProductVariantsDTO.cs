@@ -9,6 +9,8 @@ namespace E_Commerce.Core.Features.ProductVariants
 
     public record VariantOptionValueDto(Guid Id, string Value, string OptionName);
 
+    public record UpdateProductVariantDto(string SKU, decimal Price, int StockQuantity,
+    bool IsActive, List<Guid>? OptionValueIds);
 
 
 }

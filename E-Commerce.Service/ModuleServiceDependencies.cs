@@ -15,14 +15,7 @@ namespace E_Commerce.Service
     {
         public static IServiceCollection AddServiceDependencies(this IServiceCollection service)
         {
-        //    service.AddTransient<ICategoryService, CategoryService>();
-        //    service.AddTransient<IProductService, ProductService>();
-        //    service.AddTransient<IFileService, FileService>();
-        //    service.AddTransient<ICompanyService, CompanyService>();
-        //    service.AddTransient<IProductImageService , ProductImageService>();
-        //    service.AddTransient<IProductOptionService, ProductOptionService>();
-        //    service.AddTransient<IProductOptionValueService, ProductOptionValueService>();
-            //service.AddTransient<IProductPriceTierService , ProductPriceTierService>();
+       
             service.AddTransient<IApplicationUserService, ApplicationUserService>();
             service.AddTransient<IEmailsService, EmailsService>();
             service.AddTransient<IAuthenticationService, AuthenticationService>();
@@ -30,6 +23,7 @@ namespace E_Commerce.Service
             service.AddTransient<ICurrentUserService, CurrentUserService>();
             service.AddSingleton<ITokenService, JwtTokenService>();
             service.AddTransient<IFileStorageService, LocalFileStorageService>();
+            service.AddTransient<IPaymentGateway, MockPaymentGateway>();
 
             return service;
         }

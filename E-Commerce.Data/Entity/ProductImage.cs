@@ -43,6 +43,22 @@ namespace E_Commerce.Data.Entity
                 DisplayOrder = displayOrder,
                 AltText = altText
             };
+
+
+        }
+
+        public void UpdateMetadata(string? altText, int displayOrder)
+        {
+            AltText = altText;
+            DisplayOrder = displayOrder;
+        }
+
+        public void UpdateFileDetails(string url, string fileName, string contentType, long size)
+        {
+            Url = url;
+            OriginalFileName = fileName;
+            ContentType = contentType;
+            FileSizeBytes = size;
         }
 
     }

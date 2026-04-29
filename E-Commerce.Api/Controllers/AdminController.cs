@@ -1,6 +1,5 @@
 ﻿using E_Commerce.Core.Features.AdminDashboard.Commands.Models;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
-using E_Commerce.Core.Features.ProductOptions.Commands.Models;
 using E_Commerce.Data.Status;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

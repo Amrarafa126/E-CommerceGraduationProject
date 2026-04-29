@@ -29,10 +29,10 @@
     <Folder Include="Features\Authentication\Queries\Handlers\" />
     <Folder Include="Features\Authentication\Queries\Models\" />
     <Folder Include="Features\Authentication\Queries\Response\" />
-    <Folder Include="Features\ProductImages\Commands\Vaildations\" />
     <Folder Include="Features\ProductImages\Queries\Handlers\" />
     <Folder Include="Features\ProductImages\Queries\Models\" />
     <Folder Include="Features\ProductImages\Queries\Response\" />
+    <Folder Include="Features\ProductOptionsValue\Queries\" />
     <Folder Include="Features\ProductOptions\Commands\Vaildations\" />
     <Folder Include="Features\ProductOptions\Queries\Handlers\" />
     <Folder Include="Features\ProductOptions\Queries\Models\" />
@@ -41,7 +41,6 @@
     <Folder Include="Features\ProductPriceTiers\Queries\Handlers\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Models\" />
     <Folder Include="Features\ProductPriceTiers\Queries\Response\" />
-    <Folder Include="Features\ProductVariants\Commands\Vaildations\" />
     <Folder Include="Features\ProductVariants\Queries\Handlers\" />
     <Folder Include="Features\ProductVariants\Queries\Models\" />
     <Folder Include="Features\ProductVariants\Queries\Response\" />

@@ -31,5 +31,17 @@ namespace E_Commerce.Data.Entity
                 MaxQuantity = maxQty
             };
         }
+        public void Update(int minQty, decimal unitPrice, int? maxQty = null)
+        {
+            if (minQty <= 0) throw new ArgumentException("Min quantity must be > 0.");
+            if (unitPrice < 0) throw new ArgumentException("Unit price cannot be negative.");
+            if (maxQty.HasValue && maxQty <= minQty)
+                throw new ArgumentException("Max must be > min quantity.");
+
+            MinQuantity = minQty;
+            UnitPrice = unitPrice;
+            MaxQuantity = maxQty;
+            MarkAsUpdated();
+        }
     }
 }

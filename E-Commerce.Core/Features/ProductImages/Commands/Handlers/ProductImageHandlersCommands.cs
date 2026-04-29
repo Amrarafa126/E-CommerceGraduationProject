@@ -1,21 +1,16 @@
-﻿
-using AutoMapper;
-using E_Commerce.Core.BaseResponse;
-using E_Commerce.Core.Exceptions;
-using E_Commerce.Core.Features.Categorys.Commands.Models;
+﻿using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.ProductImages.Commands.Models;
 using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
-using E_Commerce.Service.Repostoiry;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
 {
     public class ProductImageHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IFileStorageService storage)
     : IRequestHandler<UploadProductImageCommand, ApiResponse<ProductImageDto>>,
-         IRequestHandler<DeleteProductImageCommand, ApiResponse<object>>
+         IRequestHandler<DeleteProductImageCommand, ApiResponse<object>>,
+         IRequestHandler<UpdateProductImageCommand, ApiResponse<ProductImageDto>>
     {
         private const int MaxImages = 6;
 
@@ -27,8 +22,7 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-            // OwnedCompanyId from JWT — no extra DB call needed
-            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")//////////////////////////////////////////////////////
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only upload images to your own products.");
 
             if (product.ActiveImageCount >= MaxImages)
@@ -74,8 +68,41 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
 
             return ApiResponse<object>.Ok("Image deleted successfully.");
         }
+
+        public async Task<ApiResponse<ProductImageDto>> Handle(
+        UpdateProductImageCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null) throw new UnauthorizedException();
+
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
+
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
+                throw new ForbiddenException("You can only update images of your own products.");
+
+            var image = product.Images.FirstOrDefault(i => i.Id == req.ImageId)
+                ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
+
+            if (req.File != null)
+            {
+                await storage.DeleteAsync(image.Url, ct);
+
+                await using var stream = req.File.OpenReadStream();
+                var newUrl = await storage.UploadAsync(
+                    stream, req.File.FileName, $"products/{product.Id}", ct);
+
+                image.UpdateFileDetails(newUrl, req.File.FileName, req.File.ContentType, req.File.Length);
+            }
+
+            image.UpdateMetadata(req.AltText, req.DisplayOrder ?? image.DisplayOrder);
+
+            uow.Products.Update(product);
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<ProductImageDto>.Ok(new ProductImageDto(
+                image.Id, image.Url, image.OriginalFileName,
+                image.FileSizeBytes, image.AltText, image.DisplayOrder));
+        }
     }
-
 }
-
 

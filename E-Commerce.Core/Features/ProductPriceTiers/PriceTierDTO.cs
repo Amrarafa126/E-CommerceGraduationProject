@@ -8,6 +8,7 @@ namespace E_Commerce.Core.Features.ProductPriceTiers
 {
     public record PriceTierDto(Guid Id, int MinQuantity, int? MaxQuantity, decimal UnitPrice);
     public record AddPriceTierDto(int MinQuantity, decimal UnitPrice, int? MaxQuantity = null);
+    public record UpdatePriceTierDto(int MinQuantity, decimal UnitPrice, int? MaxQuantity = null);
 
 
 

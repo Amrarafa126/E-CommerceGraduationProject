@@ -37,7 +37,7 @@ namespace E_Commerce.Data.Entity
         private Payment() { }
 
         public static Payment Create(Guid orderId, decimal amount,
-            PaymentMethod method, string currency = "USD")
+            PaymentMethod method, string currency = "EGP")
         {
             if (amount <= 0) throw new ArgumentException("Payment amount must be positive.");
             return new Payment
