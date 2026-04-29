@@ -25,10 +25,10 @@ namespace E_Commerce.Data.Entity
         public static class Names
         {
             public const string Admin = "Admin";
-            public const string Supplier = "Supplier";
+            public const string Seller = "Seller";
             public const string Buyer = "Buyer";
 
-            public static readonly string[] All = [Admin, Supplier, Buyer];
+            public static readonly string[] All = [Admin, Seller, Buyer];
         }
     }
 }

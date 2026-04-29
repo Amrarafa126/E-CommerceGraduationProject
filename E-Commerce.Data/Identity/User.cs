@@ -38,7 +38,7 @@ namespace E_Commerce.Data.Identity
         public User() { }
 
         // ── Factory methods ────────────────────────────────────────────
-        public static User CreateSupplier(string email, string firstName, string lastName, string? phone = null)
+        public static User CreateSeller(string email, string firstName, string lastName, string? phone = null)
             => new()
             {
                 Id = Guid.NewGuid(),
@@ -49,7 +49,7 @@ namespace E_Commerce.Data.Identity
                 FirstName = firstName,
                 LastName = lastName,
                 PhoneNumber = phone,
-                Role = UserRole.Supplier,
+                Role = UserRole.Seller,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 
@@ -86,7 +86,7 @@ namespace E_Commerce.Data.Identity
         // ── Domain behaviour ───────────────────────────────────────────
         public void AssignOwnedCompany(Guid companyId)
         {
-            if (Role != UserRole.Supplier)
+            if (Role != UserRole.Seller)
                 throw new InvalidOperationException("Only Sellers can own a company.");
             OwnedCompanyId = companyId;
             MarkAsUpdated();
@@ -137,7 +137,7 @@ namespace E_Commerce.Data.Identity
 
         // ── Computed ───────────────────────────────────────────────────
         public string FullName => $"{FirstName} {LastName}".Trim();
-        public bool IsSupplier => Role == UserRole.Supplier;
+        public bool IsSeller => Role == UserRole.Seller;
         public bool IsBuyer => Role == UserRole.Buyer;
         public bool IsAdmin => Role == UserRole.Admin;
 

@@ -59,25 +59,5 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Approve a company (Admin only).</summary>
-        [HttpPost("{id:guid}/approve")]
-        [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
-        public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
-        {
-            var r = await mediator.Send(new ApproveCompanyCommand(id), ct);
-            return StatusCode(r.StatusCode, r);
-        }
-
-        /// <summary>Suspend a company (Admin only).</summary>
-        [HttpPost("{id:guid}/suspend")]
-        [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
-        public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)
-        {
-            var r = await mediator.Send(new SuspendCompanyCommand(id), ct);
-            return StatusCode(r.StatusCode, r);
-        }
-
     }
 }

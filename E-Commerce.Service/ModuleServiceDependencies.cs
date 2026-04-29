@@ -28,8 +28,8 @@ namespace E_Commerce.Service
             service.AddTransient<IAuthenticationService, AuthenticationService>();
             //service.AddTransient<IVariantService, VariantService>();
             service.AddTransient<ICurrentUserService, CurrentUserService>();
-            service.AddTransient<IPasswordService, PasswordService>();
             service.AddSingleton<ITokenService, JwtTokenService>();
+            service.AddTransient<IFileStorageService, LocalFileStorageService>();
 
             return service;
         }

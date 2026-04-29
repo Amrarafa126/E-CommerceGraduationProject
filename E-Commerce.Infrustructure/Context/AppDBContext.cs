@@ -40,6 +40,7 @@ namespace E_Commerce.Infrustructure.Context
         public DbSet<ContactInfo> contactInfos { get; set; }   
         public DbSet<ShippingEvent> shippingEvents { get; set; }
         public DbSet<OrderStatusHistory> orderStatusHistories {get; set; }
+        public DbSet<Payout> payouts { get; set; }
 
 
 

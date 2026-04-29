@@ -30,7 +30,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
         public async Task<ApiResponse<AuthResponseDto>> Handle(RegisterSellerCommand req, CancellationToken ct)
         {
             // Build domain user — no password here, Identity sets it via CreateAsync
-            var user = User.CreateSupplier(
+            var user = User.CreateSeller(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
 
             await uow.BeginTransactionAsync(ct);
@@ -43,7 +43,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                          result.Errors.Select(e => e.Description));
 
                 // ── 2. Identity: assign "Seller" role ─────────────────
-                await userManager.AddToRoleAsync(user, Role.Names.Supplier);
+                await userManager.AddToRoleAsync(user, Role.Names.Seller);
 
                 // ── 3. Domain: Company + Wallet ───────────────────────
                 var address = new Address(req.Street, req.City, req.State, req.Country, req.PostalCode);

@@ -13,9 +13,8 @@ using MediatR;
 namespace E_Commerce.Core.Features.Companies.Commands.Handlers
 {
     public class CompanyHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IMapper mapper) 
-         : IRequestHandler<UpdateCompanyCommand, ApiResponse<CompanyDto>>,
-         IRequestHandler<ApproveCompanyCommand, ApiResponse<CompanyDto>>,
-         IRequestHandler<SuspendCompanyCommand, ApiResponse<CompanyDto>>
+         : IRequestHandler<UpdateCompanyCommand, ApiResponse<CompanyDto>>
+      
     {
         public async Task<ApiResponse<CompanyDto>> Handle(
        UpdateCompanyCommand req, CancellationToken ct)
@@ -35,25 +34,7 @@ namespace E_Commerce.Core.Features.Companies.Commands.Handlers
             await uow.SaveChangesAsync(ct);
             return ApiResponse<CompanyDto>.Ok(mapper.Map<CompanyDto>(company));
         }
-        public async Task<ApiResponse<CompanyDto>> Handle(ApproveCompanyCommand req, CancellationToken ct)
-        {
-            var company = await uow.Companies.GetWithDetailsAsync(req.CompanyId, ct)
-                ?? throw new NotFoundException(nameof(Company), req.CompanyId);
-            company.Approve();
-            uow.Companies.Update(company);
-            await uow.SaveChangesAsync(ct);
-            return ApiResponse<CompanyDto>.Ok(mapper.Map<CompanyDto>(company));
-        }
-
-        public async Task<ApiResponse<CompanyDto>> Handle(SuspendCompanyCommand req, CancellationToken ct)
-        {
-            var company = await uow.Companies.GetWithDetailsAsync(req.CompanyId, ct)
-                ?? throw new NotFoundException(nameof(Company), req.CompanyId);
-            company.Suspend();
-            uow.Companies.Update(company);
-            await uow.SaveChangesAsync(ct);
-            return ApiResponse<CompanyDto>.Ok(mapper.Map<CompanyDto>(company));
-        }
+      
     } 
 }
 

@@ -33,7 +33,7 @@ namespace E_Commerce.Api.Controllers
         //    return StatusCode(result.StatusCode, result);
         //}
         [HttpPost("{id:guid}/options")]
-        [Authorize(Roles = "Supplier")]
+        [Authorize(Roles = "seller")]
         [ProducesResponseType(typeof(ApiResponse<ProductOptionDto>), StatusCodes.Status201Created)]
         public async Task<IActionResult> AddOption(
              Guid id,
@@ -46,7 +46,7 @@ namespace E_Commerce.Api.Controllers
         }
 
             [HttpPost("{id:guid}/variants")]
-    [Authorize(Roles = "Supplier")]
+    [Authorize(Roles = "Seller")]
     [ProducesResponseType(typeof(ApiResponse<ProductVariantDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> AddVariant(
         Guid id,
@@ -58,7 +58,7 @@ namespace E_Commerce.Api.Controllers
         return StatusCode(result.StatusCode, result);
     }
         [HttpPost("{id:guid}/price-tiers")]
-        [Authorize(Roles = "Supplier")]
+        [Authorize(Roles = "Seller")]
         [ProducesResponseType(typeof(ApiResponse<PriceTierDto>), StatusCodes.Status201Created)]
         public async Task<IActionResult> AddPriceTier(
     Guid id,
@@ -71,53 +71,4 @@ namespace E_Commerce.Api.Controllers
         }
     }
 }
-            //public ProductController(IMediator mediator)
-            //{
-            //    _mediator = mediator;
-            //}
-            //[HttpPost("ADD product")]
-            //public async Task<IActionResult> AddProduct([FromForm] AddProductModelComands command)
-            //{
-            //    var Response = await _mediator.Send(command);
-            //    return Ok(Response);
-            //}
-            //[HttpGet("Get-List-HomePage")]
-            //public async Task<IActionResult> GetProductList()
-            //{
-            //    var Response = await _mediator.Send(new GetListProductQueries());
-            //    return Ok(Response);
-            //}
-            //[HttpPost("products/{id}/options")]
-            //public async Task<IActionResult> AddOption(int id, AddProductOptionCommand command)
-            //{
-            //    command.ProductId = id;
-            //    return Ok(await _mediator.Send(command));
-            //}
-            //[HttpPost("options/{id}/values")]
-            //public async Task<IActionResult> AddValue(int id, AddOptionValueCommand command)
-            //{
-            //    if (command.ProductOptionId != id)
-            //        return BadRequest("Not Found ProductOptionValue");
-
-            //    command.ProductOptionId = id;
-            //    return Ok(await _mediator.Send(command));
-            //}
-
-            //[HttpPost("products/{id}/price-tiers")]
-            //public async Task<IActionResult> AddPriceTier(int id, AddPriceTierCommand command)
-            //{
-            //    command.ProductId = id;
-            //    return Ok(await _mediator.Send(command));
-            //}
-            //[HttpPost("generate-variants/{productId}")]
-            //public async Task<IActionResult> GenerateVariants(int productId)
-            //{
-            //    var result = await _mediator.Send(new GenerateVariantsCommand
-            //    {
-            //        ProductId = productId
-            //    });
-
-            //    return Ok(result);
-            //}
-       
-
+          

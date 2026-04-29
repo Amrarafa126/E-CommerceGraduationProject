@@ -10,7 +10,7 @@ namespace E_Commerce.Data.Status
     public enum UserRole
     {
         Admin = 1,
-        Supplier = 2,
+        Seller = 2,
         Buyer = 3
     }
 
