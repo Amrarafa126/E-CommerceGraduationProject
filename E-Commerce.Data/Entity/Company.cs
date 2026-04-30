@@ -22,8 +22,7 @@ namespace E_Commerce.Data.Entity
         public ICollection<Order> ReceivedOrders { get; private set; } = new List<Order>();
         public ICollection<Product> Products { get; set; }
         public ICollection<Payout> Payouts { get; private set; } = new List<Payout>();
-        public Wallet? Wallet { get; private set; }
-
+        public Wallet Wallet { get; private set; }
 
         private Company() { }
 
@@ -48,7 +47,6 @@ namespace E_Commerce.Data.Entity
               
             };
         }
-
         public void Update(string name, string description, Address address,
             ContactInfo contactInfo, int yearEstablished, int employeesCount)
         {
@@ -57,13 +55,10 @@ namespace E_Commerce.Data.Entity
             EmployeesCount = employeesCount;
             MarkAsUpdated();
         }
-
         public void Approve() { Status = CompanyStatus.Active; MarkAsUpdated(); }
         public void Suspend() { Status = CompanyStatus.Suspended; MarkAsUpdated(); }
         public void Reject() { Status = CompanyStatus.Rejected; MarkAsUpdated(); }
         public void SetLogo(string url) { LogoUrl = url; MarkAsUpdated(); }
         public bool IsActive => Status == CompanyStatus.Active;
-
-
     }
 }

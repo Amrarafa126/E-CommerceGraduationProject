@@ -16,11 +16,8 @@ namespace E_Commerce.Data.Entity
         public bool IsBuyerArchived { get; private set; }
         public bool IsCompanyArchived { get; private set; }
         public DateTime? LastMessageAt { get; private set; }
-
         public ICollection<Message> Messages { get; private set; } = new List<Message>();
-
         private Conversation() { }
-
         public static Conversation Create(Guid buyerId, Guid companyId) => new()
         {
             BuyerId = buyerId,

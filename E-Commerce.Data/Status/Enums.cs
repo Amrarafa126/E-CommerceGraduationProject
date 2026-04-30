@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Status
 {
-
     public enum UserRole
     {
         Admin = 1,
         Seller = 2,
         Buyer = 3
     }
-
     public enum CompanyStatus
     {
         Pending = 1,
@@ -21,7 +19,6 @@ namespace E_Commerce.Data.Status
         Suspended = 3,
         Rejected = 4
     }
-
     public enum ProductStatus
     {
         Draft = 1,
@@ -57,8 +54,6 @@ namespace E_Commerce.Data.Status
         Quoted = 6,
         Closed = 7
     }
-
-
     public enum ShippingStatus
     {
         Pending = 1,
@@ -70,10 +65,6 @@ namespace E_Commerce.Data.Status
         Returned = 7
     }
     public enum ShippingMethod { Standard = 1, Express = 2, Overnight = 3, Pickup = 4 }
-
     public enum PaymentStatus { Pending = 1, Paid = 2, Failed = 3, Refunded = 4, PartiallyRefunded = 5 }
     public enum PaymentMethod { Card = 1, Wallet = 2, CashOnDelivery = 3, BankTransfer = 4 }
-
-
-
 }

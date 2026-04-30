@@ -17,33 +17,27 @@ namespace E_Commerce.Data.Entity
         public decimal ShippingCost { get; private set; }
         public decimal TaxAmount { get; private set; }
         public decimal TotalAmount { get; private set; }
-        public string Currency { get; private set; } = "USD";
+        public string Currency { get; private set; } = "EGP";
         public string? BuyerNotes { get; private set; }
         public string? CancellationReason { get; private set; }
 
-        // Relations
         public Guid BuyerId { get; private set; }
         public User Buyer { get; private set; } = null!;
 
         public Guid SellerCompanyId { get; private set; }
         public Company SellerCompany { get; private set; } = null!;
 
-        // Payment (created after order)
         public Guid? PaymentId { get; private set; }
         public Payment? Payment { get; private set; }
 
-        // Shipment (created after payment)
         public Guid? ShipmentId { get; private set; }
         public Shipping? Shipment { get; private set; }
 
         public ICollection<OrderItem> Items { get; private set; } = new List<OrderItem>();
         public ICollection<OrderStatusHistory> StatusHistory { get; private set; } = new List<OrderStatusHistory>();
-
-
         private Order() { }
-
         public static Order Create(Guid buyerId, Guid sellerCompanyId,
-            string? notes = null, string currency = "USD")
+            string? notes = null, string currency = "EGP")
         {
             var order = new Order
             {
@@ -56,7 +50,6 @@ namespace E_Commerce.Data.Entity
             order.AddStatusHistory(OrderStatus.Pending, "Order created.");
             return order;
         }
-
         public void AddItem(OrderItem item)
         {
             if (Status != OrderStatus.Pending)
@@ -64,7 +57,6 @@ namespace E_Commerce.Data.Entity
             Items.Add(item);
             RecalculateTotals();
         }
-
         public void RecalculateTotals(decimal? shippingCost = null, decimal taxRate = 0)
         {
             SubTotal = Items.Sum(i => i.TotalPrice);
@@ -72,14 +64,11 @@ namespace E_Commerce.Data.Entity
             TaxAmount = Math.Round(SubTotal * taxRate, 2);
             TotalAmount = SubTotal + ShippingCost + TaxAmount;
         }
-
-        // ── Payment ───────────────────────────────────────────────────
         public void LinkPayment(Guid paymentId)
         {
             PaymentId = paymentId;
             MarkAsUpdated();
         }
-
         public void MarkPaid()
         {
             EnsureStatus(OrderStatus.Pending);
@@ -87,14 +76,11 @@ namespace E_Commerce.Data.Entity
             AddStatusHistory(OrderStatus.Paid, "Payment confirmed.");
             MarkAsUpdated();
         }
-
-        // ── Shipment ──────────────────────────────────────────────────
         public void LinkShipment(Guid shipmentId)
         {
             ShipmentId = shipmentId;
             MarkAsUpdated();
         }
-
         public void MarkProcessing()
         {
             EnsureStatus(OrderStatus.Paid);
@@ -102,7 +88,6 @@ namespace E_Commerce.Data.Entity
             AddStatusHistory(OrderStatus.Processing, "Seller is preparing the order.");
             MarkAsUpdated();
         }
-
         public void MarkShipped()
         {
             EnsureStatus(OrderStatus.Processing);
@@ -110,7 +95,6 @@ namespace E_Commerce.Data.Entity
             AddStatusHistory(OrderStatus.Shipped, "Order handed to carrier.");
             MarkAsUpdated();
         }
-
         public void MarkDelivered()
         {
             EnsureStatus(OrderStatus.Shipped);
@@ -118,7 +102,6 @@ namespace E_Commerce.Data.Entity
             AddStatusHistory(OrderStatus.Delivered, "Order delivered to buyer.");
             MarkAsUpdated();
         }
-
         public void MarkCompleted()
         {
             EnsureStatus(OrderStatus.Delivered);
@@ -126,7 +109,6 @@ namespace E_Commerce.Data.Entity
             AddStatusHistory(OrderStatus.Completed, "Order completed.");
             MarkAsUpdated();
         }
-
         public void Cancel(string reason)
         {
             if (Status is OrderStatus.Shipped or OrderStatus.Delivered or OrderStatus.Completed)

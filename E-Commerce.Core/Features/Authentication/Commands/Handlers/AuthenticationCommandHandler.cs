@@ -2,7 +2,6 @@
 using AutoMapper;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Authentication.Commands.Models;
-using E_Commerce.Core.Features.Companies;
 using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
 using E_Commerce.Data.ValueObjects;
@@ -25,27 +24,22 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
         IRequestHandler<LoginCommand, ApiResponse<AuthResponseDto>>,
         IRequestHandler<RefreshTokenCommand, ApiResponse<AuthResponseDto>>,
         IRequestHandler<LogoutCommand, ApiResponse<object>>
-
     {
         public async Task<ApiResponse<AuthResponseDto>> Handle(RegisterSellerCommand req, CancellationToken ct)
         {
-            // Build domain user — no password here, Identity sets it via CreateAsync
             var user = User.CreateSeller(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
 
             await uow.BeginTransactionAsync(ct);
             try
             {
-                // ── 1. Identity: create user + hash password ──────────
                 var result = await userManager.CreateAsync(user, req.Password);
                 if (!result.Succeeded)
                     throw new ValidationException(
                          result.Errors.Select(e => e.Description));
 
-                // ── 2. Identity: assign "Seller" role ─────────────────
                 await userManager.AddToRoleAsync(user, Role.Names.Seller);
 
-                // ── 3. Domain: Company + Wallet ───────────────────────
                 var address = new Address(req.Street, req.City, req.State, req.Country, req.PostalCode);
                 var contact = new ContactInfo(req.ContactEmail, req.ContactPhone);
                 var company = Company.Create(user.Id, req.CompanyName, req.CompanyDescription,
@@ -57,13 +51,11 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                 var wallet = Wallet.Create(company.Id);
                 await uow.Wallets.AddAsync(wallet, ct);
 
-                // ── 4. Link user → company ─────────────────────────────
                 user.AssignOwnedCompany(company.Id);
 
                 var refresh = tok.GenerateRefreshToken();
                 user.SetRefreshToken(refresh, DateTime.UtcNow.AddDays(30));
 
-                // Persist domain-property changes through UserManager
                 var updateResult = await userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                     throw new ValidationException(
@@ -88,13 +80,11 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
             var user = User.CreateBuyer(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
 
-            // Identity creates user and hashes the password
             var result = await userManager.CreateAsync(user, req.Password);
             if (!result.Succeeded)
                 throw new ValidationException(
                     result.Errors.Select(e => e.Description));
 
-            // Assign "Buyer" Identity role
             await userManager.AddToRoleAsync(user, Role.Names.Buyer);
 
             var refresh = tok.GenerateRefreshToken();
@@ -112,27 +102,23 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
         public async Task<ApiResponse<AuthResponseDto>> Handle(
        LoginCommand req, CancellationToken ct)
         {
-            // Find user by email (normalised lookup)
             var user = await userManager.FindByEmailAsync(req.Email);
 
             if (user is null || user.IsDeleted || !user.IsActive)
                 throw new UnauthorizedException("Invalid email or password.");
 
-            // Check for lockout
             if (await userManager.IsLockedOutAsync(user))
                 throw new UnauthorizedException(
                     "Account is locked out due to multiple failed login attempts. " +
                     "Try again in 15 minutes.");
 
-            // Identity verifies the hashed password
             var valid = await userManager.CheckPasswordAsync(user, req.Password);
             if (!valid)
             {
-                await userManager.AccessFailedAsync(user); // increment lockout counter
+                await userManager.AccessFailedAsync(user);
                 throw new UnauthorizedException("Invalid email or password.");
             }
 
-            // Reset failed-access counter on success
             await userManager.ResetAccessFailedCountAsync(user);
 
             var refresh = tok.GenerateRefreshToken();

@@ -22,13 +22,19 @@ namespace E_Commerce.Data.Entity
         private Payout() { }
 
         public static Payout Create(Guid companyId, decimal amount,
-            string currency = "USD", string? bankLast4 = null) => new()
+            string currency = "EGP", string? bankLast4 = null)
+            {
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+            return new Payout
+
             {
                 CompanyId = companyId,
                 Amount = amount,
                 Currency = currency,
                 BankAccountLast4 = bankLast4
-            };
+            }; 
+            }
 
         public void MarkProcessing(string externalRef)
         {

@@ -15,19 +15,18 @@ namespace E_Commerce.Api.Controllers
     public class CompanyController(ISender mediator) : ControllerBase
     {
 
-        [HttpGet]
+        [HttpGet("Get-All")]
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<CompanySummaryDto>>), 200)]
         public async Task<IActionResult> GetAll(
-       [FromQuery] string? search,
-       [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
-       CancellationToken ct = default)
+        [FromQuery] string? search,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
         {
             var r = await mediator.Send(new GetCompaniesQuery(search, page, pageSize), ct);
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Get company by ID (includes wallet balances for owner).</summary>
-        [HttpGet("{id:guid}")]
+        [HttpGet("Get-By-Id/{id:guid}")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
@@ -35,8 +34,7 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Get the authenticated seller's own company.</summary>
-        [HttpGet("my")]
+        [HttpGet("my-company")]
         [Authorize(Roles = "Seller")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> GetMine(CancellationToken ct)
@@ -45,8 +43,7 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Update company info (Seller owner or Admin only).</summary>
-        [HttpPut("{id:guid}")]
+        [HttpPut("Update/{id:guid}")]
         [Authorize(Roles = "Seller,Admin")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyDto dto, CancellationToken ct)

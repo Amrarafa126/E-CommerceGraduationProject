@@ -3,7 +3,6 @@ using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Data.Status;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
@@ -21,7 +20,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Monthly revenue / orders / new users chart for the last N months.</summary>
         [HttpGet("dashboard/revenue-chart")]
         public async Task<IActionResult> RevenueChart([FromQuery] int months = 12, CancellationToken ct = default)
         {
@@ -29,7 +27,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Order count + revenue grouped by status (Pending, Paid, Shipped…).</summary>
         [HttpGet("dashboard/order-status-distribution")]
         public async Task<IActionResult> OrderStatusDistribution(CancellationToken ct)
         {
@@ -37,7 +34,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Top N sellers by completed revenue.</summary>
         [HttpGet("dashboard/top-sellers")]
         public async Task<IActionResult> TopSellers([FromQuery] int limit = 10, CancellationToken ct = default)
         {
@@ -45,7 +41,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Top N products by units sold.</summary>
         [HttpGet("dashboard/top-products")]
         public async Task<IActionResult> TopProducts([FromQuery] int limit = 10, CancellationToken ct = default)
         {
@@ -53,7 +48,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Recent platform activity feed (orders, registrations, reviews).</summary>
         [HttpGet("dashboard/activity")]
         public async Task<IActionResult> RecentActivity([FromQuery] int limit = 20, CancellationToken ct = default)
         {
@@ -61,7 +55,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Platform financial summary: GMV, balances, payouts, discounts.</summary>
         [HttpGet("dashboard/financial")]
         public async Task<IActionResult> FinancialSummary(CancellationToken ct)
         {
@@ -70,7 +63,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         // ── Users Management ────────────────────────────────────────────
-        /// <summary>All users with search, role filter, and pagination.</summary>
+      
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers(
             [FromQuery] string? search, [FromQuery] string? role,
@@ -81,7 +74,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Activate, deactivate, lock, unlock, or email-verify a user.</summary>
         [HttpPatch("users/{userId:guid}/manage")]
         public async Task<IActionResult> ManageUser(
             Guid userId, [FromBody] ManageUserDto dto, CancellationToken ct)
@@ -91,7 +83,6 @@ namespace E_Commerce.Api.Controllers
         }
 
         // ── Companies Management ────────────────────────────────────────
-        /// <summary>All companies with search, status filter, and pagination.</summary>
         [HttpGet("companies")]
         public async Task<IActionResult> GetCompanies(
             [FromQuery] string? search, [FromQuery] CompanyStatus? status,
@@ -102,7 +93,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>Approve, reject, suspend, or reactivate a company.</summary>
         [HttpPatch("companies/{companyId:guid}/manage")]
         public async Task<IActionResult> ManageCompany(
             Guid companyId, [FromBody] ManageCompanyDto dto, CancellationToken ct)
@@ -112,7 +102,6 @@ namespace E_Commerce.Api.Controllers
         }
 
         // ── Orders Management ───────────────────────────────────────────
-        /// <summary>All platform orders with filters.</summary>
         [HttpGet("orders")]
         public async Task<IActionResult> GetOrders(
             [FromQuery] string? search, [FromQuery] OrderStatus? status,

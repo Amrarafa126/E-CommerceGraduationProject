@@ -46,12 +46,10 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
                 await uow.shipping.AddAsync(shipment, ct);
                 await uow.SaveChangesAsync(ct);
 
-                // Link shipment → order and move order to Processing
                 order.LinkShipment(shipment.Id);
                 if (order.Status == OrderStatus.Paid)
                     order.MarkProcessing();
 
-                // Recalculate totals with shipping cost
                 order.RecalculateTotals(req.ShippingCost);
                 uow.Orders.Update(order);
 
@@ -62,7 +60,6 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
             }
             catch { await uow.RollbackTransactionAsync(ct); throw; }
         }
-
         public async Task<ApiResponse<ShipmentDto>> Handle(
        UpdateShipmentStatusCommand req, CancellationToken ct)
         {

@@ -4,20 +4,25 @@ using E_Commerce.Core.Features.Orders.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/Order")]
     [ApiController]
     public class OrderController(ISender mediator) : ControllerBase
     {
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Buyer,Seller,Admin")]
         [ProducesResponseType(typeof(ApiResponse<OrderDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
-       => StatusCode((await mediator.Send(new GetOrderByIdQuery(id), ct)).StatusCode,
-           await mediator.Send(new GetOrderByIdQuery(id), ct));
+        {
+            var r = await mediator.Send(new GetOrderByIdQuery(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
 
         [HttpGet("my")]
         [Authorize(Roles = "Buyer")]
@@ -63,6 +68,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         [HttpPost("{id:guid}/cancel")]
+        [Authorize(Roles = "Buyer,Seller,Admin")]
         public async Task<IActionResult> Cancel(Guid id, [FromBody] CancelRequest req, CancellationToken ct)
         {
             var r = await mediator.Send(new CancelOrderCommand(id, req.Reason), ct);

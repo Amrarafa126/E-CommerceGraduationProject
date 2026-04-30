@@ -53,10 +53,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>
-        /// Request payout of available balance to bank account (Seller only).
-        /// Simulates an instant payout in this mock implementation.
-        /// </summary>
         [HttpPost("payout")]
         [Authorize(Roles = "Seller")]
         [ProducesResponseType(typeof(ApiResponse<PayoutDto>), 201)]
@@ -76,7 +72,6 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
     }
-
     public record PayRequest(Guid OrderId, string PaymentMethod, string? CardToken, string Currency = "USD");
     public record RefundReq(decimal Amount, string Reason);
     public record PayoutReq(decimal Amount, string? BankAccountLast4 = null);

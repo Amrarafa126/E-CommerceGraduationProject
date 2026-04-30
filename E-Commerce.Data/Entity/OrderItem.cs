@@ -16,7 +16,6 @@ namespace E_Commerce.Data.Entity
         public string ProductName { get; private set; } = string.Empty;
         public string? VariantSKU { get; private set; }
 
-        // Navigation
         public Guid OrderId { get; private set; }
         public Order Order { get; private set; } = null!;
         public Guid ProductId { get; private set; }

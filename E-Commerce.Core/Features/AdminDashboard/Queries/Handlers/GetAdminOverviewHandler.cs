@@ -75,13 +75,12 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Where(o => o.Status == OrderStatus.Completed && o.CreatedAt >= thisYear && !o.IsDeleted)
                 .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
 
-            // ── Reviews & RFQs ─────────────────────────────────────
             var totalReviews = await db.productReviews.CountAsync(r => !r.IsDeleted, ct);
             var avgRating = await db.productReviews.Where(r => !r.IsDeleted)
                 .AverageAsync(r => (double?)r.Rating, ct) ?? 0;
             var totalRfqs = await db.rfqRequests.CountAsync(r => !r.IsDeleted, ct);
             var pendingRfqs = await db.rfqRequests.CountAsync(r => r.Status == RfqStatus.Pending && !r.IsDeleted, ct);
-            // ── Month-over-month growth ────────────────────────────
+
             double revenueGrowth = revenueLastMonth == 0 ? 100
                 : Math.Round((double)((revenueMonth - revenueLastMonth) / revenueLastMonth * 100), 1);
 

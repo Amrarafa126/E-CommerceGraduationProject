@@ -48,11 +48,11 @@ namespace E_Commerce.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseCors(CORS);
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors(CORS);
             app.UseStaticFiles();
 
             app.MapControllers();

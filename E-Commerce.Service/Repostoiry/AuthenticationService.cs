@@ -33,9 +33,9 @@ namespace E_Commerce.Service.Repostoiry
             var refreshToken = GetRefreshToken(user.UserName);
             var userRefreshToken = new UserRefreshToken
             {
-                AddedTime = DateTime.Now,
-                ExpiryDate = DateTime.Now.AddDays(_jwtSettings.RefreshTokenExpireDate),
-                IsUsed = true,
+                AddedTime = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpireDate),
+                IsUsed = false,
                 IsRevoked = false,
                 JwtId = jwtToken.Id,
                 RefreshToken = refreshToken.TokenString,

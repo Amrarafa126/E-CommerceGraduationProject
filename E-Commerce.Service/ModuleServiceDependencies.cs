@@ -16,10 +16,8 @@ namespace E_Commerce.Service
         public static IServiceCollection AddServiceDependencies(this IServiceCollection service)
         {
        
-            service.AddTransient<IApplicationUserService, ApplicationUserService>();
             service.AddTransient<IEmailsService, EmailsService>();
             service.AddTransient<IAuthenticationService, AuthenticationService>();
-            //service.AddTransient<IVariantService, VariantService>();
             service.AddTransient<ICurrentUserService, CurrentUserService>();
             service.AddSingleton<ITokenService, JwtTokenService>();
             service.AddTransient<IFileStorageService, LocalFileStorageService>();

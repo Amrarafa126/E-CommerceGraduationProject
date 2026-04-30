@@ -158,26 +158,7 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        // ══════════════════════════════════════════════════════════════════
-        //  OPTION VALUES  — CRUD
-        //  Route: /api/product/{id}/options/{optionId}/values
-        // ══════════════════════════════════════════════════════════════════
-
-        /// <summary>Add a new value to an option (e.g. add "XL" to the "Size" option)</summary>
-        //[HttpPost("{id:guid}/options/{optionId:guid}/values")]
-        //[Authorize(Roles = "Seller,Admin")]
-        //[ProducesResponseType(typeof(ApiResponse<ProductOptionValueDto>), StatusCodes.Status201Created)]
-        //public async Task<IActionResult> AddOptionValue(
-        //    Guid id,
-        //    Guid optionId,
-        //    [FromBody] AddOptionValueDto dto,
-        //    CancellationToken ct)
-        //{
-        //    var result = await Mediator.Send(
-        //        new AddOptionValueCommand(id, optionId, dto.Value, dto.DisplayOrder), ct);
-        //    return StatusCode(result.StatusCode, result);
-        //}
-
+        
         /// <summary>Update an option value label / display order</summary>
         [HttpPut("{id:guid}/options/{optionId:guid}/values/{valueId:guid}")]
         [Authorize(Roles = "Seller,Admin")]
@@ -300,4 +281,24 @@ namespace E_Commerce.Api.Controllers
         }
     }
 }
-          
+
+
+// ══════════════════════════════════════════════════════════════════
+//  OPTION VALUES  — CRUD
+//  Route: /api/product/{id}/options/{optionId}/values
+// ══════════════════════════════════════════════════════════════════
+
+/// <summary>Add a new value to an option (e.g. add "XL" to the "Size" option)</summary>
+//[HttpPost("{id:guid}/options/{optionId:guid}/values")]
+//[Authorize(Roles = "Seller,Admin")]
+//[ProducesResponseType(typeof(ApiResponse<ProductOptionValueDto>), StatusCodes.Status201Created)]
+//public async Task<IActionResult> AddOptionValue(
+//    Guid id,
+//    Guid optionId,
+//    [FromBody] AddOptionValueDto dto,
+//    CancellationToken ct)
+//{
+//    var result = await Mediator.Send(
+//        new AddOptionValueCommand(id, optionId, dto.Value, dto.DisplayOrder), ct);
+//    return StatusCode(result.StatusCode, result);
+//}

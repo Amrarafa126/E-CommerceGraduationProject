@@ -5,11 +5,7 @@ using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace E_Commerce.Core.Features.Orders.Commands.Handlers
 {
@@ -35,7 +31,7 @@ namespace E_Commerce.Core.Features.Orders.Commands.Handlers
                     req.Notes, req.Currency);
 
                 await uow.Orders.AddAsync(order, ct);
-                await uow.SaveChangesAsync(ct); // get order.Id
+                await uow.SaveChangesAsync(ct); 
 
                 foreach (var itemReq in req.Items)
                 {
@@ -82,7 +78,6 @@ namespace E_Commerce.Core.Features.Orders.Commands.Handlers
 
                     order.AddItem(orderItem);
                 }
-
                 order.RecalculateTotals();
                 uow.Orders.Update(order);
                 await uow.SaveChangesAsync(ct);
@@ -118,7 +113,6 @@ namespace E_Commerce.Core.Features.Orders.Commands.Handlers
             var order = await uow.Orders.GetWithFullDetailsAsync(req.OrderId, ct)
                 ?? throw new NotFoundException(nameof(Order), req.OrderId);
 
-            // OwnedCompanyId from JWT — no extra DB lookup
             bool isBuyer = order.BuyerId == cu.UserId.Value;
             bool isSeller = cu.OwnedCompanyId == order.SellerCompanyId; //***********************************************
             bool isAdmin = cu.Role == "Admin";

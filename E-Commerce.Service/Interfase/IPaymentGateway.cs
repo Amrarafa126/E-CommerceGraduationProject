@@ -16,8 +16,8 @@ namespace E_Commerce.Service.Interfase
     public record GatewayChargeRequest(
         decimal Amount,
         string Currency,
-        string PaymentMethod,     // "card", "wallet", etc.
-        string? CardToken,        // tokenized card from client SDK
+        string PaymentMethod,    
+        string? CardToken,       
         string? CustomerId,
         string OrderReference,
         string Description,

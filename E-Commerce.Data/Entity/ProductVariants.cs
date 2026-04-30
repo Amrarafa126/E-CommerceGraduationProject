@@ -33,7 +33,11 @@ namespace E_Commerce.Data.Entity
                 StockQuantity = stock,
             };
         }
-
+        public void UpdateSku(string sku)
+        {
+            SKU = sku;
+            MarkAsUpdated();
+        }
         public void UpdateStock(int qty) { StockQuantity = qty; MarkAsUpdated(); }
         public void AdjustStock(int delta)
         {

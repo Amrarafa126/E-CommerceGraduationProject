@@ -22,7 +22,6 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(c => c.Status)
                 .HasConversion<string>().HasMaxLength(20);
 
-            // Owned Value Objects
             builder.OwnsOne(c => c.Address, a =>
             {
                 a.Property(x => x.Street).HasColumnName("Street").IsRequired().HasMaxLength(300);
@@ -36,13 +35,12 @@ namespace E_Commerce.Infrustructure.Configurations
             {
                 ci.Property(x => x.Email).HasColumnName("ContactEmail").IsRequired().HasMaxLength(256);
                 ci.Property(x => x.Phone).HasColumnName("ContactPhone").IsRequired().HasMaxLength(20);
-                ci.Property(x => x.Fax).HasColumnName("ContactFax").HasMaxLength(20);
             });
 
             builder.HasMany(c => c.Products)
                 .WithOne(p => p.Company)
                 .HasForeignKey(p => p.CompanyId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);//يحذف الكل تلقائيًا
         }
     }
 }

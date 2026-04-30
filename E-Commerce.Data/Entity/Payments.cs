@@ -19,18 +19,15 @@ namespace E_Commerce.Data.Entity
         public PaymentStatus Status { get; private set; } = PaymentStatus.Pending;
         public PaymentMethod Method { get; private set; }
 
-        // Gateway data
         public string? GatewayTransactionId { get; private set; }
         public string? GatewayReference { get; private set; }
         public string? GatewayRawResponse { get; private set; }
         public string? FailureReason { get; private set; }
 
-        // Refund tracking
         public decimal AmountRefunded { get; private set; }
         public DateTime? PaidAt { get; private set; }
         public DateTime? RefundedAt { get; private set; }
 
-        // Card info (last 4 only – never store full card number)
         public string? CardLast4 { get; private set; }
         public string? CardBrand { get; private set; }
 
@@ -49,7 +46,6 @@ namespace E_Commerce.Data.Entity
             };
         }
 
-        // ── State transitions ─────────────────────────────────────────
         public void MarkPaid(string gatewayTransactionId, string? gatewayRef = null,
             string? cardLast4 = null, string? cardBrand = null)
         {

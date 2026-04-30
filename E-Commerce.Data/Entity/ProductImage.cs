@@ -17,7 +17,7 @@ namespace E_Commerce.Data.Entity
         public string ContentType { get; private set; } = string.Empty;
         public long FileSizeBytes { get; private set; }
         public string? AltText { get; private set; }
-        public int DisplayOrder { get; private set; }
+        public int DisplayOrder { get; private set; } = 0;
         public Guid ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
 
@@ -49,12 +49,19 @@ namespace E_Commerce.Data.Entity
 
         public void UpdateMetadata(string? altText, int displayOrder)
         {
+            if (displayOrder < 0)
+                throw new ArgumentException("Display order cannot be negative");
             AltText = altText;
             DisplayOrder = displayOrder;
         }
 
         public void UpdateFileDetails(string url, string fileName, string contentType, long size)
         {
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentException("URL is required");
+
+            if (size <= 0)
+                throw new ArgumentException("Invalid file size");
             Url = url;
             OriginalFileName = fileName;
             ContentType = contentType;
