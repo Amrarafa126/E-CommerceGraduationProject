@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
-using E_Commerce.Core.BaseResponse;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.ProductVariants.Commands.Models;
 using E_Commerce.Data.Entity;
-using E_Commerce.Infrustructure.Context;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
@@ -27,7 +24,6 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only Add variants of your own products.");
 
-            // Check SKU uniqueness within product
             if (product.productVariants.Any(v => v.SKU == req.SKU))
                 throw new ConflictException($"SKU '{req.SKU}' already exists in this product.");
 
@@ -58,19 +54,17 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             var variant = product.productVariants.FirstOrDefault(v => v.Id == req.VariantId)
                 ?? throw new NotFoundException(nameof(ProductVariant), req.VariantId);
 
-            // SKU uniqueness check (excluding self)
             if (product.productVariants.Any(v => v.Id != req.VariantId && v.SKU == req.SKU))
                 return ApiResponse<ProductVariantDto>.Fail(
                     $"SKU '{req.SKU}' already exists in another variant of this product.", 409);
 
-            // Update scalar fields
+            variant.UpdateSku(req.SKU); 
             variant.UpdatePrice(req.Price);
             variant.UpdateStock(req.StockQuantity);
 
             if (req.IsActive) variant.Activate();
             else variant.Deactivate();
 
-            // Replace option-value links
             variant.OptionValues.Clear();
             foreach (var optionValueId in req.OptionValueIds)
                 variant.OptionValues.Add(ProductVariantOptionValue.Create(variant.Id, optionValueId));
@@ -81,9 +75,7 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             return ApiResponse<ProductVariantDto>.Ok(mapper.Map<ProductVariantDto>(variant));
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // DELETE VARIANT
-        // ─────────────────────────────────────────────────────────────────
+       
         public async Task<ApiResponse<object>> Handle(DeleteProductVariantCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
