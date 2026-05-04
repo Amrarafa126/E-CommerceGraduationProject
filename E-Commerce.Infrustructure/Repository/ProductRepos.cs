@@ -1,5 +1,4 @@
-﻿
-using E_Commerce.Data.Entity;
+﻿using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Infrustructure.InfrustructureBases;
 using E_Commerce.Infrustructure.Interfase;
@@ -7,33 +6,69 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class ProductRepos :GenericRepositoryAsync<Product>, IProductRepos
+    public class ProductRepos(AppDBContext Context) :GenericRepositoryAsync<Product>(Context), IProductRepos
     {
-        DbSet<Product> products;
-        public ProductRepos(AppDBContext dbContext) : base(dbContext)
-        {
-            products = dbContext.Set<Product>();
-        }
+        public async Task<Product?> GetWithFullDetailsAsync(Guid productId, CancellationToken ct = default)
+       => await Context.products
+           .Include(p => p.Company)
+           .Include(p => p.Category)
+           .Include(p => p.Images.OrderBy(i => i.DisplayOrder))
+           .Include(p => p.ProductOptions.OrderBy(o => o.DisplayOrder))
+               .ThenInclude(o => o.Values.OrderBy(v => v.DisplayOrder))
+           .Include(p => p.productVariants)
+               .ThenInclude(v => v.OptionValues)
+                   .ThenInclude(ov => ov.ProductOptionValue)
+                       .ThenInclude(pov => pov.ProductOption)
+           .Include(p => p.PriceTiers.OrderBy(t => t.MinQuantity))
+           .FirstOrDefaultAsync(p => p.Id == productId, ct);
 
-        public Task<IEnumerable<Product>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default)
+        public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(
+            int page, int pageSize,
+            Guid? categoryId = null,
+            Guid? companyId = null,
+            string? search = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            CancellationToken ct = default)
         {
-            throw new NotImplementedException();
-        }
+            var query = Context.products
+                .AsNoTracking()
+                .Include(p => p.Company)
+                .Include(p => p.Category)
+                .AsQueryable();
 
-        public Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, Guid? categoryId = null, Guid? companyId = null, string? search = null, decimal? minPrice = null, decimal? maxPrice = null, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
+            if (categoryId.HasValue)
+                query = query.Where(p => p.CategoryId == categoryId.Value);
 
-        public async Task<List<Product>> GetProductListAsync()
-        {
-            var Product = await products.Include(x =>x.Images).ToListAsync();
-            return Product;
-        }
+            if (companyId.HasValue)
+                query = query.Where(p => p.CompanyId == companyId.Value);
 
-        public Task<Product?> GetWithFullDetailsAsync(Guid productId, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(p =>
+                    p.Name.Contains(search) ||
+                    p.Description.Contains(search));
+
+            if (minPrice.HasValue)
+                query = query.Where(p => p.BasePrice >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                query = query.Where(p => p.BasePrice <= maxPrice.Value);
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            return (items, total);
         }
+        public async Task<IEnumerable<Product>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default)
+            => await Context.products
+                .AsNoTracking()
+                .Where(p => p.CompanyId == companyId)
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync(ct);
     }
 }

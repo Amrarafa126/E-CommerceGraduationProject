@@ -10,7 +10,6 @@ namespace E_Commerce.Infrustructure.Repository
 {
     public class OrderRepos(AppDBContext Db) : GenericRepositoryAsync<Order>(Db), IOrderRepos
     {
-
         public Task<Order?> GetWithFullDetailsAsync(Guid id, CancellationToken ct = default)
        => Db.orders
            .Include(o => o.Buyer)

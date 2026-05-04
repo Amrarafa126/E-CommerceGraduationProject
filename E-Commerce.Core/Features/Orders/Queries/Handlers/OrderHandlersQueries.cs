@@ -29,13 +29,10 @@ namespace E_Commerce.Core.Features.Orders.Queries.Handlers
             return ApiResponse<PaginatedResult<OrderDto>>.Ok(
                 PaginatedResult<OrderDto>.Success(dtos, total, req.Page, req.PageSize));
         }
-
         public async Task<ApiResponse<PaginatedResult<OrderDto>>> Handle(
        GetSellerOrdersQuery req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
-
-            // OwnedCompanyId comes from JWT — no extra DB call needed
             if (cu.OwnedCompanyId == null)
                 throw new BusinessException("You do not own a company.");
 

@@ -3,18 +3,11 @@ using E_Commerce.Infrustructure.Context;
 using E_Commerce.Infrustructure.InfrustructureBases;
 using E_Commerce.Infrustructure.Interfase;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+ 
 namespace E_Commerce.Infrustructure.Repository
 {
     public class ProductReviewRepos(AppDBContext Db) : GenericRepositoryAsync<ProductReview>(Db), IProductReviewRepos
     {
-       
-
         public Task<ProductReview?> GetWithImagesAsync(Guid id, CancellationToken ct = default)
        => Db.productReviews
            .Include(r => r.Buyer).Include(r => r.Product).Include(r => r.Images)
@@ -35,7 +28,6 @@ namespace E_Commerce.Infrustructure.Repository
         public Task<bool> HasBuyerReviewedAsync(Guid productId, Guid buyerId, CancellationToken ct = default)
             => Db.productReviews.AnyAsync(
                 r => r.ProductId == productId && r.BuyerId == buyerId && !r.IsDeleted, ct);
-
         public async Task<(double Avg, int Count, Dictionary<int, int> Dist)> GetStatsAsync(
             Guid productId, CancellationToken ct = default)
         {

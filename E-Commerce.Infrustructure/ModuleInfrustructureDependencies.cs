@@ -29,6 +29,13 @@ namespace E_Commerce.Infrustructure
             service.AddTransient<IWalletRepos, WalletRepos>();
             service.AddTransient<IOrderRepos, OrderRepos>();
             service.AddTransient<IOrderItemRepos, OrderItemRepos>();
+            service.AddTransient<IPaymentRepos, PaymentRepos>();
+            service.AddTransient<IShippingRepos, ShippingRepos>();
+            service.AddTransient<IProductVariantsRepos, ProductVariantsRepos>();
+            service.AddTransient<IMessageRepos, MessageRepos>();
+            service.AddTransient<IRfqQuotationRepos, RfqQuotationRepos>();
+            service.AddTransient<IRfqRequestRepos, RfqRequestRepos>();
+            service.AddTransient<i>
             service.AddTransient<IUnitOfWork, UnitOfWork>();
 
             service.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));

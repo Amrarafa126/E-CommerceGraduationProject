@@ -11,13 +11,8 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class MessageRepos : GenericRepositoryAsync<Message>, IMessageRepos
+    public class MessageRepos(AppDBContext Context) : GenericRepositoryAsync<Message>(Context), IMessageRepos
     {
-        DbSet<Message> messages;
-        public MessageRepos(AppDBContext context) : base(context)
-        {
-            messages = context.Set<Message>();
-        }
         public async Task MarkAllReadAsync(
        Guid conversationId, Guid receiverId, CancellationToken ct = default)
         {

@@ -20,7 +20,6 @@ namespace E_Commerce.Infrustructure.Interfase
             decimal? maxPrice = null,
             CancellationToken ct = default);
         Task<IEnumerable<Product>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default);
-        public Task<List<Product>> GetProductListAsync();
 
     }
 }
