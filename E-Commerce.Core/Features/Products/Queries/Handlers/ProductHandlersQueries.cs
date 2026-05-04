@@ -1,20 +1,13 @@
 ﻿using AutoMapper;
-using E_Commerce.Core.BaseResponse;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Products.Queries.Models;
-using E_Commerce.Core.Features.Products.Queries.Response;
 using E_Commerce.Core.Wrappers;
 using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
-using E_Commerce.Service.Repostoiry;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace E_Commerce.Core.Features.Products.Queries.Handlers
 {

@@ -1,12 +1,8 @@
-﻿using E_Commerce.Api.Base;
-using E_Commerce.Core.Features.Authentication;
+﻿using E_Commerce.Core.Features.Authentication;
 using E_Commerce.Core.Features.Authentication.Commands.Models;
-using E_Commerce.Core.Features.Companies;
-using E_Commerce.Core.Features.Companies.Commands.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers

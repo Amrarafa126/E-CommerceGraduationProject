@@ -4,11 +4,6 @@ using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
 {
@@ -21,7 +16,6 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
 
             var company = await uow.Companies.GetByIdAsync(req.CompanyId, ct)
                 ?? throw new NotFoundException(nameof(Company), req.CompanyId);
-
             switch (req.Action)
             {
                 case CompanyAdminAction.Approve:
@@ -37,7 +31,6 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
                     company.Approve();
                     break;
             }
-
             uow.Companies.Update(company);
             await uow.SaveChangesAsync(ct);
 

@@ -14,30 +14,21 @@ namespace E_Commerce.Data.Identity
         public bool IsActive { get; private set; } = true;
         public string? AvatarUrl { get; private set; }
 
-        // ── Refresh token (stored here for single-table lookup) ────────
         public string? RefreshToken { get; private set; }
         public DateTime? RefreshTokenExpiryTime { get; private set; }
-
-        // ── Company links ──────────────────────────────────────────────
-        /// <summary>Set only for Seller role. 1-to-1 with Company.</summary>
         public Guid? OwnedCompanyId { get; private set; }
         public Company? OwnedCompany { get; private set; }
-
-  
-        // ── Audit / Soft-delete (Identity doesn't have these) ─────────
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
 
-        // ── Navigation ─────────────────────────────────────────────────
+      
         public ICollection<Order> Orders { get; private set; } = new List<Order>();
         public ICollection<ProductReview> Reviews { get; private set; } = new List<ProductReview>();
 
-        // ── Constructors ───────────────────────────────────────────────
-        // Identity requires a parameterless constructor
+     
         public User() { }
 
-        // ── Factory methods ────────────────────────────────────────────
         public static User CreateSeller(string email, string firstName, string lastName, string? phone = null)
             => new()
             {
@@ -83,7 +74,6 @@ namespace E_Commerce.Data.Identity
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 
-        // ── Domain behaviour ───────────────────────────────────────────
         public void AssignOwnedCompany(Guid companyId)
         {
             if (Role != UserRole.Seller)
@@ -92,11 +82,7 @@ namespace E_Commerce.Data.Identity
             MarkAsUpdated();
         }
 
-        //public void JoinCompanyAsEmployee(Guid companyId)
-        //{
-        //    EmployerCompanyId = companyId;
-        //    MarkAsUpdated();
-        //}
+  
 
         public void SetRefreshToken(string token, DateTime expiry)
         {
@@ -135,7 +121,6 @@ namespace E_Commerce.Data.Identity
 
         private void MarkAsUpdated() => UpdatedAt = DateTime.UtcNow;
 
-        // ── Computed ───────────────────────────────────────────────────
         public string FullName => $"{FirstName} {LastName}".Trim();
         public bool IsSeller => Role == UserRole.Seller;
         public bool IsBuyer => Role == UserRole.Buyer;

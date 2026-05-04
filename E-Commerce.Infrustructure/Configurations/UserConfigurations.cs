@@ -9,10 +9,9 @@ namespace E_Commerce.Infrustructure.Configurations
     public class ApplicationUserConfiguration : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
-        {  // Rename AspNetUsers → Users (cleaner schema)
+        {  
             builder.ToTable("Users");
 
-            // ── Domain-only columns ───────────────────────────────────
             builder.Property(u => u.FirstName)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -43,9 +42,7 @@ namespace E_Commerce.Infrustructure.Configurations
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            // ── Relations ─────────────────────────────────────────────
-
-            // Seller → OwnedCompany (1-to-1)
+  
             builder.HasOne(u => u.OwnedCompany)
                 .WithOne(c => c.Owner)
                 .HasForeignKey<Company>(c => c.OwnerUserId)

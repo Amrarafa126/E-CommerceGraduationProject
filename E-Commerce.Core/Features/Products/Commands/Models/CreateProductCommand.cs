@@ -1,8 +1,4 @@
-﻿
-using E_Commerce.Core.BaseResponse;
-using E_Commerce.Data;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
 
 namespace E_Commerce.Core.Features.Products.Commands.Models
 {

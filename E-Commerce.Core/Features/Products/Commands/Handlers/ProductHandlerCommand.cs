@@ -1,14 +1,11 @@
 ﻿
 using AutoMapper;
-using E_Commerce.Core.BaseResponse;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Products.Commands.Models;
 using E_Commerce.Data.Entity;
-using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using Org.BouncyCastle.Ocsp;
 
 namespace E_Commerce.Core.Features.Products.Commands.Handlers
 {

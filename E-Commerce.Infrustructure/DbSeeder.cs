@@ -5,11 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace E_Commerce.Infrustructure
 {
@@ -22,12 +18,10 @@ namespace E_Commerce.Infrustructure
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<AppDBContext>>();
-
             try
             {
                 await db.Database.MigrateAsync();
 
-                // ── 1. Seed Identity Roles ────────────────────────────
                 foreach (var roleName in Role.Names.All)
                 {
                     if (!await roleManager.RoleExistsAsync(roleName))
@@ -38,7 +32,6 @@ namespace E_Commerce.Infrustructure
                     }
                 }
 
-                // ── 2. Seed Admin User ────────────────────────────────
                 const string adminEmail = "arafaamr777@gmail.com";
                 const string adminPwd = "Amr@123456";
 
@@ -63,7 +56,6 @@ namespace E_Commerce.Infrustructure
                     }
                 }
 
-                // ── 3. Seed Categories (Parent → Children) ────────────
                 if (!await db.categories.AnyAsync())
                 {
                     var electronics = Category.Create("Electronics", "Electronic devices and components");

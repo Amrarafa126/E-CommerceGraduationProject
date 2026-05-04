@@ -17,7 +17,6 @@ namespace E_Commerce.Service
         {
        
             service.AddTransient<IEmailsService, EmailsService>();
-            service.AddTransient<IAuthenticationService, AuthenticationService>();
             service.AddTransient<ICurrentUserService, CurrentUserService>();
             service.AddSingleton<ITokenService, JwtTokenService>();
             service.AddTransient<IFileStorageService, LocalFileStorageService>();

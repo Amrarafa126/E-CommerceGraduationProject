@@ -27,9 +27,16 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(s => s.TrackingNumber).HasMaxLength(100);
             builder.Property(s => s.TrackingUrl).HasMaxLength(500);
 
+            builder.HasOne(s => s.Order)
+              .WithOne(o => o.Shipment)
+              .HasForeignKey<Shipping>(s => s.OrderId)
+              .HasPrincipalKey<Order>(o => o.Id)
+              .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasMany(s => s.Events)
-                .WithOne(e => e.Shipment).HasForeignKey(e => e.ShipmentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                   .WithOne(e => e.Shipment)
+                   .HasForeignKey(e => e.ShipmentId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

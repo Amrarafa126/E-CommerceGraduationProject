@@ -1,5 +1,4 @@
-﻿using E_Commerce.Core.BaseResponse;
-using E_Commerce.Data.Result;
+﻿using E_Commerce.Data.Result;
 using MediatR;
 using System;
 using System.Collections.Generic;

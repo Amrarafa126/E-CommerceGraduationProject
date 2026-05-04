@@ -18,7 +18,6 @@ namespace E_Commerce.Data.Entity
         public Address Address { get; private set; } = null!;
         public ContactInfo ContactInfo { get; private set; } = null!;
         public CompanyStatus Status { get; set; } = CompanyStatus.Pending;
-        public ICollection<User> Employees { get; set; }
         public ICollection<Order> ReceivedOrders { get; private set; } = new List<Order>();
         public ICollection<Product> Products { get; set; }
         public ICollection<Payout> Payouts { get; private set; } = new List<Payout>();

@@ -1,15 +1,17 @@
 
+using E_Commerce.Api.Middleware;
 using E_Commerce.Core;
 using E_Commerce.Infrustructure;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace E_Commerce.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +38,53 @@ namespace E_Commerce.Api
                                       policy.AllowAnyOrigin();
                                   });
             });
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "B2B Marketplace API",
+                    Version = "v1",
+                    Description = "A B2B Marketplace platform",
+                    Contact = new OpenApiContact { Name = "B2B Marketplace Team" }
+                });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token: Bearer {token}"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
+            });
 
             #endregion
             var app = builder.Build();
+            await DbSeeder.SeedAsync(app.Services);
 
-            // Configure the HTTP request pipeline.
+
+            app.UseGlobalExceptionHandling();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -48,6 +92,7 @@ namespace E_Commerce.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseCors(CORS);
 
             app.UseAuthentication();

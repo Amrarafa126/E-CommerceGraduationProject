@@ -1,6 +1,7 @@
 ﻿using E_Commerce.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
@@ -26,6 +27,12 @@ namespace E_Commerce.Infrustructure.Configurations
 
             builder.HasIndex(p => p.OrderId).IsUnique();
             builder.HasIndex(p => p.GatewayTransactionId);
+
+            builder.HasOne(p => p.Order)
+                 .WithOne(o => o.Payment)
+                 .HasForeignKey<Payment>(p => p.OrderId)
+                 .HasPrincipalKey<Order>(o => o.Id)
+                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

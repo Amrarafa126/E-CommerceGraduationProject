@@ -1,5 +1,4 @@
-﻿using E_Commerce.Core.BaseResponse;
-using MediatR;
+﻿using MediatR;
 
 namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Models
 {
