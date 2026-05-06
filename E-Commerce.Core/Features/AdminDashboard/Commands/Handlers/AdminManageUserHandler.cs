@@ -34,7 +34,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
                     user.Deactivate();
                     break;
                 case AdminUserAction.Lock:
-                    await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
+                    await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(1));
                     break;
                 case AdminUserAction.Unlock:
                     await userManager.SetLockoutEndDateAsync(user, null);

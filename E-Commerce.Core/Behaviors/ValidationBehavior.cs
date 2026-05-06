@@ -1,10 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Behaviors
 {
@@ -30,7 +25,7 @@ namespace E_Commerce.Core.Behaviors
                 .ToList();
 
             if (failures.Count != 0)
-                throw new ValidationException(failures);
+                throw new E_Commerce.Core.Exceptions.ValidationException(failures);
 
             return await next();
         }

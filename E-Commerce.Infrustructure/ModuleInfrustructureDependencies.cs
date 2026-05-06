@@ -30,6 +30,9 @@ namespace E_Commerce.Infrustructure
             service.AddTransient<IRfqQuotationRepos, RfqQuotationRepos>();
             service.AddTransient<IRfqRequestRepos, RfqRequestRepos>();
             service.AddTransient<IUnitOfWork, UnitOfWork>();
+            service.AddTransient<IConversationRepos, ConversationRepos>();
+            service.AddTransient<IProductReviewRepos, ProductReviewRepos>();
+            service.AddTransient<IPayoutRepos, PayoutRepos>();
 
             service.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 

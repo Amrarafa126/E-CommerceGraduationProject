@@ -9,7 +9,7 @@ namespace E_Commerce.Api.Controllers
 {
     [ApiController]
     [Route("api/v1/admin")]
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "AdminOnly")]
     [Produces("application/json")]
     public class AdminController(ISender mediator) : ControllerBase
     {

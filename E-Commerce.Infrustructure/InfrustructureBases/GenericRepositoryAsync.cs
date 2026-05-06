@@ -1,12 +1,6 @@
 ﻿using E_Commerce.Infrustructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Infrustructure.InfrustructureBases
 {
@@ -49,8 +43,14 @@ namespace E_Commerce.Infrustructure.InfrustructureBases
 
         public virtual void Update(T entity)
         {
-            DbSet.Attach(entity);
-            Context.Entry(entity).State = EntityState.Modified;
+            var entry = Context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                DbSet.Attach(entity);
+                entry.State = EntityState.Modified;
+            }
+         
         }
 
         public virtual void Remove(T entity) => DbSet.Remove(entity);

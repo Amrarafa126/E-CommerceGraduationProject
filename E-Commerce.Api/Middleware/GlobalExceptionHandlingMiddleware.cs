@@ -32,11 +32,17 @@ namespace E_Commerce.Api.Middleware
                     HttpStatusCode.NotFound,
                     ApiResponse<object>.NotFound(ex.Message)),
 
-                   ValidationException ex => (
-                    HttpStatusCode.UnprocessableEntity,
-                    ApiResponse<object>.ValidationFail(
-                        ex.Errors.SelectMany(e => e.Value).ToList(),
-                        "Validation failed.")),
+                ValidationException ex => (
+                 HttpStatusCode.UnprocessableEntity,
+                 ApiResponse<object>.ValidationFail(
+                     ex.Errors?.SelectMany(e => e.Value).ToList() ?? new List<string>(),
+                     "Validation failed.")),
+
+//                FluentValidation.ValidationException ex => (
+//HttpStatusCode.UnprocessableEntity,
+//ApiResponse<object>.ValidationFail(
+//   ex.Errors.Select(e => e.ErrorMessage).ToList(),
+//   "Validation failed.")),
 
                 UnauthorizedException ex => (
                     HttpStatusCode.Unauthorized,
@@ -54,11 +60,17 @@ namespace E_Commerce.Api.Middleware
                     HttpStatusCode.BadRequest,
                     ApiResponse<object>.Fail(ex.Message, (int)HttpStatusCode.BadRequest)),
 
-                _ => (
-                    HttpStatusCode.InternalServerError,
-                    ApiResponse<object>.Fail(
-                        "An unexpected error occurred. Please try again later.",
-                        (int)HttpStatusCode.InternalServerError))
+                //_ => (
+                //    HttpStatusCode.InternalServerError,
+                //    ApiResponse<object>.Fail(
+                //        "An unexpected error occurred. Please try again later.",
+                //        (int)HttpStatusCode.InternalServerError))
+
+                        _ => (
+    HttpStatusCode.InternalServerError,
+    ApiResponse<object>.Fail(
+        exception.ToString(),
+        (int)HttpStatusCode.InternalServerError))
             };
 
             context.Response.ContentType = "application/json";

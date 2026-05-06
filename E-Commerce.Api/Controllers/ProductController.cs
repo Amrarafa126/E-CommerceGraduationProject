@@ -1,4 +1,5 @@
-﻿using E_Commerce.Core.Features.Categorys.Queries.Models;
+﻿using E_Commerce.Core.Features.ProductImages;
+using E_Commerce.Core.Features.ProductImages.Commands.Models;
 using E_Commerce.Core.Features.ProductOptions;
 using E_Commerce.Core.Features.ProductOptions.Commands.Models;
 using E_Commerce.Core.Features.ProductOptionsValue.Commands.Models;
@@ -111,6 +112,35 @@ namespace E_Commerce.Api.Controllers
         {
             var result = await Mediator.Send(new PublishProductCommand(id), ct);
             return StatusCode(result.StatusCode, result);
+        }
+
+        /// </summary>
+        [HttpPost("{id:guid}/images")]
+        [Authorize(Roles = "Seller,Admin")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ApiResponse<ProductImageDto>), 201)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        public async Task<IActionResult> UploadImage(
+            Guid id,
+            IFormFile file,
+            [FromForm] string? altText = null,
+            [FromForm] int displayOrder = 0,
+            CancellationToken ct = default)
+        {
+            var r = await Mediator.Send(
+                new UploadProductImageCommand(id, file, altText, displayOrder), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Remove a product image by ID.</summary>
+        [HttpDelete("{id:guid}/images/{imageId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        public async Task<IActionResult> DeleteImage(
+            Guid id, Guid imageId, CancellationToken ct)
+        {
+            var r = await  Mediator.Send(new DeleteProductImageCommand(id, imageId), ct);
+            return StatusCode(r.StatusCode, r);
         }
 
         // ══════════════════════════════════════════════════════════════════

@@ -30,11 +30,11 @@ namespace E_Commerce.Data.Entity
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
 
-        public ICollection<ProductImage>? Images { get; set; }
-        public ICollection<ProductPriceTier>? PriceTiers { get; set; }
-        public ICollection<ProductReview>? Reviews { get; set; }
-        public ICollection<ProductVariant>? productVariants { get; set; }
-        public ICollection<ProductOption>? ProductOptions { get; set; }
+        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+        public ICollection<ProductPriceTier> PriceTiers { get; set; } = new List<ProductPriceTier>();
+        public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+        public ICollection<ProductVariant> productVariants { get; set; } = new List<ProductVariant>();
+        public ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
 
         private Product() { }
 
@@ -93,7 +93,8 @@ namespace E_Commerce.Data.Entity
         {
             if (!Images.Any(i => !i.IsDeleted))
                 throw new InvalidOperationException("Product needs at least one image.");
-            Status = ProductStatus.Active; MarkAsUpdated();
+            Status = ProductStatus.Active;
+            MarkAsUpdated();
         }
 
         public void Deactivate() { Status = ProductStatus.Inactive; MarkAsUpdated(); }
@@ -101,9 +102,9 @@ namespace E_Commerce.Data.Entity
         public decimal GetPriceForQuantity(int quantity)
         {
             var tier = PriceTiers
-                .Where(t => quantity >= t.MinQuantity)
-                .OrderByDescending(t => t.MinQuantity)
-                .FirstOrDefault();
+               .Where(t => quantity >= t.MinQuantity)
+               .OrderByDescending(t => t.MinQuantity)
+               .FirstOrDefault();
             return tier?.UnitPrice ?? BasePrice;
         }
 

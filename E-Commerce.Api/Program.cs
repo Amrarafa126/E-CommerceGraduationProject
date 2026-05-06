@@ -27,16 +27,10 @@ namespace E_Commerce.Api
 
 
             #region AllowCORS
-            var CORS = "_cors";
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: CORS,
-                                  policy =>
-                                  {
-                                      policy.AllowAnyHeader();
-                                      policy.AllowAnyMethod();
-                                      policy.AllowAnyOrigin();
-                                  });
+                options.AddPolicy("AllowAll", policy =>
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
             builder.Services.AddSwaggerGen(c =>
             {
@@ -92,13 +86,12 @@ namespace E_Commerce.Api
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseCors(CORS);
 
+            app.UseStaticFiles();
+
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseStaticFiles();
 
             app.MapControllers();
 

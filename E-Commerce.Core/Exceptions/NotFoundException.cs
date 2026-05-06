@@ -15,7 +15,10 @@
         public ValidationException(IEnumerable<string> enumerable)
             : base("One or more validation failures have occurred.")
         {
-            Errors = new Dictionary<string, string[]>();
+            Errors = new Dictionary<string, string[]>
+            {
+                ["Errors"] = enumerable.ToArray()
+            };
         }
 
         public ValidationException(IEnumerable<FluentValidation.Results.ValidationFailure> failures)
@@ -28,12 +31,17 @@
 
         public ValidationException(string message) : base(message)
         {
+            Errors = new Dictionary<string, string[]>();
 
         }
 
         public ValidationException()
+            : base("One or more validation failures have occurred.")
         {
+            Errors = new Dictionary<string, string[]>();
         }
+        
+        
     }
 
     public class UnauthorizedException : Exception
@@ -49,7 +57,7 @@
     public class ConflictException : Exception
     {
         public ConflictException(string message) : base(message) { }
-    }
+    } 
 
     public class BusinessException : Exception
     {

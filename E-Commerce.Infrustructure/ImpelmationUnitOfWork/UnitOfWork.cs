@@ -1,4 +1,6 @@
-﻿using E_Commerce.Infrustructure.Context;
+﻿using E_Commerce.Data.Entity;
+using E_Commerce.Infrustructure.Context;
+using E_Commerce.Infrustructure.InfrustructureBases;
 using E_Commerce.Infrustructure.Interfase;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Infrustructure.Repository;
@@ -10,6 +12,8 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
 
     public class UnitOfWork(AppDBContext context) : IUnitOfWork
     {
+        private IGenericRepositoryAsync<ProductPriceTier>? _priceTiers;
+        private IGenericRepositoryAsync<ProductImage>? _productImages;
         private IDbContextTransaction? _transaction;
         private IUserRepos? _users;
         private ICompanyRepos? _companies;
@@ -26,10 +30,15 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         private ICategoryRepos? _categories;
         private IPaymentRepos? _payment;
         private IPayoutRepos? _payout;
-        
+
 
         //private IDashboardRepository? _dashboard;
 
+        public IGenericRepositoryAsync<ProductPriceTier> PriceTiers
+          => _priceTiers ??= new GenericRepositoryAsync<ProductPriceTier>(context);
+
+        public IGenericRepositoryAsync<ProductImage> ProductImages
+            => _productImages ??= new GenericRepositoryAsync<ProductImage>(context);
         public IUserRepos Users => _users ??= new UserRepos(context);
         public ICompanyRepos Companies => _companies ??= new CompanyRepos(context);
         public IProductRepos Products => _products ??= new ProductRepos(context);

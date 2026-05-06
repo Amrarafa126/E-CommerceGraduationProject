@@ -19,6 +19,7 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
         {
             if (cu.UserId == null) throw new UnauthorizedException();
 
+            // ✅ GetWithFullDetailsAsync loads with tracking → Images collection is initialized
             var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
@@ -28,6 +29,7 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             if (product.ActiveImageCount >= MaxImages)
                 throw new BusinessException($"A product can have at most {MaxImages} images.");
 
+            // Upload file to storage
             await using var stream = req.File.OpenReadStream();
             var url = await storage.UploadAsync(
                 stream, req.File.FileName, $"products/{product.Id}", ct);
@@ -38,13 +40,14 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
                 req.DisplayOrder, req.AltText);
 
             product.AddImage(image);
-            uow.Products.Update(product);
+            await uow.ProductImages.AddAsync(image, ct);
+
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductImageDto>.Created(new ProductImageDto(
                 image.Id, image.Url, image.OriginalFileName,
                 image.FileSizeBytes, image.AltText, image.DisplayOrder));
-        
+
         }
 
         public async Task<ApiResponse<object>> Handle(
@@ -58,12 +61,13 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only delete images from your own products.");
 
-            var image = product.Images.FirstOrDefault(i => i.Id == req.ImageId)
+            var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
             await storage.DeleteAsync(image.Url, ct);
+
             product.RemoveImage(req.ImageId);
-            uow.Products.Update(product);
+
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<object>.Ok("Image deleted successfully.");
@@ -80,7 +84,7 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only update images of your own products.");
 
-            var image = product.Images.FirstOrDefault(i => i.Id == req.ImageId)
+            var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
             if (req.File != null)
@@ -96,7 +100,6 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
 
             image.UpdateMetadata(req.AltText, req.DisplayOrder ?? image.DisplayOrder);
 
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductImageDto>.Ok(new ProductImageDto(

@@ -9,7 +9,6 @@ using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using static Azure.Core.HttpHeader;
 
 namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
 {
@@ -59,7 +58,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                 var updateResult = await userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                     throw new ValidationException(
-                    result.Errors.Select(e => e.Description));
+                    updateResult.Errors.Select(e => e.Description));
 
                 await uow.SaveChangesAsync(ct);
                 await uow.CommitTransactionAsync(ct);
@@ -80,23 +79,33 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
             var user = User.CreateBuyer(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
 
-            var result = await userManager.CreateAsync(user, req.Password);
-            if (!result.Succeeded)
-                throw new ValidationException(
-                    result.Errors.Select(e => e.Description));
+            await uow.BeginTransactionAsync(ct);
+            try
+            {
+                var result = await userManager.CreateAsync(user, req.Password);
+                if (!result.Succeeded)
+                    throw new ValidationException(
+                        result.Errors.Select(e => e.Description));
 
-            await userManager.AddToRoleAsync(user, Role.Names.Buyer);
+                await userManager.AddToRoleAsync(user, Role.Names.Buyer);
 
-            var refresh = tok.GenerateRefreshToken();
-            user.SetRefreshToken(refresh, DateTime.UtcNow.AddDays(30));
-            await userManager.UpdateAsync(user);
+                var refresh = tok.GenerateRefreshToken();
+                user.SetRefreshToken(refresh, DateTime.UtcNow.AddDays(30));
+                var updateResult = await userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                    throw new ValidationException(
+                        updateResult.Errors.Select(e => e.Description));
 
-            var roles = await userManager.GetRolesAsync(user);
-            var access = tok.GenerateAccessToken(user, roles);
+                await uow.CommitTransactionAsync(ct);
 
-            return ApiResponse<AuthResponseDto>.Created(new AuthResponseDto(
-                access, refresh, DateTime.UtcNow.AddMinutes(60),
-                mapper.Map<UserDto>(user)));
+                var roles = await userManager.GetRolesAsync(user);
+                var access = tok.GenerateAccessToken(user, roles);
+
+                return ApiResponse<AuthResponseDto>.Created(new AuthResponseDto(
+                    access, refresh, DateTime.UtcNow.AddMinutes(60),
+                    mapper.Map<UserDto>(user)));
+            }
+            catch { await uow.RollbackTransactionAsync(ct); throw; }
         }
 
         public async Task<ApiResponse<AuthResponseDto>> Handle(

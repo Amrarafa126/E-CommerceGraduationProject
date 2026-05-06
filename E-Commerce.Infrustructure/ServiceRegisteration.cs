@@ -3,6 +3,7 @@ using E_Commerce.Data.Helpers;
 using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,59 +16,62 @@ namespace E_Commerce.Infrustructure
     {
         public static IServiceCollection AddServiceRegisteration(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentity<User, Role>(option =>
+            services.AddIdentity<User, Role>(opts =>
             {
-                // Password settings.
-                option.Password.RequireDigit = false;
-                option.Password.RequireLowercase = false;
-                option.Password.RequireNonAlphanumeric = false;
-                option.Password.RequireUppercase = false;
-                option.Password.RequiredLength = 6;
-                option.Password.RequiredUniqueChars = 1;
+                opts.Password.RequireDigit = true;
+                opts.Password.RequireLowercase = true;
+                opts.Password.RequireNonAlphanumeric = true;
+                opts.Password.RequireUppercase = true;
+                opts.Password.RequiredLength = 6;
+                opts.Password.RequiredUniqueChars = 1;
 
-                // Lockout settings.
-                option.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
-                option.Lockout.MaxFailedAccessAttempts = 5;
-                option.Lockout.AllowedForNewUsers = true;
+                opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                opts.Lockout.MaxFailedAccessAttempts = 5;
+                opts.Lockout.AllowedForNewUsers = true;
 
-                // User settings.
-                option.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                //option.User.RequireUniqueEmail = true;
-                //option.SignIn.RequireConfirmedEmail = true;
+                opts.User.RequireUniqueEmail = true;
+
+                opts.SignIn.RequireConfirmedEmail = false;
 
             }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            var jwtSecret = configuration["JwtSettings:Secret"]
+                      ?? throw new InvalidOperationException("JwtSettings:Secret is not configured.");
 
-            //JWT Authentication
-            var jwtSettings = new JwtSettings();
-            var emailSettings = new EmailSettings();
-            configuration.GetSection(nameof(jwtSettings)).Bind(jwtSettings);
-            configuration.GetSection(nameof(emailSettings)).Bind(emailSettings);
+            services
+                .AddAuthentication(opts =>
+                {
+                    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(opts =>
+                {
+                    opts.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = configuration["JwtSettings:Issuer"],
+                        ValidAudience = configuration["JwtSettings:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtSecret)),
+                        ClockSkew = TimeSpan.Zero,
 
-            services.AddSingleton(jwtSettings);
-            services.AddSingleton(emailSettings);
+                        // Map the ClaimTypes.Role from the JWT to ASP.NET Core's role system
+                        // so [Authorize(Roles = "Seller")] works correctly
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                    };
 
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-           .AddJwtBearer(x =>
-           {
-               x.RequireHttpsMetadata = false;
-               x.SaveToken = true;
-               x.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuer = jwtSettings.ValidateIssuer,
-                   ValidIssuers = new[] { jwtSettings.Issuer },
-                   ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
-                   ValidAudience = jwtSettings.Audience,
-                   ValidateAudience = jwtSettings.ValidateAudience,
-                   ValidateLifetime = jwtSettings.ValidateLifeTime,
-               };
-           });
-
+                    opts.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = ctx =>
+                        {
+                            if (ctx.Exception is SecurityTokenExpiredException)
+                                ctx.Response.Headers.Append("Token-Expired", "true");
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             //Swagger Gn
             // services.AddSwaggerGen(c =>
@@ -106,7 +110,6 @@ namespace E_Commerce.Infrustructure
              .AddPolicy("AdminOnly", p => p.RequireRole(Role.Names.Admin))
              .AddPolicy("SellerOrAdmin", p => p.RequireRole(
                  Role.Names.Seller, Role.Names.Admin));
-
 
 
             return services;

@@ -1,4 +1,6 @@
-﻿using E_Commerce.Infrustructure.Interfase;
+﻿using E_Commerce.Data.Entity;
+using E_Commerce.Infrustructure.InfrustructureBases;
+using E_Commerce.Infrustructure.Interfase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,10 +25,11 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         IProductReviewRepos Reviews { get; }
         IShippingRepos shipping {  get; }
         IPaymentRepos payment { get; }
-        IPayoutRepos payout { get; }    
-        
-        //   IDashboardRepository Dashboard { get; }
+        IPayoutRepos payout { get; }
 
+        //   IDashboardRepository Dashboard { get; }
+        IGenericRepositoryAsync<ProductPriceTier> PriceTiers { get; }
+        IGenericRepositoryAsync<ProductImage> ProductImages { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
         Task BeginTransactionAsync(CancellationToken ct = default);
         Task CommitTransactionAsync(CancellationToken ct = default);

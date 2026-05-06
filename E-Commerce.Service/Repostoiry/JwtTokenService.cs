@@ -11,11 +11,11 @@ namespace E_Commerce.Service.Repostoiry
 {
     public class JwtTokenService(IConfiguration config) : ITokenService
     {
-        private readonly string _secret = config["JwtSettings:secret"]
+        private readonly string _secret = config["JwtSettings:Secret"]
             ?? throw new InvalidOperationException("JWT Secret is not configured.");
-        private readonly string _issuer = config["JwtSettings:issuer"] ?? "B2BMarketplace";
-        private readonly string _audience = config["JwtSettings:audience"] ?? "B2BMarketplace";
-        private readonly int _expiryMinutes = int.Parse(config["JwtSettings:ExpiryMinutes"] ?? "60");
+        private readonly string _issuer = config["JwtSettings:Issuer"] ?? "B2BMarketplace";
+        private readonly string _audience = config["JwtSettings:Audience"] ?? "B2BMarketplace";
+        private readonly int _accessTokenExpireMinutes = int.Parse(config["JwtSettings:AccessTokenExpireMinutes"] ?? "60");
 
         public string GenerateAccessToken(User user, IEnumerable<string> roles)
         {
@@ -29,15 +29,13 @@ namespace E_Commerce.Service.Repostoiry
             new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier,     user.Id.ToString()),
             new(ClaimTypes.Email,              user.Email ?? string.Empty),
-            new(ClaimTypes.GivenName,          user.FirstName),
-            new(ClaimTypes.Surname,            user.LastName),
+            new(ClaimTypes.GivenName,          user.FirstName ?? string.Empty),
+            new(ClaimTypes.Surname,            user.LastName ?? string.Empty),
 
-            // Custom domain claims — read by ICurrentUserService
             new("owned_company_id",    user.OwnedCompanyId?.ToString()    ?? string.Empty),
         };
 
-            // One ClaimTypes.Role per Identity role
-            // Supports multi-role scenarios (e.g., Seller is also an Admin)
+         
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
@@ -45,7 +43,7 @@ namespace E_Commerce.Service.Repostoiry
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
+                expires: DateTime.UtcNow.AddMinutes(_accessTokenExpireMinutes),
                 signingCredentials: cred);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -59,10 +57,6 @@ namespace E_Commerce.Service.Repostoiry
             return Convert.ToBase64String(bytes);
         }
 
-        /// <summary>
-        /// Validates signature of an expired token and returns its ClaimsPrincipal.
-        /// Used during token refresh — lifetime validation is intentionally skipped.
-        /// </summary>
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
             var parameters = new TokenValidationParameters

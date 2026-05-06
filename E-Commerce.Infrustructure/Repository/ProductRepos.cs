@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Infrustructure.Repository
 {
-    public class ProductRepos(AppDBContext Context) :GenericRepositoryAsync<Product>(Context), IProductRepos
+    public class ProductRepos(AppDBContext Con) :GenericRepositoryAsync<Product>(Con), IProductRepos
     {
         public async Task<Product?> GetWithFullDetailsAsync(Guid productId, CancellationToken ct = default)
-       => await Context.products
+       => await Con.products
            .Include(p => p.Company)
            .Include(p => p.Category)
            .Include(p => p.Images.OrderBy(i => i.DisplayOrder))
@@ -64,7 +64,7 @@ namespace E_Commerce.Infrustructure.Repository
             return (items, total);
         }
         public async Task<IEnumerable<Product>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default)
-            => await Context.products
+            => await Con.products
                 .AsNoTracking()
                 .Where(p => p.CompanyId == companyId)
                 .Include(p => p.Category)

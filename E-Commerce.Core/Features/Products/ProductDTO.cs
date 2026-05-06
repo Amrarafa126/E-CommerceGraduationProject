@@ -18,15 +18,64 @@ namespace E_Commerce.Core.Features.Products
         int ReviewCount, List<ProductImageDto> Images, List<ProductOptionDto> Options, List<ProductVariantDto> Variants,
         List<PriceTierDto> PriceTiers, DateTime CreatedAt, DateTime? UpdatedAt);
 
+    //public class ProductDto
+    //{
+    //    public Guid Id { get; set; }
+    //    public string Name { get; set; }
+    //    public string Description { get; set; }
+    //    public string? MainImageUrl { get; set; }
+    //    public decimal BasePrice { get; set; }
+    //    public string Currency { get; set; }
+    //    public int MinimumOrderQuantity { get; set; }
+    //    public string Status { get; set; }
+    //    public Guid CompanyId { get; set; }
+    //    public string? CompanyName { get; set; }
+    //    public Guid CategoryId { get; set; }
+    //    public string? CategoryName { get; set; }
+    //    public double AverageRating { get; set; }
+    //    public int ReviewCount { get; set; }
+    //    public List<ProductImageDto> Images { get; set; }
+    //    public List<ProductOptionDto> Options { get; set; }
+    //    public List<ProductVariantDto> Variants { get; set; }
+    //    public List<PriceTierDto> PriceTiers { get; set; }
+    //    public DateTime CreatedAt { get; set; }
+    //    public DateTime? UpdatedAt { get; set; }
+    //    public ProductDto new 
+
+
+
+    //}
+
     public record CreateProductDto(string Name, string Description, Guid CategoryId,
     int MinimumOrderQuantity, decimal BasePrice, string currency);
 
-    public record ProductSummaryDto(Guid Id, string Name ,string? MainImageUrl, decimal BasePrice, string Currency, 
-        int MinimumOrderQuantity, string Status, Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName,
-        double AverageRating, int ReviewCount, DateTime CreatedAt);
+    //public record ProductSummaryDto(Guid Id, string Name ,string? MainImageUrl, decimal BasePrice, string Currency, 
+    //    int MinimumOrderQuantity, string Status, Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName,
+    //    double AverageRating, int ReviewCount, DateTime CreatedAt);
 
+    public class ProductSummaryDto
+    {
+        public ProductSummaryDto()
+        {
+            
+        }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string? MainImageUrl { get; set; }
+        public decimal BasePrice { get; set; }
+        public string Currency { get; set; }
+        public int MinimumOrderQuantity { get; set; }
+        public string Status { get; set; }
+        public Guid CompanyId { get; set; }
+        public string? CompanyName { get; set; }
+        public Guid CategoryId { get; set; }
+        public string? CategoryName { get; set; }
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
 
-    public record UpdateProductDto(string Name, string Description, Guid CategoryId, int MinimumOrderQuantity, 
+        public record UpdateProductDto(string Name, string Description, Guid CategoryId, int MinimumOrderQuantity, 
         decimal BasePrice);
 
     internal static class ProductMapper

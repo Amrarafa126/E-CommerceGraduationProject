@@ -10,10 +10,9 @@ using MediatR;
 
 namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
 {
-   
-        public class ProductOptionHandlerCommands(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu)
-     : IRequestHandler<AddProductOptionCommand, ApiResponse<ProductOptionDto>>,
-        IRequestHandler<DeleteProductOptionCommand, ApiResponse<object>>,
+       public class ProductOptionHandlerCommands(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu)
+        :IRequestHandler<AddProductOptionCommand, ApiResponse<ProductOptionDto>>,
+         IRequestHandler<DeleteProductOptionCommand, ApiResponse<object>>,
          IRequestHandler<UpdateProductOptionCommand, ApiResponse<ProductOptionDto>>
     {
             public async Task<ApiResponse<ProductOptionDto>> Handle(AddProductOptionCommand req, CancellationToken ct)
@@ -45,23 +44,18 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
         public async Task<ApiResponse<object>> Handle(
            DeleteProductOptionCommand req, CancellationToken ct)
         {
-            // ── 1. Auth ───────────────────────────────────────────────
             if (cu.UserId == null)
                 throw new UnauthorizedException();
 
-            // ── 2. Load product (with options + variants) ─────────────
             var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
-            // ── 3. Ownership check ────────────────────────────────────
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only delete options of your own products.");
 
-            // ── 4. Find the option ────────────────────────────────────
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
 
-            // ── 5. Safety: warn if variants reference this option's values ──
             var optionValueIds = option.Values.Select(v => v.Id).ToHashSet();
 
             bool variantsUseThisOption = product.productVariants
@@ -73,7 +67,6 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                     "Cannot delete this option because one or more variants are linked to its values. " +
                     "Delete the related variants first.", 409);
 
-            // ── 6. Remove the option (cascade removes Values via EF config) ──
             product.ProductOptions.Remove(option);
             uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
