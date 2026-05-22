@@ -31,7 +31,8 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
             if (order.ShipmentId.HasValue)
                 throw new ConflictException("Shipment already exists for this order.");
 
-            if (!Enum.TryParse<ShippingMethod>(req.Method, true, out var method))
+            var method = (ShippingMethod)(req.Method + 1);
+            if (!Enum.IsDefined(typeof(ShippingMethod), method))
                 throw new BusinessException("Invalid shipping method.");
 
             await uow.BeginTransactionAsync(ct);
@@ -77,19 +78,23 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
             try
             {
                 // Apply status transition on shipment
-                switch (req.Status)
+                var status = (ShippingStatus)(req.Status + 1);
+            if (!Enum.IsDefined(typeof(ShippingStatus), status))
+                throw new BusinessException("Invalid shipment status.");
+
+            switch (status)
                 {
-                    case "ReadyForPickup":
+                    case ShippingStatus.ReadyForPickup:
                         shipment.MarkReadyForPickup();
                         break;
-                    case "InTransit":
+                    case ShippingStatus.InTransit:
                         shipment.MarkInTransit(req.CarrierName!, req.TrackingNumber!, req.TrackingUrl);
                         order?.MarkShipped();
                         break;
-                    case "OutForDelivery":
+                    case ShippingStatus.OutForDelivery:
                         shipment.MarkOutForDelivery();
                         break;
-                    case "Delivered":
+                    case ShippingStatus.Delivered:
                         shipment.MarkDelivered();
                         order?.MarkDelivered();
                         // Release wallet balance to Available
@@ -104,10 +109,10 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
                             }
                         }
                         break;
-                    case "Failed":
+                    case ShippingStatus.Failed:
                         shipment.MarkFailed(req.FailureReason ?? "Delivery failed.");
                         break;
-                    case "Returned":
+                    case ShippingStatus.Returned:
                         shipment.MarkReturned();
                         break;
                 }

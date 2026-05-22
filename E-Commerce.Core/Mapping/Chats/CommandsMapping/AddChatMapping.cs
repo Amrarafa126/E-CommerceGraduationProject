@@ -23,7 +23,7 @@ namespace E_Commerce.Core.Mapping.Chats
 
             CreateMap<Message, MessageDto>()
                 .ForMember(d => d.SenderName, o => o.MapFrom(s => s.Sender != null ? s.Sender.FullName : ""))
-                .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString()));
+                .ForMember(d => d.Type, o => o.MapFrom(s => (int)s.Type));
         }
     }
 }

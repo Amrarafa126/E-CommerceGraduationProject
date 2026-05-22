@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
 {
-    internal class RFQHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IMapper mapper , AppDBContext db)
+    public class RFQHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IMapper mapper , AppDBContext db)
     : IRequestHandler<CreateRfqCommand, ApiResponse<RfqRequestDto>>,
       IRequestHandler<CancelRfqCommand, ApiResponse<RfqRequestDto>>,
       IRequestHandler<SubmitQuoteCommand, ApiResponse<RfqQuoteDto>>,
@@ -58,8 +58,7 @@ namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
             var rfq = await uow.RfqRequest.GetWithQuotesAsync(req.RfqRequestId, ct)
                 ?? throw new NotFoundException(nameof(RfqRequest), req.RfqRequestId);
 
-            var user = await uow.Users.GetByIdAsync(cu.UserId.Value, ct)!;
-            if (user?.OwnedCompanyId != rfq.SellerCompanyId && cu.Role != "Supplier")
+            if (cu.OwnedCompanyId == null || cu.OwnedCompanyId != rfq.SellerCompanyId)
                 throw new ForbiddenException("Only the seller company can submit quotes.");
 
             if (rfq.Status == RfqStatus.Cancelled || rfq.Status == RfqStatus.Accepted)

@@ -14,7 +14,7 @@ namespace E_Commerce.Data.Entity
         public string Title { get; private set; } = string.Empty;
         public string Description { get; private set; } = string.Empty;
         public int Quantity { get; private set; }
-        public string Currency { get; private set; } = "USD";
+        public string Currency { get; private set; } = "EGP";
         public string? TargetPrice { get; private set; }   // Optional target price from buyer
         public string? Attachments { get; private set; }   // Comma-separated URLs
         public string? ShippingCountry { get; private set; }
@@ -38,7 +38,7 @@ namespace E_Commerce.Data.Entity
         public static RfqRequest Create(
             string title, string description, int quantity,
             Guid buyerId, Guid sellerCompanyId,
-            string currency = "USD",
+            string currency = "EGP",
             string? targetPrice = null,
             string? shippingCountry = null,
             DateTime? deadline = null,

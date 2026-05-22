@@ -43,38 +43,10 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        /// <summary>View seller's company wallet balance</summary>
-        [HttpGet("wallet")]
-        [Authorize(Roles = "Seller")]
-        [ProducesResponseType(typeof(ApiResponse<WalletDto>), 200)]
-        public async Task<IActionResult> Wallet(CancellationToken ct)
-        {
-            var r = await mediator.Send(new GetWalletQuery(), ct);
-            return StatusCode(r.StatusCode, r);
-        }
-
-        [HttpPost("payout")]
-        [Authorize(Roles = "Seller")]
-        [ProducesResponseType(typeof(ApiResponse<PayoutDto>), 201)]
-        public async Task<IActionResult> Payout([FromBody] PayoutReq req, CancellationToken ct)
-        {
-            var r = await mediator.Send(new RequestPayoutCommand(req.Amount, req.BankAccountLast4), ct);
-            return StatusCode(r.StatusCode, r);
-        }
-
-        [HttpGet("payouts")]
-        [Authorize(Roles = "Seller")]
-        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<PayoutDto>>), 200)]
-        public async Task<IActionResult> Payouts(
-            [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-        {
-            var r = await mediator.Send(new GetPayoutsQuery(page, pageSize), ct);
-            return StatusCode(r.StatusCode, r);
-        }
+        /// <summary>Get payment details for an order</summary>
     }
-    public record PayRequest(Guid OrderId, string PaymentMethod, string? CardToken, string Currency = "USD");
+    public record PayRequest(Guid OrderId, int PaymentMethod, string? CardToken, string Currency = "EGP");
     public record RefundReq(decimal Amount, string Reason);
-    public record PayoutReq(decimal Amount, string? BankAccountLast4 = null);
 
 }
 

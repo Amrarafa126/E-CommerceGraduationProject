@@ -12,6 +12,7 @@ namespace E_Commerce.Data.Entity
     {
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
+        [NotMapped]
         public decimal TotalPrice => UnitPrice * Quantity;
         public string ProductName { get; private set; } = string.Empty;
         public string? VariantSKU { get; private set; }

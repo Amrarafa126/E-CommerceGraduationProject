@@ -1,4 +1,5 @@
 ﻿using E_Commerce.Data.Status;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_Commerce.Data.Entity
 {
@@ -78,7 +79,9 @@ namespace E_Commerce.Data.Entity
             MarkAsUpdated();
         }
 
+        [NotMapped]
         public bool IsPaid => Status == PaymentStatus.Paid;
+        [NotMapped]
         public decimal RemainingAmount => Amount - AmountRefunded;
     }
 }

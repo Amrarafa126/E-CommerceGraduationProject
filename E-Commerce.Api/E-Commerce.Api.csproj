@@ -30,4 +30,9 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <!-- Auto-kill running API instance before build to prevent file lock errors (MSB3027) -->
+  <Target Name="KillRunningApiBeforeBuild" BeforeTargets="BeforeBuild">
+    <Exec Command="powershell.exe -NoProfile -Command &quot;Get-Process | Where-Object { $_.ProcessName -like '*E-Commerce*Api*' } | Stop-Process -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" />
+  </Target>
+
 </Project>

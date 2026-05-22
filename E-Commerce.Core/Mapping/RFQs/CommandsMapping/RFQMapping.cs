@@ -10,7 +10,7 @@ namespace E_Commerce.Core.Mapping.RFQs
         public void AddRFQMapping()
         {
             CreateMap<RfqRequest, RfqRequestDto>()
-          .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+          .ForMember(d => d.Status, o => o.MapFrom(s => (int)s.Status - 1))
           .ForMember(d => d.BuyerName, o => o.MapFrom(s => s.Buyer != null ? s.Buyer.FullName : ""))
           .ForMember(d => d.SellerCompanyName, o => o.MapFrom(s => s.SellerCompany != null ? s.SellerCompany.CompanyName : ""))
           .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product != null ? s.Product.Name : null));

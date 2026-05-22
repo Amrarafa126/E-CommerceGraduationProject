@@ -11,20 +11,16 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Vaildations
 
     public class UpdateShipmentStatusValidator : AbstractValidator<UpdateShipmentStatusCommand>
     {
-        private static readonly string[] ValidStatuses =
-            ["ReadyForPickup", "InTransit", "OutForDelivery", "Delivered", "Failed", "Returned"];
-
         public UpdateShipmentStatusValidator()
         {
             RuleFor(x => x.ShipmentId).NotEmpty();
-            RuleFor(x => x.Status).NotEmpty()
-                .Must(s => ValidStatuses.Contains(s))
-                .WithMessage($"Status must be one of: {string.Join(", ", ValidStatuses)}");
+            RuleFor(x => x.Status).InclusiveBetween(0, 6)
+                .WithMessage("Status must be 0 (ReadyForPickup), 1 (InTransit), 2 (OutForDelivery), 3 (Delivered), 4 (Failed), or 5 (Returned).");
             RuleFor(x => x.CarrierName).NotEmpty()
-                .When(x => x.Status == "InTransit")
+                .When(x => x.Status == 1)
                 .WithMessage("CarrierName required when marking as InTransit.");
             RuleFor(x => x.TrackingNumber).NotEmpty()
-                .When(x => x.Status == "InTransit")
+                .When(x => x.Status == 1)
                 .WithMessage("TrackingNumber required when marking as InTransit.");
         }
     }

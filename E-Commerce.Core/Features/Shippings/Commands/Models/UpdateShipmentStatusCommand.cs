@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.Shippings.Commands.Models
 {
     public record UpdateShipmentStatusCommand(
-       Guid ShipmentId, string Status,
+       Guid ShipmentId, int Status,
        string? CarrierName = null, string? TrackingNumber = null,
        string? TrackingUrl = null, string? FailureReason = null)
        : IRequest<ApiResponse<ShipmentDto>>;

@@ -14,8 +14,9 @@ namespace E_Commerce.Data.Entity
 
         public decimal UnitPrice { get; private set; }
         public int Quantity { get; private set; }
+        [NotMapped]
         public decimal TotalPrice => UnitPrice * Quantity;
-        public string Currency { get; private set; } = "USD";
+        public string Currency { get; private set; } = "EGP";
         public string? Notes { get; private set; }
         public string? PaymentTerms { get; private set; }
         public string? DeliveryTerms { get; private set; }
@@ -28,7 +29,7 @@ namespace E_Commerce.Data.Entity
 
         public static RfqQuotation Create(
             Guid rfqRequestId, decimal unitPrice, int quantity,
-            string currency = "USD",
+            string currency = "EGP",
             string? notes = null,
             string? paymentTerms = null,
             string? deliveryTerms = null,
@@ -53,6 +54,7 @@ namespace E_Commerce.Data.Entity
 
         public void Accept() { IsAccepted = true; MarkAsUpdated(); }
         public void Decline() { IsDeclined = true; MarkAsUpdated(); }
+        [NotMapped]
         public bool IsExpired => DateTime.UtcNow > ValidUntil;
     }
 }

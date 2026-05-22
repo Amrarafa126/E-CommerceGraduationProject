@@ -28,7 +28,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 
             var result = dist
                 .OrderBy(d => d.Status)
-                .Select(d => new OrderStatusCountDto(d.Status.ToString(), d.Count, d.Revenue))
+                .Select(d => new OrderStatusCountDto((int)d.Status - 1, d.Count, d.Revenue))
                 .ToList();
 
             return ApiResponse<List<OrderStatusCountDto>>.Ok(result);

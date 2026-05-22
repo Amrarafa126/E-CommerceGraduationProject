@@ -10,7 +10,7 @@ namespace E_Commerce.Api.Controllers
     [ApiController]
     [Route("api/v1/auth")]
     [Produces("application/json")]
-    public class AuthController(ISender mediator) : ControllerBase
+    public class AuthenticationController(ISender mediator) : ControllerBase
     {
         /// <summary>Register a new Supplier account</summary>
         [HttpPost("register/seller")]

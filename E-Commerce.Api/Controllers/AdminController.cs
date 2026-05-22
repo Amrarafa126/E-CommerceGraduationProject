@@ -85,7 +85,7 @@ namespace E_Commerce.Api.Controllers
         // ── Companies Management ────────────────────────────────────────
         [HttpGet("companies")]
         public async Task<IActionResult> GetCompanies(
-            [FromQuery] string? search, [FromQuery] CompanyStatus? status,
+            [FromQuery] string? search, [FromQuery] int? status,
             [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
             CancellationToken ct = default)
         {
@@ -104,7 +104,7 @@ namespace E_Commerce.Api.Controllers
         // ── Orders Management ───────────────────────────────────────────
         [HttpGet("orders")]
         public async Task<IActionResult> GetOrders(
-            [FromQuery] string? search, [FromQuery] OrderStatus? status,
+            [FromQuery] string? search, [FromQuery] int? status,
             [FromQuery] DateTime? from, [FromQuery] DateTime? to,
             [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
             CancellationToken ct = default)
@@ -250,11 +250,6 @@ namespace E_Commerce.Api.Controllers
     public record ManageUserDto(AdminUserAction Action, string? Reason);
     public record ManageCompanyDto(CompanyAdminAction Action, string? Reason);
     public record AdjustPointsDto(Guid BuyerId, int Delta, string Reason);
-    public record UpdateOptionBody(string Name, int DisplayOrder = 0);
-    public record AddValueBody(string Value, string? DisplayLabel = null, int DisplayOrder = 0);
-    public record UpdateVariantBody(string SKU, decimal Price, int StockQuantity, bool IsActive, string? ImageUrl = null);
-    public record PatchStockBody(int Delta);
-    public record UpdatePriceTierBody(int MinQuantity, decimal UnitPrice, int? MaxQuantity = null);
     public record UpdateCouponBody(string Description, decimal? MaxDiscountAmount, DateTime? ExpiresAt, int? MaxUsageCount);
 
 }

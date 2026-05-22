@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/shipping")]
     [ApiController]
     public class ShippingController(ISender mediator) : ControllerBase
     {
@@ -26,6 +26,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
@@ -34,6 +35,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         [HttpGet("order/{orderId:guid}")]
+        [Authorize]
         [ProducesResponseType(typeof(ApiResponse<ShipmentDto>), 200)]
         public async Task<IActionResult> GetByOrder(Guid orderId, CancellationToken ct)
         {

@@ -57,25 +57,19 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
                 .CountAsync(c => c.CompanyId == companyId && !c.IsCompanyArchived, ct);
 
             // ── RFQ ───────────────────────────────────────────────────────────────
-            var rfqStats = await db.rfqRequests
-                .Where(r => r.SellerCompanyId == companyId && !r.IsDeleted)
-                .GroupBy(_ => true)
-                .Select(g => new
-                {
-                    Total = g.Count(),
-                    Pending = g.Count(r => r.Status == RfqStatus.Pending)
-                })
-                .FirstOrDefaultAsync(ct);
+            var rfqTotal = await db.rfqRequests
+                .CountAsync(r => r.SellerCompanyId == companyId && !r.IsDeleted, ct);
+            var rfqPending = await db.rfqRequests
+                .CountAsync(r => r.SellerCompanyId == companyId && !r.IsDeleted && r.Status == RfqStatus.Pending, ct);
 
             // ── Top Products ──────────────────────────────────────────────────────
-            // ✅ Step 1: نعمل GroupBy و Select بـ anonymous type عشان EF يترجمها لـ SQL بدون مشاكل
             var rawTopProducts = await db.orderItems
                 .Where(i => i.Order.SellerCompanyId == companyId && !i.Order.IsDeleted)
-                .GroupBy(i => new { i.ProductId, i.ProductName })
+                .GroupBy(i => i.ProductId)
                 .Select(g => new
                 {
-                    g.Key.ProductId,
-                    g.Key.ProductName,
+                    ProductId = g.Key,
+                    ProductName = g.First().ProductName,
                     OrderCount = g.Count(),
                     Revenue = g.Sum(i => i.UnitPrice * i.Quantity)
                 })
@@ -83,12 +77,17 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
                 .Take(5)
                 .ToListAsync(ct);
 
-            // ✅ Step 2: نعمل Map للـ DTO في الميموري بعد ToListAsync
+            var productIds = rawTopProducts.Select(x => x.ProductId).ToList();
+            var productImages = await db.products
+                .Where(p => productIds.Contains(p.Id))
+                .Select(p => new { p.Id, p.MainImageUrl })
+                .ToDictionaryAsync(p => p.Id, p => p.MainImageUrl, ct);
+
             var topProducts = rawTopProducts
                 .Select(x => new TopProductDto(
                     x.ProductId,
                     x.ProductName,
-                    null,
+                    productImages.GetValueOrDefault(x.ProductId),
                     x.OrderCount,
                     x.Revenue,
                     0))
@@ -130,7 +129,7 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
                     ratings.Any() ? Math.Round(ratings.Average(), 1) : 0,
                     ratings.Count),
                 new ChatSummaryDto(unread, activeConvs),
-                new RfqSummaryDto(rfqStats?.Pending ?? 0, rfqStats?.Total ?? 0),
+                new RfqSummaryDto(rfqPending, rfqTotal),
                 topProducts,
                 monthly,
                 statusDist);

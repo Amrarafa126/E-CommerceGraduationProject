@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Models
 {
     public record GetAllCompaniesQuery(
-     string? Search = null, CompanyStatus? Status = null,
+     string? Search = null, int? Status = null,
      int Page = 1, int PageSize = 20)
      : IRequest<ApiResponse<PaginatedResult<AdminCompanyDto>>>;
 }

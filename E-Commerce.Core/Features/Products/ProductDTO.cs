@@ -3,6 +3,7 @@ using E_Commerce.Core.Features.ProductOptions;
 using E_Commerce.Core.Features.ProductPriceTiers;
 using E_Commerce.Core.Features.ProductVariants;
 using E_Commerce.Data.Entity;
+using E_Commerce.Data.Status;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace E_Commerce.Core.Features.Products
 {
 
     public record ProductDto(Guid Id, string Name, string Description,
-        string? MainImageUrl, decimal BasePrice, string Currency, int MinimumOrderQuantity, string Status,
+        string? MainImageUrl, decimal BasePrice, string Currency, int MinimumOrderQuantity, int Status,
         Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName, double AverageRating,
         int ReviewCount, List<ProductImageDto> Images, List<ProductOptionDto> Options, List<ProductVariantDto> Variants,
         List<PriceTierDto> PriceTiers, DateTime CreatedAt, DateTime? UpdatedAt);
@@ -65,7 +66,7 @@ namespace E_Commerce.Core.Features.Products
         public decimal BasePrice { get; set; }
         public string Currency { get; set; }
         public int MinimumOrderQuantity { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
         public Guid CompanyId { get; set; }
         public string? CompanyName { get; set; }
         public Guid CategoryId { get; set; }
@@ -80,9 +81,17 @@ namespace E_Commerce.Core.Features.Products
 
     internal static class ProductMapper
     {
+        internal static int MapProductStatus(ProductStatus status) => status switch
+        {
+            ProductStatus.Draft => 0,
+            ProductStatus.Active => 1,
+            ProductStatus.Inactive => 3,
+            _ => 0
+        };
+
         internal static ProductDto Map(Product p) => new(
             p.Id, p.Name, p.Description ,p.MainImageUrl,
-            p.BasePrice, p.Currency, p.MinimumOrderQuantity, p.Status.ToString(),
+            p.BasePrice, p.Currency, p.MinimumOrderQuantity, (int)p.Status,
             p.CompanyId, p.Company?.CompanyName, p.CategoryId, p.Category?.Name,
             p.AverageRating, p.ReviewCount,
             p.Images.Where(i => !i.IsDeleted).OrderBy(i => i.DisplayOrder)

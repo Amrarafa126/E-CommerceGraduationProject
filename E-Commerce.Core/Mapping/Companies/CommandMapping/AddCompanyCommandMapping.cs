@@ -11,7 +11,8 @@ namespace E_Commerce.Core.Mapping.Companies
         public void AddCompanyMapping()
         {
             CreateMap<Company, CompanyDto>()
-           .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+           .ForMember(d => d.Name, o => o.MapFrom(s => s.CompanyName ?? ""))
+           .ForMember(d => d.Status, o => o.MapFrom(s => (int)s.Status - 1))
            .ForMember(d => d.OwnerName, o => o.MapFrom(s => s.Owner != null ? s.Owner.FullName : ""))
            .ForMember(d => d.Street, o => o.MapFrom(s => s.Address.Street))
            .ForMember(d => d.City, o => o.MapFrom(s => s.Address.City))
@@ -24,7 +25,8 @@ namespace E_Commerce.Core.Mapping.Companies
            .ForMember(d => d.WalletAvailableBalance, o => o.MapFrom(s => s.Wallet != null ? s.Wallet.AvailableBalance : 0m));
 
             CreateMap<Company, CompanySummaryDto>()
-                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+                .ForMember(d => d.Name, o => o.MapFrom(s => s.CompanyName ?? ""))
+                .ForMember(d => d.Status, o => o.MapFrom(s => (int)s.Status - 1))
                 .ForMember(d => d.City, o => o.MapFrom(s => s.Address.City))
                 .ForMember(d => d.Country, o => o.MapFrom(s => s.Address.Country));
 

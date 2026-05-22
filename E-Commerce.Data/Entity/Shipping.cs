@@ -147,6 +147,7 @@ namespace E_Commerce.Data.Entity
         private void AddEvent(string description)
             => Events.Add(ShippingEvent.Create(Id, Status, description));
 
+        [NotMapped]
         public string FullAddress =>
             $"{AddressLine1}{(AddressLine2 != null ? ", " + AddressLine2 : "")}, {City}, {State} {PostalCode}, {Country}";
     }

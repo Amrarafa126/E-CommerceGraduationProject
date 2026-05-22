@@ -87,6 +87,7 @@ namespace E_Commerce.Data.Entity
         }
 
         public void SetMainImage(string url) { MainImageUrl = url; MarkAsUpdated(); }
+        [NotMapped]
         public int ActiveImageCount => Images.Count(i => !i.IsDeleted);
 
         public void Publish()

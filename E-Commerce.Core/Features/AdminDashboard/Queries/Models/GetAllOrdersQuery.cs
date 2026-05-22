@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Models
 {
     public record GetAllOrdersQuery(
-     string? Search = null, OrderStatus? Status = null,
+     string? Search = null, int? Status = null,
      DateTime? From = null, DateTime? To = null,
      int Page = 1, int PageSize = 20)
      : IRequest<ApiResponse<PaginatedResult<AdminOrderDto>>>;

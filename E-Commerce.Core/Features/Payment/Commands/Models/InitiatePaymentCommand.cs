@@ -9,7 +9,7 @@ namespace E_Commerce.Core.Features.Payment.Commands.Models
 {
     public record InitiatePaymentCommand(
        Guid OrderId,
-       string PaymentMethod,
+       int PaymentMethod,
        string? CardToken,
        string Currency = "EGP")
        : IRequest<ApiResponse<PaymentDto>>;

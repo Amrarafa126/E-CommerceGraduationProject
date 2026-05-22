@@ -27,16 +27,15 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                 throw new ForbiddenException("You are not allowed to modify this product.");
 
             var option = ProductOption.Create(product.Id, req.Name);
+            product.ProductOptions.Add(option);
+            await uow.SaveChangesAsync(ct);
 
-                if (req.Values != null)
-                {
-                    foreach (var val in req.Values)
-                        option.Values.Add(ProductOptionValue.Create(option.Id, val)); // خلي بالك انك لازم تضيف ال option قبل ما تضيف ال values عشان تاخد ال optionId اللي هو auto increment
-            }
-
-                product.ProductOptions.Add(option);
-                uow.Products.Update(product);
+            if (req.Values != null && req.Values.Count > 0)
+            {
+                foreach (var val in req.Values)
+                    option.Values.Add(ProductOptionValue.Create(option.Id, val));
                 await uow.SaveChangesAsync(ct);
+            }
 
             return ApiResponse<ProductOptionDto>.Created(mapper.Map<ProductOptionDto>(option));
         }
@@ -68,7 +67,6 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                     "Delete the related variants first.", 409);
 
             product.ProductOptions.Remove(option);
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<object>.Ok("Option and all its values deleted successfully.");
@@ -90,7 +88,6 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
 
             option.Update(req.Name, req.DisplayOrder);
 
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductOptionDto>.Ok(mapper.Map<ProductOptionDto>(option));

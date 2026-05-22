@@ -21,7 +21,7 @@ namespace E_Commerce.Core.Features.Payment.Queries.Handlers
 
             return ApiResponse<PaymentDto>.Ok(new PaymentDto(
                 payment.Id, payment.OrderId, payment.Amount, payment.Currency,
-                payment.Status.ToString(), payment.Method.ToString(),
+                (int)payment.Status - 1, (int)payment.Method - 1,
                 payment.GatewayTransactionId, payment.CardLast4, payment.CardBrand,
                 payment.FailureReason, payment.AmountRefunded,
                 payment.PaidAt, payment.RefundedAt, payment.CreatedAt));
@@ -52,7 +52,7 @@ namespace E_Commerce.Core.Features.Payment.Queries.Handlers
                 cu.OwnedCompanyId.Value, req.Page, req.PageSize, ct);
 
             var dtos = items.Select(p => new PayoutDto(
-                p.Id, p.CompanyId, p.Amount, p.Currency, p.Status.ToString(),
+                p.Id, p.CompanyId, p.Amount, p.Currency, (int)p.Status - 1,
                 p.ExternalReference, p.BankAccountLast4, p.FailureReason,
                 p.ProcessedAt, p.CreatedAt)).ToList();
 

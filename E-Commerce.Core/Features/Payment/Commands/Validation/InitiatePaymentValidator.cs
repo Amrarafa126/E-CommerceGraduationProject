@@ -11,16 +11,13 @@ namespace E_Commerce.Core.Features.Payment.Commands.Validation
 
     public class InitiatePaymentValidator : AbstractValidator<InitiatePaymentCommand>
     {
-        private static readonly string[] AllowedMethods = ["Card", "Wallet", "CashOnDelivery", "BankTransfer"];
-
         public InitiatePaymentValidator()
         {
             RuleFor(x => x.OrderId).NotEmpty();
-            RuleFor(x => x.PaymentMethod).NotEmpty()
-                .Must(m => AllowedMethods.Contains(m))
-                .WithMessage($"PaymentMethod must be one of: {string.Join(", ", AllowedMethods)}");
+            RuleFor(x => x.PaymentMethod).InclusiveBetween(0, 3)
+                .WithMessage("PaymentMethod must be 0 (Card), 1 (Wallet), 2 (CashOnDelivery), or 3 (BankTransfer).");
             RuleFor(x => x.CardToken)
-                .NotEmpty().When(x => x.PaymentMethod == "Card")
+                .NotEmpty().When(x => x.PaymentMethod == 0)
                 .WithMessage("CardToken is required for card payments.");
         }
     }

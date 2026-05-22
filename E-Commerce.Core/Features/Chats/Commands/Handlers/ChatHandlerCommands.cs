@@ -64,7 +64,7 @@ namespace E_Commerce.Core.Features.Chats.Commands.Handlers
             lastMsg == null ? null : new MessageDto(
                 lastMsg.Id, lastMsg.ConversationId, lastMsg.SenderId,
                 buyer.FullName, lastMsg.Content, lastMsg.AttachmentUrl,
-                lastMsg.Type.ToString(), lastMsg.IsRead, lastMsg.ReadAt, lastMsg.CreatedAt),
+                (int)lastMsg.Type, lastMsg.IsRead, lastMsg.ReadAt, lastMsg.CreatedAt),
             c.LastMessageAt, c.CreatedAt);
     
      public async Task<ApiResponse<MessageDto>> Handle(SendMessageCommand req, CancellationToken ct)
@@ -84,8 +84,7 @@ namespace E_Commerce.Core.Features.Chats.Commands.Handlers
             if (!isBuyer && !isCompanyMember)
                 throw new ForbiddenException("You are not a participant in this conversation.");
 
-            var type = Enum.TryParse<MessageType>(req.Type, true, out var parsed)
-                ? parsed : MessageType.Text;
+            var type = (MessageType)req.Type;
 
             var message = Message.Create(
                 conversation.Id, currentUser.UserId.Value, req.Content, req.AttachmentUrl, type);
@@ -98,7 +97,7 @@ namespace E_Commerce.Core.Features.Chats.Commands.Handlers
             return ApiResponse<MessageDto>.Created(new MessageDto(
                 message.Id, message.ConversationId, message.SenderId,
                 user.FullName, message.Content, message.AttachmentUrl,
-                message.Type.ToString(), message.IsRead, message.ReadAt, message.CreatedAt));
+                (int)message.Type, message.IsRead, message.ReadAt, message.CreatedAt));
         }
 
         public async Task<ApiResponse<object>> Handle(MarkMessagesReadCommand req, CancellationToken ct)

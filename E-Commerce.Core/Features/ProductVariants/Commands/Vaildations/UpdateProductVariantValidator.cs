@@ -29,7 +29,7 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Vaildations
                 .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
 
             RuleFor(x => x.OptionValueIds)
-                .NotEmpty().WithMessage("Option values cannot be empty.");
+                .NotNull().WithMessage("OptionValueIds is required.");
         }
     }
 }

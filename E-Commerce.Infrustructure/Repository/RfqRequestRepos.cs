@@ -33,11 +33,15 @@ namespace E_Commerce.Infrustructure.Repository
         }
 
         public async Task<(IEnumerable<RfqRequest> Items, int Total)> GetBySellerPagedAsync(
-            Guid companyId, int page, int pageSize, CancellationToken ct = default)
+            Guid companyId, int page, int pageSize, int? status = null, CancellationToken ct = default)
         {
             var q = Db.rfqRequests.AsNoTracking()
                 .Include(r => r.Buyer).Include(r => r.Quotes)
                 .Where(r => r.SellerCompanyId == companyId && !r.IsDeleted);
+
+            if (status.HasValue)
+                q = q.Where(r => (int)r.Status == status.Value + 1);
+
             var total = await q.CountAsync(ct);
             var items = await q.OrderByDescending(r => r.CreatedAt)
                 .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);

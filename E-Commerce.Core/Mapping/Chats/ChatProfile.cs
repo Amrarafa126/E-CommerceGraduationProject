@@ -6,7 +6,7 @@ namespace E_Commerce.Core.Mapping.Chats
     {
         public ChatProfile()
         {
-
+            AddMappingChat();
         }
     }
 }

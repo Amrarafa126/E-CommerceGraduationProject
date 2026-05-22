@@ -35,7 +35,6 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             }
 
             product.productVariants.Add(variant);
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductVariantDto>.Created(mapper.Map<ProductVariantDto>(variant));
@@ -69,7 +68,6 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             foreach (var optionValueId in req.OptionValueIds)
                 variant.OptionValues.Add(ProductVariantOptionValue.Create(variant.Id, optionValueId));
 
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductVariantDto>.Ok(mapper.Map<ProductVariantDto>(variant));
@@ -90,7 +88,6 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
                 ?? throw new NotFoundException(nameof(ProductVariant), req.VariantId);
 
             product.productVariants.Remove(variant);
-            uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<object>.Ok("Variant deleted successfully.");

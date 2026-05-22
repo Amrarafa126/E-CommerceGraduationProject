@@ -15,7 +15,7 @@ namespace E_Commerce.Api.Controllers
     public class CompanyController(ISender mediator) : ControllerBase
     {
 
-        [HttpGet("Get-All")]
+        [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<CompanySummaryDto>>), 200)]
         public async Task<IActionResult> GetAll(
         [FromQuery] string? search,
@@ -26,7 +26,7 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        [HttpGet("Get-By-Id/{id:guid}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
@@ -43,7 +43,7 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
-        [HttpPut("Update/{id:guid}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Roles = "Seller,Admin")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyDto dto, CancellationToken ct)

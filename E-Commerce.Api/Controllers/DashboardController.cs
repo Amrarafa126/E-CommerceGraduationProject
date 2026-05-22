@@ -13,7 +13,7 @@ namespace E_Commerce.Api.Controllers
     [Produces("application/json")]
     public class DashboardController(ISender mediator) : ControllerBase
     {
-        [HttpGet("get-dashboard")]
+        [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<CompanyDashboardDto>), 200)]
         public async Task<IActionResult> Get(CancellationToken ct)
         {

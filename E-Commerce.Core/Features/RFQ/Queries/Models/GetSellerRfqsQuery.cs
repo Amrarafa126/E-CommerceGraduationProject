@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.RFQ.Queries.Models
 {
-    public record GetSellerRfqsQuery(int Page = 1, int PageSize = 20)
+    public record GetSellerRfqsQuery(int Page = 1, int PageSize = 20, int? Status = null)
       : IRequest<ApiResponse<PaginatedResult<RfqRequestDto>>>;
 }

@@ -4,13 +4,11 @@ using E_Commerce.Core.Features.Orders.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
 {
-    [Route("api/v1/Order")]
+    [Route("api/v1/orders")]
     [ApiController]
     public class OrderController(ISender mediator) : ControllerBase
     {

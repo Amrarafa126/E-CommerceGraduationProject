@@ -28,7 +28,7 @@ namespace E_Commerce.Core.Features.AdminDashboard
         string MonthKey, string MonthLabel,
         decimal Revenue, int Orders, int NewUsers);
 
-    public record OrderStatusCountDto(string Status, int Count, decimal Revenue);
+    public record OrderStatusCountDto(int Status, int Count, decimal Revenue);
 
     public record AdminUserDto(
         Guid Id, string Email, string FirstName, string LastName, string FullName,
@@ -38,7 +38,7 @@ namespace E_Commerce.Core.Features.AdminDashboard
         DateTime CreatedAt, DateTime? UpdatedAt);
 
     public record AdminCompanyDto(
-        Guid Id, string Name, string Description, string Status,
+        Guid Id, string Name, string Description, int Status,
         string OwnerName, string OwnerEmail,
         string? Country, int? YearEstablished, int EmployeesCount,
         decimal AvailableBalance, decimal PendingBalance,
@@ -47,7 +47,7 @@ namespace E_Commerce.Core.Features.AdminDashboard
 
     public record AdminOrderDto(
         Guid Id, string BuyerName, string BuyerEmail,
-        string SellerCompanyName, string Status,
+        string SellerCompanyName, int Status,
         decimal SubTotal, decimal ShippingCost, decimal TaxAmount,
          decimal TotalAmount, string Currency,
         string? PaymentStatus, 

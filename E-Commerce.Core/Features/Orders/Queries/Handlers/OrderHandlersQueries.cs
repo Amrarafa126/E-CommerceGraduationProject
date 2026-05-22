@@ -14,8 +14,18 @@ namespace E_Commerce.Core.Features.Orders.Queries.Handlers
     {
         public async Task<ApiResponse<OrderDto>> Handle(GetOrderByIdQuery req, CancellationToken ct)
         {
+            if (cu.UserId == null) throw new UnauthorizedException();
+
             var order = await uow.Orders.GetWithFullDetailsAsync(req.OrderId, ct)
                 ?? throw new NotFoundException(nameof(Order), req.OrderId);
+
+            bool isBuyer = order.BuyerId == cu.UserId.Value;
+            bool isSeller = cu.OwnedCompanyId != null && order.SellerCompanyId == cu.OwnedCompanyId.Value;
+            bool isAdmin = cu.Role == "Admin";
+
+            if (!isBuyer && !isSeller && !isAdmin)
+                throw new ForbiddenException("You are not authorized to view this order.");
+
             return ApiResponse<OrderDto>.Ok(MapExt.MapOrder(order));
         }
 

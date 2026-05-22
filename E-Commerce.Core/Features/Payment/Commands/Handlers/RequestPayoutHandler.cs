@@ -50,7 +50,7 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
 
                 return ApiResponse<PayoutDto>.Created(new PayoutDto(
                     payout.Id, payout.CompanyId, payout.Amount, payout.Currency,
-                    payout.Status.ToString(), payout.ExternalReference,
+                    (int)payout.Status - 1, payout.ExternalReference,
                     payout.BankAccountLast4, payout.FailureReason,
                     payout.ProcessedAt, payout.CreatedAt));
             }

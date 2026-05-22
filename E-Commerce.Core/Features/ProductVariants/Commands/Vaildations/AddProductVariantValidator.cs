@@ -26,8 +26,7 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Vaildations
                 .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
 
             RuleFor(x => x.OptionValueIds)
-                .NotEmpty().WithMessage("At least one option value must be selected.")
-                .Must(x => x != null && x.Count > 0).WithMessage("Option values are required.");
+                .NotNull().WithMessage("OptionValueIds is required.");
         }
     }
 

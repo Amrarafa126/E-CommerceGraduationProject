@@ -15,9 +15,38 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.ProductOptionsValue.Commands.Handlers
 {
     public class OptionValueHandlerCommand(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu):
+          IRequestHandler<AddOptionValueCommand, ApiResponse<ProductOptionValueDto>>,
           IRequestHandler<UpdateOptionValueCommand, ApiResponse<ProductOptionValueDto>>,
           IRequestHandler<DeleteOptionValueCommand, ApiResponse<object>>
     {
+        public async Task<ApiResponse<ProductOptionValueDto>> Handle(AddOptionValueCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null) throw new UnauthorizedException();
+
+            var product = await uow.Products.GetWithFullDetailsAsync(req.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), req.ProductId);
+
+            if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
+                throw new ForbiddenException("You are not allowed to modify this product.");
+
+            var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
+                ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
+
+            // Check duplicate
+            if (option.Values.Any(v => v.Value.Equals(req.Value, StringComparison.OrdinalIgnoreCase)))
+                return ApiResponse<ProductOptionValueDto>.Fail(
+                    $"Value '{req.Value}' already exists in this option.", 409);
+
+            var value = ProductOptionValue.Create(req.OptionId, req.Value);
+            value.DisplayOrder = req.DisplayOrder;
+            option.Values.Add(value);
+
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<ProductOptionValueDto>.Ok(
+                new ProductOptionValueDto(value.Id, value.Value, value.DisplayOrder));
+        }
+
         public async Task<ApiResponse<ProductOptionValueDto>> Handle(UpdateOptionValueCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();

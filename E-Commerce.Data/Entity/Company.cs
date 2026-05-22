@@ -1,6 +1,7 @@
 ﻿using E_Commerce.Data.Identity;
 using E_Commerce.Data.Status;
 using E_Commerce.Data.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace E_Commerce.Data.Entity
@@ -58,6 +59,7 @@ namespace E_Commerce.Data.Entity
         public void Suspend() { Status = CompanyStatus.Suspended; MarkAsUpdated(); }
         public void Reject() { Status = CompanyStatus.Rejected; MarkAsUpdated(); }
         public void SetLogo(string url) { LogoUrl = url; MarkAsUpdated(); }
+        [NotMapped]
         public bool IsActive => Status == CompanyStatus.Active;
     }
 }

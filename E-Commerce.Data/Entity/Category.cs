@@ -21,5 +21,13 @@ namespace E_Commerce.Data.Entity
                 Description = description,
                 ParentCategoryId = parentId
             };
+
+        public void Update(string name, string? description = null, Guid? parentId = null)
+        {
+            Name = name;
+            Description = description;
+            ParentCategoryId = parentId;
+            MarkAsUpdated();
+        }
     }
 }

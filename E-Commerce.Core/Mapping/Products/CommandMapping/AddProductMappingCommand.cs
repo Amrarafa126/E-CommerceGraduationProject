@@ -15,12 +15,12 @@ namespace E_Commerce.Core.Mapping.Products
         public void AddProductMapping()
         {
             CreateMap<Product, ProductSummaryDto>()
-           .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+           .ForMember(d => d.Status, o => o.MapFrom(s => ProductMapper.MapProductStatus(s.Status)))
            .ForMember(d => d.CompanyName, o => o.MapFrom(s => s.Company != null ? s.Company.CompanyName : null))
            .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category != null ? s.Category.Name : null));
 
             CreateMap<Product, ProductDto>()
-                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+                .ForMember(d => d.Status, o => o.MapFrom(s => ProductMapper.MapProductStatus(s.Status)))
                 .ForMember(d => d.CompanyName, o => o.MapFrom(s => s.Company != null ? s.Company.CompanyName : null))
                 .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category != null ? s.Category.Name : null))
                 .ForMember(d => d.Images, o => o.MapFrom(s =>

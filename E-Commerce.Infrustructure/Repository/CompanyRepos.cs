@@ -18,6 +18,8 @@ namespace E_Commerce.Infrustructure.Repository
           => Db.companies
               .Include(c => c.Owner)
               .Include(c => c.Wallet)
+              .Include(c => c.Address)
+              .Include(c => c.ContactInfo)
               .FirstOrDefaultAsync(c => c.Id == id, ct);
 
         public Task<Company?> GetByOwnerAsync(Guid ownerUserId, CancellationToken ct = default)

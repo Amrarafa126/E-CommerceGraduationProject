@@ -17,8 +17,18 @@ namespace E_Commerce.Core.Features.RFQ.Queries.Handlers
     {
         public async Task<ApiResponse<RfqRequestDto>> Handle(GetRfqByIdQuery req, CancellationToken ct)
         {
+            if (cu.UserId == null) throw new UnauthorizedException();
+
             var rfq = await uow.RfqRequest.GetWithQuotesAsync(req.RfqId, ct)
                 ?? throw new NotFoundException(nameof(RfqRequest), req.RfqId);
+
+            bool isBuyer = rfq.BuyerId == cu.UserId.Value;
+            bool isSeller = cu.OwnedCompanyId != null && rfq.SellerCompanyId == cu.OwnedCompanyId.Value;
+            bool isAdmin = cu.Role == "Admin";
+
+            if (!isBuyer && !isSeller && !isAdmin)
+                throw new ForbiddenException("You are not authorized to view this RFQ.");
+
             return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
         }
         public async Task<ApiResponse<PaginatedResult<RfqRequestDto>>> Handle(
@@ -34,9 +44,9 @@ namespace E_Commerce.Core.Features.RFQ.Queries.Handlers
         public async Task<ApiResponse<PaginatedResult<RfqRequestDto>>> Handle(
       GetSellerRfqsQuery req, CancellationToken ct)
         {
-            if (cu.UserId == null) throw new ForbiddenException("Only sellers can view incoming RFQs.");
+            if (cu.OwnedCompanyId == null) throw new ForbiddenException("Only sellers can view incoming RFQs.");
             var (items, total) = await uow.RfqRequest.GetBySellerPagedAsync(
-                cu.UserId.Value, req.Page, req.PageSize, ct);
+                cu.OwnedCompanyId.Value, req.Page, req.PageSize, req.Status, ct);
             var dtos = mapper.Map<IEnumerable<RfqRequestDto>>(items);
             return ApiResponse<PaginatedResult<RfqRequestDto>>.Ok(
                 PaginatedResult<RfqRequestDto>.Success(dtos, total, req.Page, req.PageSize));

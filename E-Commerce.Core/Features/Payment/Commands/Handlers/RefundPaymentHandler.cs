@@ -12,11 +12,14 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Payment.Commands.Handlers
 {
-    public class RefundPaymentHandler(IUnitOfWork uow, IPaymentGateway gateway)
+    public class RefundPaymentHandler(IUnitOfWork uow, IPaymentGateway gateway, ICurrentUserService cu)
     : IRequestHandler<RefundPaymentCommand, ApiResponse<PaymentDto>>
     {
         public async Task<ApiResponse<PaymentDto>> Handle(RefundPaymentCommand req, CancellationToken ct)
         {
+            if (cu.UserId == null) throw new UnauthorizedException();
+            if (cu.Role != "Admin") throw new ForbiddenException("Only admins can process refunds.");
+
             var payment = await uow.payment.GetByIdAsync(req.PaymentId, ct)
                 ?? throw new NotFoundException(nameof(Payment), req.PaymentId);
 
@@ -49,9 +52,18 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
                     {
                         // Try to debit from available first, then pending
                         if (wallet.AvailableBalance >= req.Amount)
+                        {
                             wallet.DebitAvailable(req.Amount);
+                        }
                         else if (wallet.PendingBalance >= req.Amount)
-                            wallet.ReleasePending(req.Amount); // move to available then debit — simplified
+                        {
+                            wallet.ReleasePending(req.Amount);
+                            wallet.DebitAvailable(req.Amount);
+                        }
+                        else
+                        {
+                            throw new BusinessException("Seller wallet has insufficient funds for refund.");
+                        }
                         uow.Wallets.Update(wallet);
                     }
 
@@ -65,7 +77,7 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
 
                 return ApiResponse<PaymentDto>.Ok(new PaymentDto(
                     payment.Id, payment.OrderId, payment.Amount, payment.Currency,
-                    payment.Status.ToString(), payment.Method.ToString(),
+                    (int)payment.Status - 1, (int)payment.Method - 1,
                     payment.GatewayTransactionId, payment.CardLast4, payment.CardBrand,
                     payment.FailureReason, payment.AmountRefunded,
                     payment.PaidAt, payment.RefundedAt, payment.CreatedAt));

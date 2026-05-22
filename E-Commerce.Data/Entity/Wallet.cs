@@ -1,7 +1,7 @@
 ﻿using E_Commerce.Data.Identity;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +50,7 @@ namespace E_Commerce.Data.Entity
             MarkAsUpdated();
         }
 
+        [NotMapped]
         public decimal TotalBalance => PendingBalance + AvailableBalance;
     }
 

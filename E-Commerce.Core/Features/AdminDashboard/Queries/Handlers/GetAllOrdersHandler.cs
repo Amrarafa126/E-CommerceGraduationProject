@@ -35,7 +35,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 q = q.Where(o => o.Buyer.Email!.ToLower().Contains(s) || o.SellerCompany.CompanyName.ToLower().Contains(s));
             }
 
-            if (req.Status.HasValue) q = q.Where(o => o.Status == req.Status.Value);
+            if (req.Status.HasValue) q = q.Where(o => (int)o.Status == req.Status.Value + 1);
             if (req.From.HasValue) q = q.Where(o => o.CreatedAt >= req.From.Value);
             if (req.To.HasValue) q = q.Where(o => o.CreatedAt <= req.To.Value);
 
@@ -48,7 +48,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 
             var dtos = orders.Select(o => new AdminOrderDto(
                 o.Id, o.Buyer.FullName, o.Buyer.Email ?? "",
-                o.SellerCompany.CompanyName, o.Status.ToString(),
+                o.SellerCompany.CompanyName, (int)o.Status - 1,
                 o.SubTotal, o.ShippingCost, o.TaxAmount,
                 o.TotalAmount, o.Currency,
                 o.Payment?.Status.ToString(),

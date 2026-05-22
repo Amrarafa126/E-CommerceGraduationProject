@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Payment.Commands.Handlers
 {
-    internal class PaymentHandlerComaands(
+    public class PaymentHandlerComaands(
     IUnitOfWork uow,
     IPaymentGateway gateway,
     ICurrentUserService cu)
@@ -35,7 +35,8 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
             if (order.PaymentId.HasValue)
                 throw new ConflictException("A payment already exists for this order.");
 
-            if (!Enum.TryParse<PaymentMethod>(req.PaymentMethod, true, out var method))
+            var method = (PaymentMethod)(req.PaymentMethod + 1);
+            if (!Enum.IsDefined(typeof(PaymentMethod), method))
                 throw new ValidationException("Invalid payment method.");
 
             await uow.BeginTransactionAsync(ct);
@@ -52,7 +53,7 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
                     var chargeReq = new GatewayChargeRequest(
                         Amount: order.TotalAmount,
                         Currency: req.Currency,
-                        PaymentMethod: req.PaymentMethod.ToLower(),
+                        PaymentMethod: method.ToString().ToLower(),
                         CardToken: req.CardToken,
                         CustomerId: cu.UserId.Value.ToString(),
                         OrderReference: order.OrderNumber,
@@ -107,8 +108,8 @@ namespace E_Commerce.Core.Features.Payment.Commands.Handlers
         }
 
         private static PaymentDto MapPayment(Data.Entity.Payment p) =>
-            new(p.Id, p.OrderId, p.Amount, p.Currency, p.Status.ToString(),
-                p.Method.ToString(), p.GatewayTransactionId,
+            new(p.Id, p.OrderId, p.Amount, p.Currency, (int)p.Status - 1,
+                (int)p.Method - 1, p.GatewayTransactionId,
                 p.CardLast4, p.CardBrand, p.FailureReason,
                 p.AmountRefunded, p.PaidAt, p.RefundedAt, p.CreatedAt);
     }

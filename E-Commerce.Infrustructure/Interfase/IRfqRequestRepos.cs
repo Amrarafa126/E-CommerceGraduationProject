@@ -10,6 +10,6 @@ namespace E_Commerce.Infrustructure.Interfase
         Task<(IEnumerable<RfqRequest> Items, int Total)> GetByBuyerPagedAsync(
             Guid buyerId, int page, int pageSize, CancellationToken ct = default);
         Task<(IEnumerable<RfqRequest> Items, int Total)> GetBySellerPagedAsync(
-            Guid companyId, int page, int pageSize, CancellationToken ct = default);
+            Guid companyId, int page, int pageSize, int? status = null, CancellationToken ct = default);
     }
 }

@@ -10,8 +10,6 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Vaildations
 {
     public class CreateShipmentValidator : AbstractValidator<CreateShipmentCommand>
     {
-        private static readonly string[] ValidMethods = ["Standard", "Express", "Overnight", "Pickup"];
-
         public CreateShipmentValidator()
         {
             RuleFor(x => x.OrderId).NotEmpty();
@@ -21,9 +19,8 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Vaildations
             RuleFor(x => x.State).NotEmpty().MaximumLength(100);
             RuleFor(x => x.Country).NotEmpty().MaximumLength(100);
             RuleFor(x => x.PostalCode).NotEmpty().MaximumLength(20);
-            RuleFor(x => x.Method).NotEmpty()
-                .Must(m => ValidMethods.Contains(m))
-                .WithMessage($"Method must be one of: {string.Join(", ", ValidMethods)}");
+            RuleFor(x => x.Method).InclusiveBetween(0, 3)
+                .WithMessage("Method must be 0 (Standard), 1 (Express), 2 (Overnight), or 3 (Pickup).");
             RuleFor(x => x.ShippingCost).GreaterThanOrEqualTo(0);
         }
     }

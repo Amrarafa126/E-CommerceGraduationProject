@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace E_Commerce.Api.Controllers
 {
     [ApiController]
-    [Route("api/v1/rfq")]
+    [Route("api/v1/rfqs")]
     [Authorize]
     [Produces("application/json")]
     public class RFQController(ISender mediator) : ControllerBase
     {
         /// <summary>Get a single RFQ with all quotes.</summary>
-        [HttpGet("Get-All-Quotes/{id:guid}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         {
@@ -42,9 +42,10 @@ namespace E_Commerce.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<RfqRequestDto>>), 200)]
         public async Task<IActionResult> GetSellerRfqs(
             [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+            [FromQuery] int? status = null,
             CancellationToken ct = default)
         {
-            var r = await mediator.Send(new GetSellerRfqsQuery(page, pageSize), ct);
+            var r = await mediator.Send(new GetSellerRfqsQuery(page, pageSize, status), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -52,7 +53,7 @@ namespace E_Commerce.Api.Controllers
         /// Buyer sends a Request for Quotation to a seller company.
         /// Optionally link to a specific product and set a target price.
         /// </summary>
-        [HttpPost("send-rfq")]
+        [HttpPost]
         [Authorize(Roles = "Buyer")]
         [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 201)]
         public async Task<IActionResult> Create([FromBody] CreateRfqDto dto, CancellationToken ct)

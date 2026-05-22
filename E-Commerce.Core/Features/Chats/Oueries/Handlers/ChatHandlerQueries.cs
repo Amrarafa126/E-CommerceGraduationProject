@@ -40,21 +40,27 @@ namespace E_Commerce.Core.Features.Chats.Oueries.Handlers
                     currentUser.UserId.Value, req.Page, req.PageSize, ct);
             }
 
-            var dtos = items.Select(c => new ConversationDto(
-                c.Id,
-                c.BuyerId,
-                c.Buyer?.FullName ?? "",
-                c.Buyer?.Email,
-                c.CompanyId,
-                c.Company?.CompanyName ?? "",
-                c.Company?.LogoUrl,
-                0, // unread count – loaded separately for performance
-                c.Messages.OrderByDescending(m => m.CreatedAt).Select(m => new MessageDto(
-                    m.Id, m.ConversationId, m.SenderId,
-                    m.Sender?.FullName ?? "", m.Content, m.AttachmentUrl,
-                    m.Type.ToString(), m.IsRead, m.ReadAt, m.CreatedAt)).FirstOrDefault(),
-                c.LastMessageAt,
-                c.CreatedAt)).ToList();
+            var dtos = new List<ConversationDto>();
+            foreach (var c in items)
+            {
+                var unread = await uow.Conversations.CountUnreadAsync(c.Id, currentUser.UserId.Value, ct);
+                var lastMsg = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+                dtos.Add(new ConversationDto(
+                    c.Id,
+                    c.BuyerId,
+                    c.Buyer?.FullName ?? "",
+                    c.Buyer?.Email,
+                    c.CompanyId,
+                    c.Company?.CompanyName ?? "",
+                    c.Company?.LogoUrl,
+                    unread,
+                    lastMsg == null ? null : new MessageDto(
+                        lastMsg.Id, lastMsg.ConversationId, lastMsg.SenderId,
+                        lastMsg.Sender?.FullName ?? "", lastMsg.Content, lastMsg.AttachmentUrl,
+                        (int)lastMsg.Type, lastMsg.IsRead, lastMsg.ReadAt, lastMsg.CreatedAt),
+                    c.LastMessageAt,
+                    c.CreatedAt));
+            }
 
             return ApiResponse<PaginatedResult<ConversationDto>>.Ok(
                 PaginatedResult<ConversationDto>.Success(dtos, total, req.Page, req.PageSize));
@@ -81,7 +87,7 @@ namespace E_Commerce.Core.Features.Chats.Oueries.Handlers
                     m.Id, m.ConversationId, m.SenderId,
                     m.Sender?.FullName ?? "",
                     m.Content, m.AttachmentUrl,
-                    m.Type.ToString(), m.IsRead, m.ReadAt, m.CreatedAt))
+                    (int)m.Type, m.IsRead, m.ReadAt, m.CreatedAt))
                 .ToList();
 
             var convDto = new ConversationDto(
@@ -97,8 +103,8 @@ namespace E_Commerce.Core.Features.Chats.Oueries.Handlers
                 conversation.LastMessageAt,
                 conversation.CreatedAt);
 
-            var totalMessages = await uow.Conversations.CountUnreadAsync(
-                req.ConversationId, currentUser.UserId.Value, ct);
+            var totalMessages = await uow.Messages.CountAsync(
+                m => m.ConversationId == req.ConversationId, ct);
 
             return ApiResponse<ConversationPageDto>.Ok(
                 new ConversationPageDto(convDto, messageDtos, totalMessages, req.Page, req.PageSize));

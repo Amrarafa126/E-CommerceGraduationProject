@@ -16,7 +16,7 @@ namespace E_Commerce.Api.Controllers
     public class ChatsController(ISender mediator) : ControllerBase
     {
 
-        [HttpGet("Get-All-Conversations")]
+        [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<ConversationDto>>), 200)]
         public async Task<IActionResult> GetAll(
          [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
@@ -39,7 +39,7 @@ namespace E_Commerce.Api.Controllers
         }
 
      
-        [HttpPost("Start-Conversation")]
+        [HttpPost]
         [Authorize(Roles = "Buyer")]
         [ProducesResponseType(typeof(ApiResponse<ConversationDto>), 201)]
         public async Task<IActionResult> Start([FromBody] StartConvRequest req, CancellationToken ct)

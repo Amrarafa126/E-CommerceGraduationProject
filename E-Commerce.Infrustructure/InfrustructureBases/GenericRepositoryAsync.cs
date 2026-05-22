@@ -12,7 +12,7 @@ namespace E_Commerce.Infrustructure.InfrustructureBases
         protected readonly DbSet<T> DbSet = context.Set<T>();
 
         public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default)
-            => await DbSet.FindAsync([id], ct);
+            => await DbSet.FindAsync(new object[] { id }, ct);
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default)
             => await DbSet.AsNoTracking().ToListAsync(ct);

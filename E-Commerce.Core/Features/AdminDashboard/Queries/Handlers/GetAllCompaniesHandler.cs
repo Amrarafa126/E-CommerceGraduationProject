@@ -34,7 +34,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
             }
 
             if (req.Status.HasValue)
-                q = q.Where(c => c.Status == req.Status.Value);
+                q = q.Where(c => (int)c.Status == req.Status.Value + 1);
 
             var total = await q.CountAsync(ct);
             var companies = await q
@@ -56,7 +56,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .ToDictionaryAsync(x => x.CompanyId, x => new { x.Count, x.Revenue }, ct);
 
             var dtos = companies.Select(c => new AdminCompanyDto(
-                c.Id, c.CompanyName, c.Description, c.Status.ToString(),
+                c.Id, c.CompanyName, c.Description, (int)c.Status - 1,
                 c.Owner.FullName, c.Owner.Email ?? "",
                 c.Address?.Country, c.YearEstablished, c.EmployeesCount,
                 c.Wallet?.AvailableBalance ?? 0, c.Wallet?.PendingBalance ?? 0,

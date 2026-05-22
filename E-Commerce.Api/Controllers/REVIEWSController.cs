@@ -11,7 +11,7 @@ namespace E_Commerce.Api.Controllers
     [ApiController]
     [Route("api/v1/reviews")]
     [Produces("application/json")]
-    public class REVIEWSController(ISender mediator) : ControllerBase
+    public class ReviewsController(ISender mediator) : ControllerBase
     {
         /// <summary>Get paginated reviews for a product.</summary>
         [HttpGet("product/{productId:guid}")]
@@ -38,7 +38,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         /// <summary>Submit a new review for a product (Buyer only, one review per product).</summary>
-        [HttpPost("create-review")]
+        [HttpPost]
         [Authorize(Roles = "Buyer")]
         [ProducesResponseType(typeof(ApiResponse<ProductReviewDto>), 201)]
         [ProducesResponseType(typeof(ApiResponse<object>), 409)]
@@ -50,7 +50,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         /// <summary>Edit your own review (Buyer only).</summary>
-        [HttpPut("update-review/{id:guid}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Roles = "Buyer")]
         [ProducesResponseType(typeof(ApiResponse<ProductReviewDto>), 200)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReviewDto dto, CancellationToken ct)
@@ -61,7 +61,7 @@ namespace E_Commerce.Api.Controllers
         }
 
         /// <summary>Delete a review (Buyer who wrote it, or Admin).</summary>
-        [HttpDelete("delete-review/{id:guid}")]
+        [HttpDelete("{id:guid}")]
         [Authorize]
         [ProducesResponseType(typeof(ApiResponse<object>), 200)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)

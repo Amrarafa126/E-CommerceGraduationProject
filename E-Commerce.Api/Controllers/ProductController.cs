@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/products")]
     [ApiController]
     public class ProductController(ISender Mediator) : ControllerBase
     {
@@ -114,7 +114,23 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
-        /// </summary>
+        /// <summary>Update an existing product image (replace file, alt text, or display order)</summary>
+        [HttpPut("{id:guid}/images/{imageId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ApiResponse<ProductImageDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateProductImage(
+            Guid id, Guid imageId,
+            IFormFile? file = null,
+            [FromForm] string? altText = null,
+            [FromForm] int? displayOrder = null,
+            CancellationToken ct = default)
+        {
+            var r = await Mediator.Send(
+                new UpdateProductImageCommand(id, imageId, file, altText, displayOrder), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
         [HttpPost("{id:guid}/images")]
         [Authorize(Roles = "Seller,Admin")]
         [Consumes("multipart/form-data")]
@@ -309,26 +325,20 @@ namespace E_Commerce.Api.Controllers
             var result = await Mediator.Send(new DeleteProductVariantCommand(id, variantId), ct);
             return StatusCode(result.StatusCode, result);
         }
+
+        /// <summary>Add a new value to an option (e.g. add "XL" to the "Size" option)</summary>
+        [HttpPost("{id:guid}/options/{optionId:guid}/values")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductOptionValueDto>), StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddOptionValue(
+            Guid id,
+            Guid optionId,
+            [FromBody] AddOptionValueDto dto,
+            CancellationToken ct)
+        {
+            var result = await Mediator.Send(
+                new AddOptionValueCommand(id, optionId, dto.Value, dto.DisplayOrder), ct);
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }
-
-
-// ══════════════════════════════════════════════════════════════════
-//  OPTION VALUES  — CRUD
-//  Route: /api/product/{id}/options/{optionId}/values
-// ══════════════════════════════════════════════════════════════════
-
-/// <summary>Add a new value to an option (e.g. add "XL" to the "Size" option)</summary>
-//[HttpPost("{id:guid}/options/{optionId:guid}/values")]
-//[Authorize(Roles = "Seller,Admin")]
-//[ProducesResponseType(typeof(ApiResponse<ProductOptionValueDto>), StatusCodes.Status201Created)]
-//public async Task<IActionResult> AddOptionValue(
-//    Guid id,
-//    Guid optionId,
-//    [FromBody] AddOptionValueDto dto,
-//    CancellationToken ct)
-//{
-//    var result = await Mediator.Send(
-//        new AddOptionValueCommand(id, optionId, dto.Value, dto.DisplayOrder), ct);
-//    return StatusCode(result.StatusCode, result);
-//}
