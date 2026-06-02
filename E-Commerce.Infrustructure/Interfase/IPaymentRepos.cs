@@ -1,17 +1,12 @@
-﻿
 using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.InfrustructureBases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Infrustructure.Interfase
 {
-    public interface IPaymentRepos :IGenericRepositoryAsync<Payment>
+    public interface IPaymentRepos : IGenericRepositoryAsync<Payment>
     {
-        Task<Payment?> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default);
+        Task<Payment?> GetByOrderSubOrderIdAsync(Guid orderSubOrderId, CancellationToken ct = default);
         Task<Payment?> GetByTransactionIdAsync(string transactionId, CancellationToken ct = default);
+        Task<Payment?> GetByPaymobOrderIdAsync(long paymobOrderId, CancellationToken ct = default);
     }
 }

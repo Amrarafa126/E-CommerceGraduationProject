@@ -22,7 +22,7 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Pay([FromBody] PayRequest req, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new InitiatePaymentCommand(req.OrderId, req.PaymentMethod, req.CardToken, req.Currency), ct);
+                new InitiatePaymentCommand(req.OrderId, req.PaymentMethod, req.CardToken, req.Currency, req.IdempotencyKey), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -45,7 +45,7 @@ namespace E_Commerce.Api.Controllers
 
         /// <summary>Get payment details for an order</summary>
     }
-    public record PayRequest(Guid OrderId, int PaymentMethod, string? CardToken, string Currency = "EGP");
+    public record PayRequest(Guid OrderId, int PaymentMethod, string? CardToken, string Currency = "EGP", string? IdempotencyKey = null);
     public record RefundReq(decimal Amount, string Reason);
 
 }

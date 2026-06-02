@@ -1,6 +1,7 @@
 ﻿using E_Commerce.Core.Features.Shippings;
 using E_Commerce.Core.Features.Shippings.Commands.Models;
 using E_Commerce.Core.Features.Shippings.Queries.Models;
+using E_Commerce.Service.Shipping;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -58,6 +59,24 @@ namespace E_Commerce.Api.Controllers
                 id, dto.Status, dto.CarrierName, dto.TrackingNumber,
                 dto.TrackingUrl, dto.FailureReason), ct);
             return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpGet("{id:guid}/track")]
+        [Authorize]
+        [ProducesResponseType(typeof(object), 200)]
+        public async Task<IActionResult> Track(Guid id, [FromServices] IBostaShippingService bosta, CancellationToken ct)
+        {
+            var shipment = await mediator.Send(new GetShipmentDetailsQuery(id), ct);
+            if (!shipment.Success || shipment.Data?.BostaTrackingNumber == null)
+                return BadRequest(new { message = "Shipment not found or not integrated with Bosta." });
+
+            var tracking = await bosta.TrackShipmentAsync(shipment.Data.BostaTrackingNumber, ct);
+            return Ok(new
+            {
+                bostaTrackingNumber = shipment.Data.BostaTrackingNumber,
+                status = tracking?.state,
+                type = tracking?.type
+            });
         }
     }
 }

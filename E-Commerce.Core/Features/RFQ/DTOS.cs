@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +23,7 @@ namespace E_Commerce.Core.Features.RFQ
         public string SellerCompanyName { get; set; } = "";
         public Guid? ProductId { get; set; }
         public string? ProductName { get; set; }
+        public string? Attachments { get; set; }
         public List<RfqQuoteDto> Quotes { get; set; } = new();
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -47,7 +48,7 @@ namespace E_Commerce.Core.Features.RFQ
         public DateTime CreatedAt { get; set; }
     }
 
-    public record CreateRfqDto(string Title, string Description, int Quantity, Guid SellerCompanyId, string Currency = "EGP", string? TargetPrice = null, string? ShippingCountry = null, DateTime? DeadlineDate = null, Guid? ProductId = null);
+    public record CreateRfqDto(string Title, string Description, int Quantity, Guid SellerCompanyId, string Currency = "EGP", string? TargetPrice = null, string? ShippingCountry = null, DateTime? DeadlineDate = null, Guid? ProductId = null, string? Attachments = null);
     public record CreateQuoteDto(Guid RfqRequestId, decimal UnitPrice, int Quantity, string Currency = "EGP", string? Notes = null, string? PaymentTerms = null, string? DeliveryTerms = null, int ValidityDays = 7);
 
 }

@@ -14,7 +14,7 @@ namespace E_Commerce.Core.Features.Products
 {
 
     public record ProductDto(Guid Id, string Name, string Description,
-        string? MainImageUrl, decimal BasePrice, string Currency, int MinimumOrderQuantity, int Status,
+        string? MainImageUrl, decimal BasePrice, string Currency, int MinimumOrderQuantity, int StockQuantity, int Status,
         Guid CompanyId, string? CompanyName, Guid CategoryId, string? CategoryName, double AverageRating,
         int ReviewCount, List<ProductImageDto> Images, List<ProductOptionDto> Options, List<ProductVariantDto> Variants,
         List<PriceTierDto> PriceTiers, DateTime CreatedAt, DateTime? UpdatedAt);
@@ -66,6 +66,7 @@ namespace E_Commerce.Core.Features.Products
         public decimal BasePrice { get; set; }
         public string Currency { get; set; }
         public int MinimumOrderQuantity { get; set; }
+        public int StockQuantity { get; set; }
         public int Status { get; set; }
         public Guid CompanyId { get; set; }
         public string? CompanyName { get; set; }
@@ -76,8 +77,8 @@ namespace E_Commerce.Core.Features.Products
         public DateTime CreatedAt { get; set; }
     }
 
-        public record UpdateProductDto(string Name, string Description, Guid CategoryId, int MinimumOrderQuantity, 
-        decimal BasePrice);
+        public record UpdateProductDto(string Name, string Description, Guid CategoryId, int MinimumOrderQuantity,
+        decimal BasePrice, int StockQuantity);
 
     internal static class ProductMapper
     {
@@ -91,7 +92,7 @@ namespace E_Commerce.Core.Features.Products
 
         internal static ProductDto Map(Product p) => new(
             p.Id, p.Name, p.Description ,p.MainImageUrl,
-            p.BasePrice, p.Currency, p.MinimumOrderQuantity, (int)p.Status,
+            p.BasePrice, p.Currency, p.MinimumOrderQuantity, p.StockQuantity, (int)p.Status,
             p.CompanyId, p.Company?.CompanyName, p.CategoryId, p.Category?.Name,
             p.AverageRating, p.ReviewCount,
             p.Images.Where(i => !i.IsDeleted).OrderBy(i => i.DisplayOrder)

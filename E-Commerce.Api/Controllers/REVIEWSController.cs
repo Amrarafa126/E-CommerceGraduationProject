@@ -45,7 +45,7 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateReviewDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new CreateReviewCommand(dto.ProductId, dto.Rating, dto.Title, dto.Comment), ct);
+                new CreateReviewCommand(dto.ProductId, dto.Rating, dto.Title, dto.Comment, dto.ImageUrls), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -56,7 +56,7 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReviewDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new UpdateReviewCommand(id, dto.Rating, dto.Title, dto.Comment), ct);
+                new UpdateReviewCommand(id, dto.Rating, dto.Title, dto.Comment, dto.ImageUrls), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -77,6 +77,18 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Reply(Guid id, [FromBody] SupplierReplyDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(new ReplyToReviewCommand(id, dto.Reply), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Get my reviews (Buyer only).</summary>
+        [HttpGet("my")]
+        [Authorize(Roles = "Buyer")]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<ProductReviewDto>>), 200)]
+        public async Task<IActionResult> GetMyReviews(
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetMyReviewsQuery(page, pageSize), ct);
             return StatusCode(r.StatusCode, r);
         }
     }

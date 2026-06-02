@@ -28,6 +28,18 @@ namespace E_Commerce.Infrustructure.Repository
         public Task<bool> HasBuyerReviewedAsync(Guid productId, Guid buyerId, CancellationToken ct = default)
             => Db.productReviews.AnyAsync(
                 r => r.ProductId == productId && r.BuyerId == buyerId && !r.IsDeleted, ct);
+
+        public async Task<(IEnumerable<ProductReview> Items, int Total)> GetByBuyerAsync(
+            Guid buyerId, int page, int pageSize, CancellationToken ct = default)
+        {
+            var q = Db.productReviews.AsNoTracking()
+                .Include(r => r.Buyer).Include(r => r.Product).Include(r => r.Images)
+                .Where(r => r.BuyerId == buyerId && !r.IsDeleted)
+                .OrderByDescending(r => r.CreatedAt);
+            var total = await q.CountAsync(ct);
+            var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+            return (items, total);
+        }
         public async Task<(double Avg, int Count, Dictionary<int, int> Dist)> GetStatsAsync(
             Guid productId, CancellationToken ct = default)
         {

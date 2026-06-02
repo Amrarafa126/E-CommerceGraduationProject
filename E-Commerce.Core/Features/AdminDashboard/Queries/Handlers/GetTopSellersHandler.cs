@@ -1,19 +1,13 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 {
-
     public class GetTopSellersHandler(AppDBContext db, ICurrentUserService cu)
         : IRequestHandler<GetTopSellersQuery, ApiResponse<List<TopSellerDto>>>
     {
@@ -22,14 +16,14 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
         {
             if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
 
-            var result = await db.orders
-                .Where(o => !o.IsDeleted && o.Status == OrderStatus.Completed)
-                .GroupBy(o => new { o.SellerCompanyId, o.SellerCompany.CompanyName })
+            var result = await db.orderSubOrders
+                .Where(s => !s.IsDeleted && s.Status == OrderStatus.Completed)
+                .GroupBy(s => new { s.SellerCompanyId, s.SellerCompany.CompanyName })
                 .Select(g => new
                 {
                     g.Key.SellerCompanyId,
                     g.Key.CompanyName,
-                    Revenue = g.Sum(o => o.TotalAmount),
+                    Revenue = g.Sum(s => s.TotalAmount),
                     OrderCount = g.Count(),
                 })
                 .OrderByDescending(x => x.Revenue)

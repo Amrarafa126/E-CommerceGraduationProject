@@ -28,6 +28,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
         {
             var user = User.CreateSeller(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
+            bool userCreated = false;
 
             await uow.BeginTransactionAsync(ct);
             try
@@ -36,6 +37,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                 if (!result.Succeeded)
                     throw new ValidationException(
                          result.Errors.Select(e => e.Description));
+                userCreated = true;
 
                 await userManager.AddToRoleAsync(user, Role.Names.Seller);
 
@@ -45,7 +47,6 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                     address, contact, req.YearEstablished, req.EmployeesCount);
 
                 await uow.Companies.AddAsync(company, ct);
-                await uow.SaveChangesAsync(ct);
 
                 var wallet = Wallet.Create(company.Id);
                 await uow.Wallets.AddAsync(wallet, ct);
@@ -70,7 +71,15 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                     access, refresh, DateTime.UtcNow.AddMinutes(60),
                     mapper.Map<UserDto>(user)));
             }
-            catch { await uow.RollbackTransactionAsync(ct); throw; }
+            catch
+            {
+                await uow.RollbackTransactionAsync(ct);
+                if (userCreated)
+                {
+                    try { await userManager.DeleteAsync(user); } catch { /* best effort cleanup */ }
+                }
+                throw;
+            }
         }
 
         public async Task<ApiResponse<AuthResponseDto>> Handle(
@@ -78,6 +87,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
         {
             var user = User.CreateBuyer(
                 req.Email, req.FirstName, req.LastName, req.PhoneNumber);
+            bool userCreated = false;
 
             await uow.BeginTransactionAsync(ct);
             try
@@ -86,6 +96,7 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                 if (!result.Succeeded)
                     throw new ValidationException(
                         result.Errors.Select(e => e.Description));
+                userCreated = true;
 
                 await userManager.AddToRoleAsync(user, Role.Names.Buyer);
 
@@ -105,7 +116,15 @@ namespace E_Commerce.Core.Features.Authentication.Commands.Handlers
                     access, refresh, DateTime.UtcNow.AddMinutes(60),
                     mapper.Map<UserDto>(user)));
             }
-            catch { await uow.RollbackTransactionAsync(ct); throw; }
+            catch
+            {
+                await uow.RollbackTransactionAsync(ct);
+                if (userCreated)
+                {
+                    try { await userManager.DeleteAsync(user); } catch { /* best effort cleanup */ }
+                }
+                throw;
+            }
         }
 
         public async Task<ApiResponse<AuthResponseDto>> Handle(

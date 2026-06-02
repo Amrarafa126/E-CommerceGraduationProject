@@ -24,11 +24,18 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
                 throw new ForbiddenException("You can only add price tiers of your own products.");
 
+            bool hasOverlap = product.PriceTiers
+                .Any(t =>
+                    req.MinQuantity <= (t.MaxQuantity ?? int.MaxValue) &&
+                    (req.MaxQuantity ?? int.MaxValue) >= t.MinQuantity);
+
+            if (hasOverlap)
+                return ApiResponse<PriceTierDto>.Fail(
+                    "The quantity range overlaps with an existing price tier.", 409);
+
             var tier = ProductPriceTier.Create(product.Id, req.MinQuantity, req.UnitPrice, req.MaxQuantity);
 
             await uow.PriceTiers.AddAsync(tier, ct);
-
-
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<PriceTierDto>.Created(mapper.Map<PriceTierDto>(tier));

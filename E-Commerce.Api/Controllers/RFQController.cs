@@ -1,4 +1,4 @@
-﻿using E_Commerce.Core.Features.RFQ;
+using E_Commerce.Core.Features.RFQ;
 using E_Commerce.Core.Features.RFQ.Commands.Models;
 using E_Commerce.Core.Features.RFQ.Queries.Models;
 using E_Commerce.Core.Wrappers;
@@ -61,7 +61,7 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new CreateRfqCommand(
                 dto.Title, dto.Description, dto.Quantity, dto.SellerCompanyId,
                 dto.Currency, dto.TargetPrice, dto.ShippingCountry,
-                dto.DeadlineDate, dto.ProductId), ct);
+                dto.DeadlineDate, dto.ProductId, dto.Attachments), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -72,6 +72,15 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
         {
             var r = await mediator.Send(new CancelRfqCommand(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpPost("{id:guid}/decline")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
+        public async Task<IActionResult> DeclineRfq(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new DeclineRfqCommand(id), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -95,6 +104,15 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new AcceptQuoteCommand(quoteId), ct);
             return StatusCode(r.StatusCode, r);
         }
+
+        [HttpPost("quotes/{quoteId:guid}/decline")]
+        [Authorize(Roles = "Buyer")]
+        [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
+        public async Task<IActionResult> DeclineQuote(Guid quoteId, CancellationToken ct)
+        {
+            var r = await mediator.Send(new DeclineQuoteCommand(quoteId), ct);
+            return StatusCode(r.StatusCode, r);
+        }
     }
 
     public record SubmitQuoteRequest(
@@ -102,4 +120,3 @@ namespace E_Commerce.Api.Controllers
         string? Notes = null, string? PaymentTerms = null,
         string? DeliveryTerms = null, int ValidityDays = 7);
 }
-

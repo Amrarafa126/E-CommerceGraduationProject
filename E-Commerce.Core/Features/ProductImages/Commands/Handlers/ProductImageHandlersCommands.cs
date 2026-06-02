@@ -64,11 +64,12 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
-            await storage.DeleteAsync(image.Url, ct);
-
+            var imageUrl = image.Url;
             product.RemoveImage(req.ImageId);
-
             await uow.SaveChangesAsync(ct);
+
+            // Best-effort storage cleanup after DB commit
+            try { await storage.DeleteAsync(imageUrl, ct); } catch { }
 
             return ApiResponse<object>.Ok("Image deleted successfully.");
         }
@@ -87,9 +88,10 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
+            string? oldUrl = null;
             if (req.File != null)
             {
-                await storage.DeleteAsync(image.Url, ct);
+                oldUrl = image.Url;
 
                 await using var stream = req.File.OpenReadStream();
                 var newUrl = await storage.UploadAsync(
@@ -101,6 +103,12 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             image.UpdateMetadata(req.AltText, req.DisplayOrder ?? image.DisplayOrder);
 
             await uow.SaveChangesAsync(ct);
+
+            // Best-effort cleanup of old file after DB commit
+            if (oldUrl != null)
+            {
+                try { await storage.DeleteAsync(oldUrl, ct); } catch { }
+            }
 
             return ApiResponse<ProductImageDto>.Ok(new ProductImageDto(
                 image.Id, image.Url, image.OriginalFileName,

@@ -11,6 +11,7 @@ namespace E_Commerce.Core.Features.Payment.Commands.Models
        Guid OrderId,
        int PaymentMethod,
        string? CardToken,
-       string Currency = "EGP")
+       string Currency = "EGP",
+       string? IdempotencyKey = null)
        : IRequest<ApiResponse<PaymentDto>>;
 }

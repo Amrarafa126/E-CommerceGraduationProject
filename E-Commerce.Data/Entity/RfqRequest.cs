@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -42,7 +42,8 @@ namespace E_Commerce.Data.Entity
             string? targetPrice = null,
             string? shippingCountry = null,
             DateTime? deadline = null,
-            Guid? productId = null)
+            Guid? productId = null,
+            string? attachments = null)
         {
             if (quantity <= 0) throw new ArgumentException("Quantity must be positive.");
             if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Title is required.");
@@ -56,6 +57,7 @@ namespace E_Commerce.Data.Entity
                 SellerCompanyId = sellerCompanyId,
                 Currency = currency.ToUpper(),
                 TargetPrice = targetPrice,
+                Attachments = attachments,
                 ShippingCountry = shippingCountry,
                 DeadlineDate = deadline,
                 ProductId = productId

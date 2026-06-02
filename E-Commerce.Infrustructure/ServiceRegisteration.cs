@@ -64,6 +64,13 @@ namespace E_Commerce.Infrustructure
 
                     opts.Events = new JwtBearerEvents
                     {
+                        OnMessageReceived = ctx =>
+                        {
+                            var accessToken = ctx.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(accessToken))
+                                ctx.Token = accessToken;
+                            return Task.CompletedTask;
+                        },
                         OnAuthenticationFailed = ctx =>
                         {
                             if (ctx.Exception is SecurityTokenExpiredException)

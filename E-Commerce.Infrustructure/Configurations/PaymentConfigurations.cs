@@ -1,12 +1,9 @@
-﻿using E_Commerce.Data.Entity;
+using E_Commerce.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection.Emit;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-    
-
     public class PaymentConfigurations : IEntityTypeConfiguration<Payment>
     {
         public void Configure(EntityTypeBuilder<Payment> builder)
@@ -24,14 +21,16 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(p => p.FailureReason).HasMaxLength(500);
             builder.Property(p => p.CardLast4).HasMaxLength(4);
             builder.Property(p => p.CardBrand).HasMaxLength(30);
+            builder.Property(p => p.PaymobToken).HasMaxLength(500);
+            builder.Property(p => p.IdempotencyKey).HasMaxLength(100);
 
-            builder.HasIndex(p => p.OrderId).IsUnique();
+            builder.HasIndex(p => p.OrderSubOrderId).IsUnique();
             builder.HasIndex(p => p.GatewayTransactionId);
 
-            builder.HasOne(p => p.Order)
-                 .WithOne(o => o.Payment)
-                 .HasForeignKey<Payment>(p => p.OrderId)
-                 .HasPrincipalKey<Order>(o => o.Id)
+            builder.HasOne(p => p.OrderSubOrder)
+                 .WithOne(s => s.Payment)
+                 .HasForeignKey<Payment>(p => p.OrderSubOrderId)
+                 .HasPrincipalKey<OrderSubOrder>(s => s.Id)
                  .OnDelete(DeleteBehavior.Restrict);
         }
     }

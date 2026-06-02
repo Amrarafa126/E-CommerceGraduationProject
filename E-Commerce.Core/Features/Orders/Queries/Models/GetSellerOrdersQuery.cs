@@ -9,5 +9,5 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.Orders.Queries.Models
 {
     public record GetSellerOrdersQuery(int Page = 1, int PageSize = 20)
-        : IRequest<ApiResponse<PaginatedResult<OrderDto>>>;
+        : IRequest<ApiResponse<PaginatedResult<OrderSubOrderDto>>>;
 }

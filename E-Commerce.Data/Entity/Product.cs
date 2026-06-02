@@ -20,6 +20,7 @@ namespace E_Commerce.Data.Entity
         public double AverageRating { get; private set; }
         public int ReviewCount { get; private set; }
         public int MinimumOrderQuantity { get; set; }
+        public int StockQuantity { get; private set; }
         public ProductStatus Status { get; private set; } = ProductStatus.Draft;
 
 
@@ -57,12 +58,26 @@ namespace E_Commerce.Data.Entity
             };
         }
         public void Update(string name, string description, Guid categoryId,
-            int moq, decimal basePrice)
+            int moq, decimal basePrice, int stockQuantity)
         {
             Name = name; Description = description; CategoryId = categoryId;
             MinimumOrderQuantity = moq; BasePrice = basePrice;
+            StockQuantity = stockQuantity;
             MarkAsUpdated();
 
+        }
+
+        public void SetStock(int quantity)
+        {
+            StockQuantity = quantity;
+            MarkAsUpdated();
+        }
+
+        public void AdjustStock(int delta)
+        {
+            StockQuantity += delta;
+            if (StockQuantity < 0) StockQuantity = 0;
+            MarkAsUpdated();
         }
 
         public void AddImage(ProductImage image)

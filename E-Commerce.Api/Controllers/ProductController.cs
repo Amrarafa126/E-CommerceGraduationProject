@@ -87,7 +87,7 @@ namespace E_Commerce.Api.Controllers
         {
             var result = await Mediator.Send(
                 new UpdateProductCommand(id, dto.Name, dto.Description,
-                    dto.CategoryId, dto.MinimumOrderQuantity, dto.BasePrice), ct);
+                    dto.CategoryId, dto.MinimumOrderQuantity, dto.BasePrice, dto.StockQuantity), ct);
             return StatusCode(result.StatusCode, result);
         }
 

@@ -35,7 +35,7 @@ namespace E_Commerce.Core.Features.Categorys.Commands.Handlers
         {
             if (cu.UserId == null) throw new UnauthorizedException();
             if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
-            var category = await uow.Category.GetByIdAsync(req.CategoryId, ct)
+            var category = await uow.Category.GetWithChildrenAsync(req.CategoryId, ct)
                 ?? throw new NotFoundException(nameof(Category), req.CategoryId);
 
             if (req.ParentCategoryId.HasValue && req.ParentCategoryId != category.ParentCategoryId)

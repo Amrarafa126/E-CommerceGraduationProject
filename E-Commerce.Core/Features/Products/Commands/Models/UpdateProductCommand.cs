@@ -9,6 +9,6 @@ namespace E_Commerce.Core.Features.Products.Commands.Models
 {
     public record UpdateProductCommand(
     Guid ProductId, string Name, string Description, Guid CategoryId,
-    int MinimumOrderQuantity, decimal BasePrice)
+    int MinimumOrderQuantity, decimal BasePrice, int StockQuantity)
     : IRequest<ApiResponse<ProductDto>>;
 }

@@ -53,7 +53,7 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
                 throw new ForbiddenException("You can only edit your own products.");
 
             product.Update(req.Name, req.Description, req.CategoryId,
-                req.MinimumOrderQuantity, req.BasePrice);
+                req.MinimumOrderQuantity, req.BasePrice, req.StockQuantity);
             uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 

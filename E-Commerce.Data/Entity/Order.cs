@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using E_Commerce.Data.Identity;
 using E_Commerce.Data.Status;
 
@@ -12,129 +6,117 @@ namespace E_Commerce.Data.Entity
     public class Order : BaseEntity
     {
         public string OrderNumber { get; private set; } = string.Empty;
-        public OrderStatus Status { get; private set; } = OrderStatus.Pending;
-        public decimal SubTotal { get; private set; }
-        public decimal ShippingCost { get; private set; }
-        public decimal TaxAmount { get; private set; }
+        public OrderOverallStatus OverallStatus { get; private set; } = OrderOverallStatus.Pending;
         public decimal TotalAmount { get; private set; }
         public string Currency { get; private set; } = "EGP";
         public string? BuyerNotes { get; private set; }
-        public string? CancellationReason { get; private set; }
+        public string? PoNumber { get; private set; }
+        public string? IdempotencyKey { get; private set; }
 
         public Guid BuyerId { get; private set; }
         public User Buyer { get; private set; } = null!;
 
-        public Guid SellerCompanyId { get; private set; }
-        public Company SellerCompany { get; private set; } = null!;
+        public ICollection<OrderSubOrder> SubOrders { get; private set; } = new List<OrderSubOrder>();
 
-        public Guid? PaymentId { get; private set; }
-        public Payment? Payment { get; private set; }
-
-        public Guid? ShipmentId { get; private set; }
-        public Shipping? Shipment { get; private set; }
-
-        public ICollection<OrderItem> Items { get; private set; } = new List<OrderItem>();
-        public ICollection<OrderStatusHistory> StatusHistory { get; private set; } = new List<OrderStatusHistory>();
         private Order() { }
-        public static Order Create(Guid buyerId, Guid sellerCompanyId,
-            string? notes = null, string currency = "EGP")
+
+        public static Order Create(Guid buyerId, string? notes = null, string currency = "EGP", string? poNumber = null)
         {
             var order = new Order
             {
                 OrderNumber = GenerateOrderNumber(),
                 BuyerId = buyerId,
-                SellerCompanyId = sellerCompanyId,
                 BuyerNotes = notes,
-                Currency = currency.ToUpper()
+                Currency = currency.ToUpper(),
+                PoNumber = poNumber
             };
-            order.AddStatusHistory(OrderStatus.Pending, "Order created.");
             return order;
         }
-        public void AddItem(OrderItem item)
+
+        public void SetIdempotencyKey(string key)
         {
-            if (Status != OrderStatus.Pending)
-                throw new InvalidOperationException("Cannot add items to a non-pending order.");
-            Items.Add(item);
+            IdempotencyKey = key;
+        }
+
+        public void AddSubOrder(OrderSubOrder subOrder)
+        {
+            SubOrders.Add(subOrder);
             RecalculateTotals();
         }
-        public void RecalculateTotals(decimal? shippingCost = null, decimal taxRate = 0)
+
+        public void RecalculateTotals()
         {
-            SubTotal = Items.Sum(i => i.TotalPrice);
-            ShippingCost = shippingCost ?? ShippingCost;
-            TaxAmount = Math.Round(SubTotal * taxRate, 2);
-            TotalAmount = SubTotal + ShippingCost + TaxAmount;
-        }
-        public void LinkPayment(Guid paymentId)
-        {
-            PaymentId = paymentId;
-            MarkAsUpdated();
-        }
-        public void MarkPaid()
-        {
-            EnsureStatus(OrderStatus.Pending);
-            Status = OrderStatus.Paid;
-            AddStatusHistory(OrderStatus.Paid, "Payment confirmed.");
-            MarkAsUpdated();
-        }
-        public void LinkShipment(Guid shipmentId)
-        {
-            ShipmentId = shipmentId;
-            MarkAsUpdated();
-        }
-        public void MarkProcessing()
-        {
-            EnsureStatus(OrderStatus.Paid);
-            Status = OrderStatus.Processing;
-            AddStatusHistory(OrderStatus.Processing, "Seller is preparing the order.");
-            MarkAsUpdated();
-        }
-        public void MarkShipped()
-        {
-            EnsureStatus(OrderStatus.Processing);
-            Status = OrderStatus.Shipped;
-            AddStatusHistory(OrderStatus.Shipped, "Order handed to carrier.");
-            MarkAsUpdated();
-        }
-        public void MarkDelivered()
-        {
-            EnsureStatus(OrderStatus.Shipped);
-            Status = OrderStatus.Delivered;
-            AddStatusHistory(OrderStatus.Delivered, "Order delivered to buyer.");
-            MarkAsUpdated();
-        }
-        public void MarkCompleted()
-        {
-            EnsureStatus(OrderStatus.Delivered);
-            Status = OrderStatus.Completed;
-            AddStatusHistory(OrderStatus.Completed, "Order completed.");
-            MarkAsUpdated();
-        }
-        public void Cancel(string reason)
-        {
-            if (Status is OrderStatus.Shipped or OrderStatus.Delivered or OrderStatus.Completed)
-                throw new InvalidOperationException($"Cannot cancel an order in status {Status}.");
-            Status = OrderStatus.Cancelled;
-            CancellationReason = reason;
-            AddStatusHistory(OrderStatus.Cancelled, $"Cancelled: {reason}");
+            TotalAmount = SubOrders.Sum(s => s.TotalAmount);
+            UpdateOverallStatus();
             MarkAsUpdated();
         }
 
-        public void MarkRefunded()
+        public void UpdateOverallStatus()
         {
-            Status = OrderStatus.Refunded;
-            AddStatusHistory(OrderStatus.Refunded, "Payment refunded.");
-            MarkAsUpdated();
+            if (!SubOrders.Any())
+            {
+                OverallStatus = OrderOverallStatus.Pending;
+                return;
+            }
+
+            // If all completed -> Completed
+            if (SubOrders.All(s => s.Status == OrderStatus.Completed))
+            {
+                OverallStatus = OrderOverallStatus.Completed;
+                return;
+            }
+
+            // If any cancelled -> PartiallyCancelled
+            if (SubOrders.Any(s => s.Status == OrderStatus.Cancelled))
+            {
+                OverallStatus = SubOrders.All(s => s.Status == OrderStatus.Cancelled)
+                    ? OrderOverallStatus.Cancelled
+                    : OrderOverallStatus.PartiallyCancelled;
+                return;
+            }
+
+            // If any refunded -> PartiallyRefunded
+            if (SubOrders.Any(s => s.Status == OrderStatus.Refunded))
+            {
+                OverallStatus = SubOrders.All(s => s.Status == OrderStatus.Refunded)
+                    ? OrderOverallStatus.Refunded
+                    : OrderOverallStatus.PartiallyRefunded;
+                return;
+            }
+
+            // If any delivered -> Delivered (but not all completed)
+            if (SubOrders.Any(s => s.Status == OrderStatus.Delivered))
+            {
+                OverallStatus = OrderOverallStatus.Delivered;
+                return;
+            }
+
+            // If any shipped -> Shipped
+            if (SubOrders.Any(s => s.Status == OrderStatus.Shipped))
+            {
+                OverallStatus = OrderOverallStatus.Shipped;
+                return;
+            }
+
+            // If any processing -> Processing
+            if (SubOrders.Any(s => s.Status == OrderStatus.Processing))
+            {
+                OverallStatus = OrderOverallStatus.Processing;
+                return;
+            }
+
+            // If any paid -> Paid
+            if (SubOrders.Any(s => s.Status == OrderStatus.Paid))
+            {
+                OverallStatus = OrderOverallStatus.Paid;
+                return;
+            }
+
+            OverallStatus = OrderOverallStatus.Pending;
         }
 
-        private void EnsureStatus(params OrderStatus[] allowed)
-        {
-            if (!allowed.Contains(Status))
-                throw new InvalidOperationException(
-                    $"Action not allowed in status '{Status}'. Allowed: {string.Join(", ", allowed)}");
-        }
-
-        private void AddStatusHistory(OrderStatus status, string note)
-            => StatusHistory.Add(OrderStatusHistory.Create(Id, status, note));
+        public bool CanCancel => SubOrders.All(s =>
+            s.Status == OrderStatus.Pending || s.Status == OrderStatus.Paid);
 
         private static string GenerateOrderNumber()
         {

@@ -1,13 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.RFQ.Commands.Models;
 using E_Commerce.Data.Entity;
 using E_Commerce.Data.Status;
-using E_Commerce.Infrustructure.Context;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +14,13 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
 {
-    public class RFQHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IMapper mapper , AppDBContext db)
+    public class RFQHandlersCommands(IUnitOfWork uow, ICurrentUserService cu, IMapper mapper)
     : IRequestHandler<CreateRfqCommand, ApiResponse<RfqRequestDto>>,
       IRequestHandler<CancelRfqCommand, ApiResponse<RfqRequestDto>>,
       IRequestHandler<SubmitQuoteCommand, ApiResponse<RfqQuoteDto>>,
-      IRequestHandler<AcceptQuoteCommand, ApiResponse<RfqRequestDto>>
+      IRequestHandler<AcceptQuoteCommand, ApiResponse<RfqRequestDto>>,
+      IRequestHandler<DeclineQuoteCommand, ApiResponse<RfqRequestDto>>,
+      IRequestHandler<DeclineRfqCommand, ApiResponse<RfqRequestDto>>
     {
         public async Task<ApiResponse<RfqRequestDto>> Handle(CreateRfqCommand req, CancellationToken ct)
         {
@@ -31,7 +31,7 @@ namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
 
             var rfq = RfqRequest.Create(req.Title, req.Description, req.Quantity,
                 cu.UserId.Value, req.SellerCompanyId, req.Currency,
-                req.TargetPrice, req.ShippingCountry, req.DeadlineDate, req.ProductId);
+                req.TargetPrice, req.ShippingCountry, req.DeadlineDate, req.ProductId, req.Attachments);
 
             await uow.RfqRequest.AddAsync(rfq, ct);
             await uow.SaveChangesAsync(ct);
@@ -77,20 +77,76 @@ namespace E_Commerce.Core.Features.RFQ.Commands.Handlers
         public async Task<ApiResponse<RfqRequestDto>> Handle(AcceptQuoteCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
-            var quote = await db.rfqQuotations
-                .Include(q => q.RfqRequest).ThenInclude(r => r.Quotes)
-                .Include(q => q.RfqRequest).ThenInclude(r => r.Buyer)
-                .Include(q => q.RfqRequest).ThenInclude(r => r.SellerCompany)
-                .FirstOrDefaultAsync(q => q.Id == req.QuoteId, ct)
+
+            var quote = await uow.RfqQuotation.GetByIdAsync(req.QuoteId, ct)
                 ?? throw new NotFoundException(nameof(RfqQuotation), req.QuoteId);
 
-            if (quote.RfqRequest.BuyerId != cu.UserId.Value)
+            var rfq = await uow.RfqRequest.GetWithQuotesAsync(quote.RfqRequestId, ct)
+                ?? throw new NotFoundException(nameof(RfqRequest), quote.RfqRequestId);
+
+            if (rfq.BuyerId != cu.UserId.Value)
                 throw new ForbiddenException("Only the buyer can accept a quote.");
 
+            if (quote.IsDeclined)
+                throw new BusinessException("This quote has already been declined.");
+
+            if (quote.IsExpired || quote.ValidUntil < DateTime.UtcNow)
+                throw new BusinessException("This quote has expired and can no longer be accepted.");
+
             quote.Accept();
-            quote.RfqRequest.MarkAccepted();
-            await db.SaveChangesAsync(ct);
-            return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(quote.RfqRequest));
+            rfq.MarkAccepted();
+
+            uow.RfqQuotation.Update(quote);
+            uow.RfqRequest.Update(rfq);
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
+        }
+
+        public async Task<ApiResponse<RfqRequestDto>> Handle(DeclineQuoteCommand req, CancellationToken ct)
+        {
+            if (cu.UserId == null) throw new UnauthorizedException();
+
+            var quote = await uow.RfqQuotation.GetByIdAsync(req.QuoteId, ct)
+                ?? throw new NotFoundException(nameof(RfqQuotation), req.QuoteId);
+
+            var rfq = await uow.RfqRequest.GetWithQuotesAsync(quote.RfqRequestId, ct)
+                ?? throw new NotFoundException(nameof(RfqRequest), quote.RfqRequestId);
+
+            if (rfq.BuyerId != cu.UserId.Value)
+                throw new ForbiddenException("Only the buyer can decline a quote.");
+
+            if (quote.IsAccepted)
+                throw new BusinessException("Cannot decline an already accepted quote.");
+
+            if (quote.IsDeclined)
+                throw new BusinessException("This quote has already been declined.");
+
+            quote.Decline();
+            uow.RfqQuotation.Update(quote);
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
+        }
+
+        public async Task<ApiResponse<RfqRequestDto>> Handle(DeclineRfqCommand req, CancellationToken ct)
+        {
+            if (cu.OwnedCompanyId == null) throw new UnauthorizedException();
+
+            var rfq = await uow.RfqRequest.GetWithQuotesAsync(req.RfqId, ct)
+                ?? throw new NotFoundException(nameof(RfqRequest), req.RfqId);
+
+            if (cu.OwnedCompanyId != rfq.SellerCompanyId)
+                throw new ForbiddenException("Only the targeted seller company can decline this RFQ.");
+
+            if (rfq.Status != RfqStatus.Pending)
+                throw new BusinessException($"Cannot decline an RFQ with status '{rfq.Status}'.");
+
+            rfq.MarkDeclined();
+            uow.RfqRequest.Update(rfq);
+            await uow.SaveChangesAsync(ct);
+
+            return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
         }
     }
 }

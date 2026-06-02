@@ -28,14 +28,14 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
 
             var option = ProductOption.Create(product.Id, req.Name);
             product.ProductOptions.Add(option);
-            await uow.SaveChangesAsync(ct);
 
             if (req.Values != null && req.Values.Count > 0)
             {
                 foreach (var val in req.Values)
                     option.Values.Add(ProductOptionValue.Create(option.Id, val));
-                await uow.SaveChangesAsync(ct);
             }
+
+            await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductOptionDto>.Created(mapper.Map<ProductOptionDto>(option));
         }
