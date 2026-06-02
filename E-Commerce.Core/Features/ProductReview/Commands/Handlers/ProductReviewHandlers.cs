@@ -1,15 +1,11 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.ProductReview.Commands.Models;
 using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_Commerce.Core.Features.ProductReview.Commands.Handlers
 {
@@ -30,32 +26,45 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Handlers
                 req.ProductId, currentUser.UserId.Value, ct);
 
             if (alreadyReviewed)
-                throw new ConflictException("You have already reviewed this product.");
+                throw new ConflictException("لقد قيّمت هذا المنتج من قبل.");
 
-            // Check if buyer has purchased this product (verified purchase)
+            // Enforce verified purchase: only buyers who ordered the product can review
             var hasPurchased = await uow.Orders.ExistsAsync(o =>
                 o.BuyerId == currentUser.UserId.Value &&
-                o.Items.Any(i => i.ProductId == req.ProductId), ct);
+                o.SubOrders.Any(s => s.Items.Any(i => i.ProductId == req.ProductId)), ct);
+
+            if (!hasPurchased)
+                throw new ForbiddenException("You must purchase this product before reviewing it.");
 
             var review = Data.Entity.ProductReview.Create(
                 req.ProductId, currentUser.UserId.Value,
-                req.Rating, req.Title, req.Comment, hasPurchased);
+                req.Rating, req.Title, req.Comment, isVerified: true);
+
+            // Add review images
+            if (req.ImageUrls?.Count > 0)
+            {
+                int order = 0;
+                foreach (var url in req.ImageUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
+                {
+                    var img = ReviewImage.Create(review.Id, url, Path.GetFileName(url) ?? "image.jpg", "image/jpeg", 0, order++);
+                    review.Images.Add(img);
+                }
+            }
 
             await uow.Reviews.AddAsync(review, ct);
             await uow.SaveChangesAsync(ct);
 
-            var buyer = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct);
-            return ApiResponse<ProductReviewDto>.Created(MapReview(review, buyer!, product));
+            var buyer = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct)
+                ?? throw new NotFoundException(nameof(User), currentUser.UserId.Value);
+            return ApiResponse<ProductReviewDto>.Created(MapReview(review, buyer, product));
         }
 
-
-
-    private static ProductReviewDto MapReview(Data.Entity.ProductReview r, User buyer, Product product) =>
-        new(r.Id, r.ProductId, product.Name, r.BuyerId, buyer.FullName,
-            r.Rating, r.Title, r.Comment, r.IsVerifiedPurchase,
-            r.SupplierReply, r.RepliedAt,
-            r.Images.Select(i => i.Url).ToList(),
-            r.CreatedAt, r.UpdatedAt);
+        private static ProductReviewDto MapReview(Data.Entity.ProductReview r, User buyer, Product product) =>
+            new(r.Id, r.ProductId, product.Name, r.BuyerId, buyer.FullName,
+                r.Rating, r.Title, r.Comment, r.IsVerifiedPurchase,
+                r.SupplierReply, r.RepliedAt,
+                r.Images.Select(i => i.Url).ToList(),
+                r.CreatedAt, r.UpdatedAt);
 
         public async Task<ApiResponse<ProductReviewDto>> Handle(UpdateReviewCommand req, CancellationToken ct)
         {
@@ -68,14 +77,35 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Handlers
                 throw new ForbiddenException("You can only update your own reviews.");
 
             review.Update(req.Rating, req.Title, req.Comment);
+
+            // Replace images if new ones provided
+            if (req.ImageUrls != null)
+            {
+                // Remove old images
+                foreach (var oldImg in review.Images.ToList())
+                {
+                    review.Images.Remove(oldImg);
+                }
+
+                // Add new images
+                int order = 0;
+                foreach (var url in req.ImageUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
+                {
+                    var img = ReviewImage.Create(review.Id, url, Path.GetFileName(url) ?? "image.jpg", "image/jpeg", 0, order++);
+                    review.Images.Add(img);
+                }
+            }
+
             uow.Reviews.Update(review);
             await uow.SaveChangesAsync(ct);
 
-            var buyer = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct);
-            var product = await uow.Products.GetByIdAsync(review.ProductId, ct);
+            var buyer = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct)
+                ?? throw new NotFoundException(nameof(User), currentUser.UserId.Value);
+            var product = await uow.Products.GetByIdAsync(review.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), review.ProductId);
             return ApiResponse<ProductReviewDto>.Ok(new ProductReviewDto(
-                review.Id, review.ProductId, product!.Name,
-                review.BuyerId, buyer!.FullName,
+                review.Id, review.ProductId, product.Name,
+                review.BuyerId, buyer.FullName,
                 review.Rating, review.Title, review.Comment,
                 review.IsVerifiedPurchase, review.SupplierReply, review.RepliedAt,
                 review.Images.Select(i => i.Url).ToList(),
@@ -109,21 +139,24 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Handlers
             var review = await uow.Reviews.GetWithImagesAsync(req.ReviewId, ct)
                 ?? throw new NotFoundException(nameof(ProductReview), req.ReviewId);
 
-            var product = await uow.Products.GetByIdAsync(review.ProductId, ct)!;
-            var user = await uow.Users.GetByIdAsync(currentUser.UserId.Value, ct)!;
+            var product = await uow.Products.GetByIdAsync(review.ProductId, ct)
+                ?? throw new NotFoundException(nameof(Product), review.ProductId);
 
             // Must be a supplier who owns this product's company
-            if (user?.OwnedCompanyId != product?.CompanyId && currentUser.Role != "Admin")
+            bool isOwner = currentUser.OwnedCompanyId == product.CompanyId;
+            bool isAdmin = currentUser.Role == "Admin";
+            if (!isOwner && !isAdmin)
                 throw new ForbiddenException("Only the product's supplier can reply to reviews.");
 
             review.AddSupplierReply(req.Reply);
             uow.Reviews.Update(review);
             await uow.SaveChangesAsync(ct);
 
-            var buyer = await uow.Users.GetByIdAsync(review.BuyerId, ct);
+            var buyer = await uow.Users.GetByIdAsync(review.BuyerId, ct)
+                ?? throw new NotFoundException(nameof(User), review.BuyerId);
             return ApiResponse<ProductReviewDto>.Ok(new ProductReviewDto(
-                review.Id, review.ProductId, product!.Name,
-                review.BuyerId, buyer!.FullName,
+                review.Id, review.ProductId, product.Name,
+                review.BuyerId, buyer.FullName,
                 review.Rating, review.Title, review.Comment,
                 review.IsVerifiedPurchase, review.SupplierReply, review.RepliedAt,
                 review.Images.Select(i => i.Url).ToList(),

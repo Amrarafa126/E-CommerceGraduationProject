@@ -15,7 +15,9 @@ using System.Threading.Tasks;
 namespace E_Commerce.Core.Features.Companies.Queries.Handlers
 {
     public class CompanyHandlersQueries(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu)
-    : IRequestHandler<GetCompanyByIdQuery, ApiResponse<CompanyDto>>
+    : IRequestHandler<GetCompanyByIdQuery, ApiResponse<CompanyDto>>,
+      IRequestHandler<GetMyCompanyQuery, ApiResponse<CompanyDto>>,
+      IRequestHandler<GetCompaniesQuery, ApiResponse<PaginatedResult<CompanySummaryDto>>>
     {
         public async Task<ApiResponse<CompanyDto>> Handle(GetCompanyByIdQuery req, CancellationToken ct)
         {
@@ -26,7 +28,7 @@ namespace E_Commerce.Core.Features.Companies.Queries.Handlers
 
         public async Task<ApiResponse<CompanyDto>> Handle(GetMyCompanyQuery req, CancellationToken ct)
         {
-            if (cu.OwnedCompanyId == null) throw new BusinessException("You do not own a company.");
+            if (cu.OwnedCompanyId == null) throw new BusinessException("لا تمتلك شركة.");
             var company = await uow.Companies.GetWithDetailsAsync(cu.OwnedCompanyId.Value, ct)
                 ?? throw new NotFoundException(nameof(Company), cu.OwnedCompanyId.Value);
             return ApiResponse<CompanyDto>.Ok(mapper.Map<CompanyDto>(company));

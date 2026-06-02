@@ -1,15 +1,10 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 {
@@ -19,7 +14,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
         public async Task<ApiResponse<PaginatedResult<AdminCompanyDto>>> Handle(
             GetAllCompaniesQuery req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var q = db.companies.AsNoTracking()
                 .Include(c => c.Owner)
@@ -49,10 +44,10 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Select(g => new { CompanyId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.CompanyId, x => x.Count, ct);
 
-            var orderCounts = await db.orders
-                .Where(o => companies.Select(c => c.Id).Contains(o.SellerCompanyId) && !o.IsDeleted)
-                .GroupBy(o => o.SellerCompanyId)
-                .Select(g => new { CompanyId = g.Key, Count = g.Count(), Revenue = g.Sum(o => o.TotalAmount) })
+            var orderCounts = await db.orderSubOrders
+                .Where(s => companies.Select(c => c.Id).Contains(s.SellerCompanyId) && !s.IsDeleted)
+                .GroupBy(s => s.SellerCompanyId)
+                .Select(g => new { CompanyId = g.Key, Count = g.Count(), Revenue = g.Sum(s => s.TotalAmount) })
                 .ToDictionaryAsync(x => x.CompanyId, x => new { x.Count, x.Revenue }, ct);
 
             var dtos = companies.Select(c => new AdminCompanyDto(

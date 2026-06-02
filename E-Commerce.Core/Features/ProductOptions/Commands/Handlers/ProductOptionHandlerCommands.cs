@@ -24,18 +24,18 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                     ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.Role != "Admin" && cu.OwnedCompanyId != product.CompanyId)
-                throw new ForbiddenException("You are not allowed to modify this product.");
+                throw new ForbiddenException("غير مسموح لك بتعديل هذا المنتج.");
 
             var option = ProductOption.Create(product.Id, req.Name);
             product.ProductOptions.Add(option);
-            await uow.SaveChangesAsync(ct);
 
             if (req.Values != null && req.Values.Count > 0)
             {
                 foreach (var val in req.Values)
                     option.Values.Add(ProductOptionValue.Create(option.Id, val));
-                await uow.SaveChangesAsync(ct);
             }
+
+            await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductOptionDto>.Created(mapper.Map<ProductOptionDto>(option));
         }
@@ -50,7 +50,7 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only delete options of your own products.");
+                throw new ForbiddenException("يمكنك حذف خيارات منتجاتك فقط.");
 
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
@@ -64,12 +64,12 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
             if (variantsUseThisOption)
                 return ApiResponse<object>.Fail(
                     "Cannot delete this option because one or more variants are linked to its values. " +
-                    "Delete the related variants first.", 409);
+                    "احذف المتغيرات المرتبطة أولاً.", 409);
 
             product.ProductOptions.Remove(option);
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok("Option and all its values deleted successfully.");
+            return ApiResponse<object>.Ok("تم حذف الخيار وجميع قيمه بنجاح.");
         }
 
         public async Task<ApiResponse<ProductOptionDto>> Handle(UpdateProductOptionCommand req, CancellationToken ct)
@@ -81,7 +81,7 @@ namespace E_Commerce.Core.Features.ProductOptions.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You are not allowed to modify this product.");
+                throw new ForbiddenException("غير مسموح لك بتعديل هذا المنتج.");
 
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);

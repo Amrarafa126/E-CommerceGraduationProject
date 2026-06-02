@@ -25,6 +25,7 @@ namespace E_Commerce.Data.Entity
                 throw new ArgumentException("Value cannot be empty.");
             Value = value.Trim();
             DisplayOrder = displayOrder;
+            MarkAsUpdated();
         }
     }
 }

@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.Chats.Commands.Models;
+using E_Commerce.Core.Features.Chats.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Chats.Commands.Vaildations
 {
@@ -12,8 +7,12 @@ namespace E_Commerce.Core.Features.Chats.Commands.Vaildations
     {
         public SendMessageValidator()
         {
-            RuleFor(x => x.ConversationId).NotEmpty();
-            RuleFor(x => x.Content).NotEmpty().MaximumLength(2000);
+            RuleFor(x => x.ConversationId).NotEmpty().WithMessage("معرف المحادثة مطلوب.");
+            RuleFor(x => x.Content)
+                .MaximumLength(2000).WithMessage("محتوى الرسالة لا يجب أن يتجاوز 2000 حرف.");
+            RuleFor(x => x)
+                .Must(cmd => !string.IsNullOrWhiteSpace(cmd.Content) || (cmd.Attachments?.Count > 0))
+                .WithMessage("الرسالة يجب أن تحتوي على نص أو مرفق واحد على الأقل.");
         }
     }
 }

@@ -2,10 +2,10 @@
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using E_Commerce.Data.Identity;
+using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service.Interfase;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -13,14 +13,13 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 {
     public class GetAllUsersHandler(
     AppDBContext db,
-    UserManager<User> userManager,
     ICurrentUserService cu)
     : IRequestHandler<GetAllUsersQuery, ApiResponse<PaginatedResult<AdminUserDto>>>
     {
         public async Task<ApiResponse<PaginatedResult<AdminUserDto>>> Handle(
             GetAllUsersQuery req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var q = db.Users.AsNoTracking()
                 .Include(u => u.OwnedCompany)
@@ -34,7 +33,10 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
             }
 
             if (!string.IsNullOrWhiteSpace(req.Role))
-                q = q.Where(u => u.Role.ToString() == req.Role);
+            {
+                if (Enum.TryParse<UserRole>(req.Role, true, out var roleEnum))
+                    q = q.Where(u => u.Role == roleEnum);
+            }
 
             if (req.IsActive.HasValue)
                 q = q.Where(u => u.IsActive == req.IsActive.Value);
@@ -46,17 +48,12 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Take(req.PageSize)
                 .ToListAsync(ct);
 
-            var dtos = new List<AdminUserDto>();
-            foreach (var u in users)
-            {
-                var roles = await userManager.GetRolesAsync(u);
-                dtos.Add(new AdminUserDto(
-                    u.Id, u.Email ?? "", u.FirstName, u.LastName, u.FullName,
-                    u.Role.ToString(), string.Join(",", roles),
-                    u.IsActive, u.EmailConfirmed, u.LockoutEnd,
-                    u.OwnedCompanyId, u.OwnedCompany?.CompanyName,
-                    u.CreatedAt, u.UpdatedAt));
-            }
+            var dtos = users.Select(u => new AdminUserDto(
+                u.Id, u.Email ?? "", u.FirstName, u.LastName, u.FullName,
+                u.Role.ToString(), u.Role.ToString(),
+                u.IsActive, u.EmailConfirmed, u.LockoutEnd,
+                u.OwnedCompanyId, u.OwnedCompany?.CompanyName,
+                u.CreatedAt, u.UpdatedAt)).ToList();
 
             return ApiResponse<PaginatedResult<AdminUserDto>>.Ok(
                 PaginatedResult<AdminUserDto>.Success(dtos, total, req.Page, req.PageSize));

@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.Orders.Commands.Models;
+using E_Commerce.Core.Features.Orders.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Orders.Commands.Vaildations
 {
@@ -12,13 +7,16 @@ namespace E_Commerce.Core.Features.Orders.Commands.Vaildations
     {
         public CreateOrderValidator()
         {
-            RuleFor(x => x.SellerCompanyId).NotEmpty();
-            RuleFor(x => x.Currency).NotEmpty().Length(3);
-            RuleFor(x => x.Items).NotEmpty().WithMessage("Order must have at least one item.");
+            RuleFor(x => x.SellerCompanyId).NotEmpty().WithMessage("معرف شركة البائع مطلوب.");
+            RuleFor(x => x.Currency)
+                .NotEmpty().WithMessage("العملة مطلوبة.")
+                .Length(3).WithMessage("رمز العملة يجب أن يكون 3 أحرف.");
+            RuleFor(x => x.Items)
+                .NotEmpty().WithMessage("الطلب يجب أن يحتوي على منتج واحد على الأقل.");
             RuleForEach(x => x.Items).ChildRules(item =>
             {
-                item.RuleFor(i => i.ProductId).NotEmpty();
-                item.RuleFor(i => i.Quantity).GreaterThan(0);
+                item.RuleFor(i => i.ProductId).NotEmpty().WithMessage("معرف المنتج مطلوب.");
+                item.RuleFor(i => i.Quantity).GreaterThan(0).WithMessage("الكمية يجب أن تكون أكبر من صفر.");
             });
         }
     }

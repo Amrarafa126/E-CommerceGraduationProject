@@ -1,15 +1,26 @@
-﻿using E_Commerce.Data.Entity;
+using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.InfrustructureBases;
 
 namespace E_Commerce.Infrustructure.Interfase
 {
-    public interface IRfqRequestRepos : IGenericRepositoryAsync<RfqRequest>   
+    public interface IRfqRequestRepos : IGenericRepositoryAsync<RfqRequest>
     {
-
         Task<RfqRequest?> GetWithQuotesAsync(Guid rfqId, CancellationToken ct = default);
+
         Task<(IEnumerable<RfqRequest> Items, int Total)> GetByBuyerPagedAsync(
             Guid buyerId, int page, int pageSize, CancellationToken ct = default);
+
         Task<(IEnumerable<RfqRequest> Items, int Total)> GetBySellerPagedAsync(
             Guid companyId, int page, int pageSize, int? status = null, CancellationToken ct = default);
+
+        Task<(IEnumerable<RfqRequest> Items, int Total)> GetMarketplaceAsync(
+            int page, int pageSize,
+            string? search = null,
+            Guid? categoryId = null,
+            string? country = null,
+            int? status = null,
+            CancellationToken ct = default);
+
+        Task<RfqRequest?> GetMarketplaceByIdAsync(Guid id, CancellationToken ct = default);
     }
 }

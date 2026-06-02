@@ -47,6 +47,11 @@ namespace E_Commerce.Core.Mapping.Products
                 .ForMember(d => d.OptionName, o => o.MapFrom(s =>
                     s.ProductOption != null ? s.ProductOption.Name : ""));
 
+            CreateMap<ProductSpecification, ProductSpecificationDto>();
+            CreateMap<ProductCertificate, ProductCertificateDto>();
+            CreateMap<ProductVideo, ProductVideoDto>();
+            CreateMap<ProductTag, ProductTagDto>();
+
         }
 
 

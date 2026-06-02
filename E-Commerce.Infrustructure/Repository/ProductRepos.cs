@@ -20,6 +20,10 @@ namespace E_Commerce.Infrustructure.Repository
                    .ThenInclude(ov => ov.ProductOptionValue)
                        .ThenInclude(pov => pov.ProductOption)
            .Include(p => p.PriceTiers.OrderBy(t => t.MinQuantity))
+           .Include(p => p.Specifications.OrderBy(s => s.DisplayOrder))
+           .Include(p => p.Certificates.OrderBy(c => c.DisplayOrder))
+           .Include(p => p.Videos.OrderBy(v => v.DisplayOrder))
+           .Include(p => p.Tags)
            .FirstOrDefaultAsync(p => p.Id == productId, ct);
 
         public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(
@@ -46,7 +50,9 @@ namespace E_Commerce.Infrustructure.Repository
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(p =>
                     p.Name.Contains(search) ||
-                    p.Description.Contains(search));
+                    p.Description.Contains(search) ||
+                    (p.Brand != null && p.Brand.Contains(search)) ||
+                    (p.Tags != null && p.Tags.Any(t => t.Tag.Contains(search))));
 
             if (minPrice.HasValue)
                 query = query.Where(p => p.BasePrice >= minPrice.Value);

@@ -1,40 +1,59 @@
-﻿using E_Commerce.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace E_Commerce.Core.Features.Shippings
 {
-    public record ShipmentDto(Guid Id, Guid OrderId, string RecipientName, string AddressLine1, string? AddressLine2, string City, string State, string Country, string PostalCode, string? PhoneNumber, int Method, int Status, decimal ShippingCost, string Currency, DateTime? EstimatedDeliveryDate, DateTime? ActualDeliveryDate, string? CarrierName, string? TrackingNumber, string? TrackingUrl, List<ShipmentEventDto> Events, DateTime CreatedAt);
-    public record ShipmentEventDto(Guid Id, int Status, string Description, string? Location, DateTime CreatedAt);
-    public record CreateShipmentDto(Guid OrderId, string RecipientName, string AddressLine1, string City, string State, string Country, string PostalCode, int Method, decimal ShippingCost, string? AddressLine2 = null, string? PhoneNumber = null, DateTime? EstimatedDeliveryDate = null);
-    public record UpdateShipmentStatusDto(int Status, string? CarrierName = null, string? TrackingNumber = null, string? TrackingUrl = null, string? FailureReason = null);
-
-    file static class ShipmentMapper
+    public class ShipmentDto
     {
-        internal static ShipmentDto MapShipment(Shipping s) => new(
-            s.Id, s.OrderId, s.RecipientName,
-            s.AddressLine1, s.AddressLine2, s.City, s.State,
-            s.Country, s.PostalCode, s.PhoneNumber,
-            (int)s.Method - 1, (int)s.Status - 1,
-            s.ShippingCost, s.Currency,
-            s.EstimatedDeliveryDate, s.ActualDeliveryDate,
-            s.CarrierName, s.TrackingNumber, s.TrackingUrl,
-            s.Events.OrderBy(e => e.CreatedAt)
-                .Select(e => new ShipmentEventDto(
-                    e.Id, (int)e.Status - 1, e.Description, e.Location, e.CreatedAt))
-                .ToList(),
-            s.CreatedAt);
+        public Guid Id { get; init; }
+        public Guid OrderId { get; init; }
+        public string RecipientName { get; init; } = string.Empty;
+        public string AddressLine1 { get; init; } = string.Empty;
+        public string? AddressLine2 { get; init; }
+        public string City { get; init; } = string.Empty;
+        public string State { get; init; } = string.Empty;
+        public string Country { get; init; } = string.Empty;
+        public string PostalCode { get; init; } = string.Empty;
+        public string? PhoneNumber { get; init; }
+        public int Method { get; init; }
+        public int Status { get; init; }
+        public decimal ShippingCost { get; init; }
+        public string Currency { get; init; } = "EGP";
+        public DateTime? EstimatedDeliveryDate { get; init; }
+        public DateTime? ActualDeliveryDate { get; init; }
+        public string? CarrierName { get; init; }
+        public string? TrackingNumber { get; init; }
+        public string? TrackingUrl { get; init; }
+        public string? BostaTrackingNumber { get; init; }
+        public string? BostaShipmentId { get; init; }
+        public List<ShipmentEventDto> Events { get; init; } = new();
+        public DateTime CreatedAt { get; init; }
     }
 
-    // Make helper accessible to commands namespace too
-    
-         static class ShippingMapper
-        {
-            internal static ShipmentDto MapShipment(Shipping s) =>
-                ShipmentMapper.MapShipment(s);
-        }
- }
+    public class ShipmentEventDto
+    {
+        public Guid Id { get; init; }
+        public int Status { get; init; }
+        public string Description { get; init; } = string.Empty;
+        public string? Location { get; init; }
+        public DateTime CreatedAt { get; init; }
+    }
 
+    public record CreateShipmentDto(
+        Guid OrderId,
+        string RecipientName,
+        string AddressLine1,
+        string City,
+        string State,
+        string Country,
+        string PostalCode,
+        int Method,
+        decimal ShippingCost,
+        string? AddressLine2 = null,
+        string? PhoneNumber = null,
+        DateTime? EstimatedDeliveryDate = null);
+
+    public record UpdateShipmentStatusDto(
+        int Status,
+        string? CarrierName = null,
+        string? TrackingNumber = null,
+        string? TrackingUrl = null,
+        string? FailureReason = null);
+}

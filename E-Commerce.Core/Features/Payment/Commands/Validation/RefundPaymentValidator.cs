@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.Payment.Commands.Models;
+using E_Commerce.Core.Features.Payment.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Payment.Commands.Validation
 {
@@ -12,9 +7,11 @@ namespace E_Commerce.Core.Features.Payment.Commands.Validation
     {
         public RefundPaymentValidator()
         {
-            RuleFor(x => x.PaymentId).NotEmpty();
-            RuleFor(x => x.Amount).GreaterThan(0);
-            RuleFor(x => x.Reason).NotEmpty().MaximumLength(500);
+            RuleFor(x => x.PaymentId).NotEmpty().WithMessage("معرف الدفع مطلوب.");
+            RuleFor(x => x.Amount).GreaterThan(0).WithMessage("المبلغ يجب أن يكون أكبر من صفر.");
+            RuleFor(x => x.Reason)
+                .NotEmpty().WithMessage("سبب الاسترجاع مطلوب.")
+                .MaximumLength(500).WithMessage("سبب الاسترجاع لا يجب أن يتجاوز 500 حرف.");
         }
     }
 }

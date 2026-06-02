@@ -15,7 +15,7 @@ namespace E_Commerce.Core.Features.Categorys.Commands.Handlers
         public async Task<ApiResponse<CategoryDto>> Handle(CreateCategoryCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
             if (req.ParentCategoryId.HasValue)
             {
                 var parent = await uow.Category.GetByIdAsync(req.ParentCategoryId.Value, ct)
@@ -34,8 +34,8 @@ namespace E_Commerce.Core.Features.Categorys.Commands.Handlers
         public async Task<ApiResponse<CategoryDto>> Handle(UpdateCategoryCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
-            var category = await uow.Category.GetByIdAsync(req.CategoryId, ct)
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
+            var category = await uow.Category.GetWithChildrenAsync(req.CategoryId, ct)
                 ?? throw new NotFoundException(nameof(Category), req.CategoryId);
 
             if (req.ParentCategoryId.HasValue && req.ParentCategoryId != category.ParentCategoryId)
@@ -55,14 +55,14 @@ namespace E_Commerce.Core.Features.Categorys.Commands.Handlers
         public async Task<ApiResponse<object>> Handle(DeleteCategoryCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
             var category = await uow.Category.GetByIdAsync(req.CategoryId, ct)
                 ?? throw new NotFoundException(nameof(Category), req.CategoryId);
 
             category.SoftDelete();
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok("Category deleted successfully.");
+            return ApiResponse<object>.Ok("تم حذف الفئة بنجاح.");
         }
     }
 }

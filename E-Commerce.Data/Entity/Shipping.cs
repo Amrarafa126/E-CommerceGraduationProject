@@ -10,8 +10,8 @@ namespace E_Commerce.Data.Entity
 {
     public class Shipping : BaseEntity
     {
-        public Guid OrderId { get; private set; }
-        public Order Order { get; private set; } = null!;
+        public Guid OrderSubOrderId { get; private set; }
+        public OrderSubOrder OrderSubOrder { get; private set; } = null!;
 
         // Destination
         public string RecipientName { get; private set; } = string.Empty;
@@ -36,12 +36,16 @@ namespace E_Commerce.Data.Entity
         public string? TrackingNumber { get; private set; }
         public string? TrackingUrl { get; private set; }
 
+        // Bosta integration
+        public string? BostaTrackingNumber { get; private set; }
+        public string? BostaShipmentId { get; private set; }
+
         public ICollection<ShippingEvent> Events { get; private set; } = new List<ShippingEvent>();
 
         private Shipping() { }
 
         public static Shipping Create(
-            Guid orderId,
+            Guid orderSubOrderId,
             string recipientName,
             string addressLine1,
             string city,
@@ -59,7 +63,7 @@ namespace E_Commerce.Data.Entity
 
             return new Shipping
             {
-                OrderId = orderId,
+                OrderSubOrderId = orderSubOrderId,
                 RecipientName = recipientName,
                 AddressLine1 = addressLine1,
                 AddressLine2 = addressLine2,
@@ -134,6 +138,13 @@ namespace E_Commerce.Data.Entity
         {
             Status = ShippingStatus.Returned;
             AddEvent("Package returned to sender.");
+            MarkAsUpdated();
+        }
+
+        public void SetBostaDetails(string bostaTrackingNumber, string bostaShipmentId)
+        {
+            BostaTrackingNumber = bostaTrackingNumber;
+            BostaShipmentId = bostaShipmentId;
             MarkAsUpdated();
         }
 

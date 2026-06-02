@@ -10,6 +10,10 @@ using E_Commerce.Core.Features.Products.Commands.Models;
 using E_Commerce.Core.Features.Products.Queries.Models;
 using E_Commerce.Core.Features.ProductVariants;
 using E_Commerce.Core.Features.ProductVariants.Commands.Models;
+using E_Commerce.Core.Features.ProductSpecifications.Commands.Models;
+using E_Commerce.Core.Features.ProductCertificates.Commands.Models;
+using E_Commerce.Core.Features.ProductVideos.Commands.Models;
+using E_Commerce.Core.Features.ProductTags.Commands.Models;
 using E_Commerce.Core.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -73,7 +77,12 @@ namespace E_Commerce.Api.Controllers
         {
             var result = await Mediator.Send(
                 new CreateProductCommand(dto.Name, dto.Description, dto.CategoryId,
-                    dto.MinimumOrderQuantity, dto.BasePrice, dto.currency), ct);
+                    dto.MinimumOrderQuantity, dto.BasePrice, dto.Currency, dto.StockQuantity,
+                    dto.Brand, dto.ModelNumber, dto.OriginCountry, dto.UnitOfMeasure,
+                    dto.LeadTimeDays, dto.LeadTimeDaysSample, dto.SupplyAbility, dto.TradeTerms,
+                    dto.PortOfLoading, dto.PaymentTerms, dto.PackagingDetails,
+                    dto.SampleAvailable, dto.SamplePrice, dto.SampleMoq,
+                    dto.MetaTitle, dto.MetaDescription, dto.Slug), ct);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -87,7 +96,12 @@ namespace E_Commerce.Api.Controllers
         {
             var result = await Mediator.Send(
                 new UpdateProductCommand(id, dto.Name, dto.Description,
-                    dto.CategoryId, dto.MinimumOrderQuantity, dto.BasePrice), ct);
+                    dto.CategoryId, dto.MinimumOrderQuantity, dto.BasePrice, dto.StockQuantity,
+                    dto.Brand, dto.ModelNumber, dto.OriginCountry, dto.UnitOfMeasure,
+                    dto.LeadTimeDays, dto.LeadTimeDaysSample, dto.SupplyAbility, dto.TradeTerms,
+                    dto.PortOfLoading, dto.PaymentTerms, dto.PackagingDetails,
+                    dto.SampleAvailable, dto.SamplePrice, dto.SampleMoq,
+                    dto.MetaTitle, dto.MetaDescription, dto.Slug), ct);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -338,6 +352,112 @@ namespace E_Commerce.Api.Controllers
         {
             var result = await Mediator.Send(
                 new AddOptionValueCommand(id, optionId, dto.Value, dto.DisplayOrder), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        //  SPECIFICATIONS
+        // ══════════════════════════════════════════════════════════════════
+
+        [HttpPost("{id:guid}/specifications")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductSpecificationDto>), StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddSpecification(
+            Guid id, [FromBody] AddProductSpecificationDto dto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(
+                new AddProductSpecificationCommand(id, dto.Name, dto.Value, dto.GroupName, dto.DisplayOrder, dto.IsHighlight), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPut("{id:guid}/specifications/{specId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductSpecificationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateSpecification(
+            Guid id, Guid specId, [FromBody] UpdateProductSpecificationDto dto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(
+                new UpdateProductSpecificationCommand(id, specId, dto.Name, dto.Value, dto.GroupName, dto.DisplayOrder, dto.IsHighlight), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{id:guid}/specifications/{specId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteSpecification(Guid id, Guid specId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeleteProductSpecificationCommand(id, specId), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        //  CERTIFICATES
+        // ══════════════════════════════════════════════════════════════════
+
+        [HttpPost("{id:guid}/certificates")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductCertificateDto>), StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddCertificate(
+            Guid id, [FromBody] AddProductCertificateDto dto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(
+                new AddProductCertificateCommand(id, dto.Name, dto.Url, dto.OriginalFileName, dto.ContentType, dto.FileSizeBytes, dto.IssuedBy, dto.ValidUntil), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{id:guid}/certificates/{certId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteCertificate(Guid id, Guid certId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeleteProductCertificateCommand(id, certId), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        //  VIDEOS
+        // ══════════════════════════════════════════════════════════════════
+
+        [HttpPost("{id:guid}/videos")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductVideoDto>), StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddVideo(
+            Guid id, [FromBody] AddProductVideoDto dto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(
+                new AddProductVideoCommand(id, dto.Url, dto.Title, dto.ThumbnailUrl, dto.DurationSeconds), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{id:guid}/videos/{videoId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteVideo(Guid id, Guid videoId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeleteProductVideoCommand(id, videoId), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        //  TAGS
+        // ══════════════════════════════════════════════════════════════════
+
+        [HttpPost("{id:guid}/tags")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductTagDto>), StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddTag(
+            Guid id, [FromBody] AddProductTagDto dto, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new AddProductTagCommand(id, dto.Tag), ct);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{id:guid}/tags/{tagId:guid}")]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteTag(Guid id, Guid tagId, CancellationToken ct)
+        {
+            var result = await Mediator.Send(new DeleteProductTagCommand(id, tagId), ct);
             return StatusCode(result.StatusCode, result);
         }
     }

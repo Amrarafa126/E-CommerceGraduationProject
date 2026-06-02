@@ -3,6 +3,7 @@ using AutoMapper;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Products.Commands.Models;
 using E_Commerce.Data.Entity;
+using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
@@ -35,7 +36,27 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
 
             var product = Product.Create(req.Name, req.Description,
                 cu.OwnedCompanyId.Value, req.CategoryId,
-                req.MinimumOrderQuantity, req.BasePrice, req.Currency);
+                req.MinimumOrderQuantity, req.BasePrice, req.Currency,
+                req.StockQuantity);
+
+            // Apply B2B fields
+            product.Brand = req.Brand;
+            product.ModelNumber = req.ModelNumber;
+            product.OriginCountry = req.OriginCountry;
+            product.UnitOfMeasure = (UnitOfMeasure)(req.UnitOfMeasure ?? (int)UnitOfMeasure.Piece);
+            product.LeadTimeDays = req.LeadTimeDays ?? 0;
+            product.LeadTimeDaysSample = req.LeadTimeDaysSample;
+            product.SupplyAbility = req.SupplyAbility;
+            product.TradeTerms = req.TradeTerms;
+            product.PortOfLoading = req.PortOfLoading;
+            product.PaymentTerms = req.PaymentTerms;
+            product.PackagingDetails = req.PackagingDetails;
+            product.SampleAvailable = req.SampleAvailable ?? false;
+            product.SamplePrice = req.SamplePrice;
+            product.SampleMoq = req.SampleMoq;
+            product.MetaTitle = req.MetaTitle;
+            product.MetaDescription = req.MetaDescription;
+            product.Slug = req.Slug;
 
             await uow.Products.AddAsync(product, ct);
             await uow.SaveChangesAsync(ct);
@@ -50,10 +71,33 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only edit your own products.");
+                throw new ForbiddenException("يمكنك تعديل منتجاتك فقط.");
 
             product.Update(req.Name, req.Description, req.CategoryId,
-                req.MinimumOrderQuantity, req.BasePrice);
+                req.MinimumOrderQuantity, req.BasePrice, req.StockQuantity);
+
+            // Apply B2B fields
+            product.Brand = req.Brand;
+            product.ModelNumber = req.ModelNumber;
+            product.OriginCountry = req.OriginCountry;
+            if (req.UnitOfMeasure.HasValue)
+                product.UnitOfMeasure = (UnitOfMeasure)req.UnitOfMeasure.Value;
+            if (req.LeadTimeDays.HasValue)
+                product.LeadTimeDays = req.LeadTimeDays.Value;
+            product.LeadTimeDaysSample = req.LeadTimeDaysSample;
+            product.SupplyAbility = req.SupplyAbility;
+            product.TradeTerms = req.TradeTerms;
+            product.PortOfLoading = req.PortOfLoading;
+            product.PaymentTerms = req.PaymentTerms;
+            product.PackagingDetails = req.PackagingDetails;
+            if (req.SampleAvailable.HasValue)
+                product.SampleAvailable = req.SampleAvailable.Value;
+            product.SamplePrice = req.SamplePrice;
+            product.SampleMoq = req.SampleMoq;
+            product.MetaTitle = req.MetaTitle;
+            product.MetaDescription = req.MetaDescription;
+            product.Slug = req.Slug;
+
             uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
@@ -89,6 +133,3 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
         }
     }
 }
-
-    
-

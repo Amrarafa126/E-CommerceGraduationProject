@@ -27,7 +27,7 @@ namespace E_Commerce.Data.Entity
 
             Name = name.Trim();
             DisplayOrder = displayOrder;
+            MarkAsUpdated();
         }
     }
 }
-

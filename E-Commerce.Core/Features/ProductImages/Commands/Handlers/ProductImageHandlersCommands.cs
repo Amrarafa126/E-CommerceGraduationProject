@@ -24,10 +24,10 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only upload images to your own products.");
+                throw new ForbiddenException("يمكنك رفع الصور فقط لمنتجاتك.");
 
             if (product.ActiveImageCount >= MaxImages)
-                throw new BusinessException($"A product can have at most {MaxImages} images.");
+                throw new BusinessException($"يمكن للمنتج أن يحتوي على {MaxImages} images.");
 
             // Upload file to storage
             await using var stream = req.File.OpenReadStream();
@@ -59,18 +59,19 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only delete images from your own products.");
+                throw new ForbiddenException("يمكنك حذف الصور فقط من منتجاتك.");
 
             var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
-            await storage.DeleteAsync(image.Url, ct);
-
+            var imageUrl = image.Url;
             product.RemoveImage(req.ImageId);
-
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok("Image deleted successfully.");
+            // Best-effort storage cleanup after DB commit
+            try { await storage.DeleteAsync(imageUrl, ct); } catch { }
+
+            return ApiResponse<object>.Ok("تم حذف الصورة بنجاح.");
         }
 
         public async Task<ApiResponse<ProductImageDto>> Handle(
@@ -82,14 +83,15 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only update images of your own products.");
+                throw new ForbiddenException("يمكنك تحديث الصور فقط لمنتجاتك.");
 
             var image = product.Images!.FirstOrDefault(i => i.Id == req.ImageId)
                 ?? throw new NotFoundException(nameof(ProductImage), req.ImageId);
 
+            string? oldUrl = null;
             if (req.File != null)
             {
-                await storage.DeleteAsync(image.Url, ct);
+                oldUrl = image.Url;
 
                 await using var stream = req.File.OpenReadStream();
                 var newUrl = await storage.UploadAsync(
@@ -101,6 +103,12 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Handlers
             image.UpdateMetadata(req.AltText, req.DisplayOrder ?? image.DisplayOrder);
 
             await uow.SaveChangesAsync(ct);
+
+            // Best-effort cleanup of old file after DB commit
+            if (oldUrl != null)
+            {
+                try { await storage.DeleteAsync(oldUrl, ct); } catch { }
+            }
 
             return ApiResponse<ProductImageDto>.Ok(new ProductImageDto(
                 image.Id, image.Url, image.OriginalFileName,

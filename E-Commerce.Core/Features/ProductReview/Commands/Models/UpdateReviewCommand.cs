@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.ProductReview.Commands.Models
 {
-    public record UpdateReviewCommand(Guid ReviewId, int Rating, string Title, string Comment)
+    public record UpdateReviewCommand(Guid ReviewId, int Rating, string Title, string Comment, List<string>? ImageUrls = null)
      : IRequest<ApiResponse<ProductReviewDto>>;
 }

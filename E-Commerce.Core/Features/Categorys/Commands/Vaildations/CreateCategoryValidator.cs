@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.Categorys.Commands.Models;
+using E_Commerce.Core.Features.Categorys.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Categorys.Commands.Vaildations
 {
@@ -12,8 +7,12 @@ namespace E_Commerce.Core.Features.Categorys.Commands.Vaildations
     {
         public CreateCategoryValidator()
         {
-            RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
-            RuleFor(x => x.Description).MaximumLength(1000).When(x => x.Description != null);
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("اسم الفئة مطلوب.")
+                .MaximumLength(200).WithMessage("اسم الفئة لا يجب أن يتجاوز 200 حرف.");
+            RuleFor(x => x.Description)
+                .MaximumLength(1000).WithMessage("الوصف لا يجب أن يتجاوز 1000 حرف.")
+                .When(x => x.Description != null);
         }
     }
 }

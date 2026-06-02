@@ -11,6 +11,9 @@ namespace E_Commerce.Infrustructure.Interfase
     public interface IPayoutRepos : IGenericRepositoryAsync<Payout>
     {
         Task<(IEnumerable<Payout> Items, int Total)> GetByCompanyPagedAsync(
-       Guid companyId, int page, int pageSize, CancellationToken ct = default);
+            Guid companyId, int page, int pageSize, CancellationToken ct = default);
+
+        Task<(IEnumerable<Payout> Items, int Total)> GetAllPagedAsync(
+            int? status, int page, int pageSize, CancellationToken ct = default);
     }
 }

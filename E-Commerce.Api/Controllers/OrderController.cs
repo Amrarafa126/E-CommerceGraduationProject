@@ -34,7 +34,7 @@ namespace E_Commerce.Api.Controllers
 
         [HttpGet("seller")]
         [Authorize(Roles = "Seller")]
-        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<OrderDto>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<OrderSubOrderDto>>), 200)]
         public async Task<IActionResult> GetSellerOrders(
             [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
         {
@@ -53,7 +53,7 @@ namespace E_Commerce.Api.Controllers
             [FromBody] CreateOrderDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new CreateOrderCommand(dto.SellerCompanyId, dto.Notes, dto.Currency, dto.Items), ct);
+                new CreateOrderCommand(dto.SellerCompanyId, dto.Notes, dto.Currency, dto.Items, dto.IdempotencyKey, dto.PoNumber), ct);
             return StatusCode(r.StatusCode, r);
         }
 

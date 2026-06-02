@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductReview.Commands.Models;
+using E_Commerce.Core.Features.ProductReview.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.ProductReview.Commands.Validations
 {
@@ -12,10 +7,15 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Validations
     {
         public UpdateReviewValidator()
         {
-            RuleFor(x => x.ReviewId).NotEmpty();
-            RuleFor(x => x.Rating).InclusiveBetween(1, 5);
-            RuleFor(x => x.Title).NotEmpty().MaximumLength(200);
-            RuleFor(x => x.Comment).NotEmpty().MaximumLength(2000);
+            RuleFor(x => x.ReviewId).NotEmpty().WithMessage("معرف التقييم مطلوب.");
+            RuleFor(x => x.Rating)
+                .InclusiveBetween(1, 5).WithMessage("التقييم يجب أن يكون بين 1 و 5.");
+            RuleFor(x => x.Title)
+                .NotEmpty().WithMessage("عنوان التقييم مطلوب.")
+                .MaximumLength(200).WithMessage("العنوان لا يجب أن يتجاوز 200 حرف.");
+            RuleFor(x => x.Comment)
+                .NotEmpty().WithMessage("التعليق مطلوب.")
+                .MaximumLength(2000).WithMessage("التعليق لا يجب أن يتجاوز 2000 حرف.");
         }
     }
 }

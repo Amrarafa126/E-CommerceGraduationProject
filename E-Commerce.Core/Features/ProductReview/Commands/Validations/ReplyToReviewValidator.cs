@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductReview.Commands.Models;
+using E_Commerce.Core.Features.ProductReview.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.ProductReview.Commands.Validations
 {
@@ -12,8 +7,10 @@ namespace E_Commerce.Core.Features.ProductReview.Commands.Validations
     {
         public ReplyToReviewValidator()
         {
-            RuleFor(x => x.ReviewId).NotEmpty();
-            RuleFor(x => x.Reply).NotEmpty().MaximumLength(1000);
+            RuleFor(x => x.ReviewId).NotEmpty().WithMessage("معرف التقييم مطلوب.");
+            RuleFor(x => x.Reply)
+                .NotEmpty().WithMessage("الرد مطلوب.")
+                .MaximumLength(1000).WithMessage("الرد لا يجب أن يتجاوز 1000 حرف.");
         }
     }
 }

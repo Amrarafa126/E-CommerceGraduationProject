@@ -1,15 +1,10 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.DashboardComapny.Queries.Models;
 using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
 {
@@ -19,7 +14,7 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
         public async Task<ApiResponse<CompanyDashboardDto>> Handle(GetDashboardQuery req, CancellationToken ct)
         {
             if (cu.OwnedCompanyId == null)
-                throw new ForbiddenException("Only sellers can view dashboard.");
+                throw new ForbiddenException("يمكن للبائعين فقط عرض لوحة التحكم.");
 
             var companyId = cu.OwnedCompanyId.Value;
             var now = DateTime.UtcNow;
@@ -32,9 +27,9 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
                 .ToListAsync(ct);
 
             // ── Orders ────────────────────────────────────────────────────────────
-            var orders = await db.orders
-                .Where(o => o.SellerCompanyId == companyId && !o.IsDeleted)
-                .Select(o => new { o.Status, o.TotalAmount, o.CreatedAt })
+            var orders = await db.orderSubOrders
+                .Where(s => s.SellerCompanyId == companyId && !s.IsDeleted)
+                .Select(s => new { s.Status, s.TotalAmount, s.CreatedAt })
                 .ToListAsync(ct);
 
             // ── Wallet ────────────────────────────────────────────────────────────
@@ -64,7 +59,7 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
 
             // ── Top Products ──────────────────────────────────────────────────────
             var rawTopProducts = await db.orderItems
-                .Where(i => i.Order.SellerCompanyId == companyId && !i.Order.IsDeleted)
+                .Where(i => i.OrderSubOrder.SellerCompanyId == companyId && !i.OrderSubOrder.IsDeleted)
                 .GroupBy(i => i.ProductId)
                 .Select(g => new
                 {
@@ -99,13 +94,14 @@ namespace E_Commerce.Core.Features.DashboardComapny.Queries.Handlers
             var monthly = orders
                 .Where(o => o.CreatedAt >= sixAgo)
                 .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
-                .Select(g => new MonthlyRevenueDto(
-                    new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM"),
-                    g.Key.Year,
-                    g.Sum(o => o.TotalAmount),
-                    g.Count()))
-                .OrderBy(m => m.Year)
-                .ThenBy(m => m.Month)
+                .Select(g => new { g.Key.Year, g.Key.Month, Revenue = g.Sum(o => o.TotalAmount), Count = g.Count() })
+                .OrderBy(x => x.Year)
+                .ThenBy(x => x.Month)
+                .Select(x => new MonthlyRevenueDto(
+                    new DateTime(x.Year, x.Month, 1).ToString("MMM"),
+                    x.Year,
+                    x.Revenue,
+                    x.Count))
                 .ToList();
 
             var statusDist = orders

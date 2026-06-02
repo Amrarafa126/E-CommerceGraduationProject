@@ -1,14 +1,14 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using System.Net;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace E_Commerce.Api.Middleware
 {
 
     public class GlobalExceptionHandlingMiddleware(
         RequestDelegate next,
-        ILogger<GlobalExceptionHandlingMiddleware> logger)
+        ILogger<GlobalExceptionHandlingMiddleware> logger,
+        IWebHostEnvironment environment)
     {
         public async Task InvokeAsync(HttpContext context)
         {
@@ -26,6 +26,8 @@ namespace E_Commerce.Api.Middleware
         {
             logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
 
+            var isDevelopment = environment.IsDevelopment();
+
             var (statusCode, response) = exception switch
             {
                 NotFoundException ex => (
@@ -36,13 +38,7 @@ namespace E_Commerce.Api.Middleware
                  HttpStatusCode.UnprocessableEntity,
                  ApiResponse<object>.ValidationFail(
                      ex.Errors?.SelectMany(e => e.Value).ToList() ?? new List<string>(),
-                     "Validation failed.")),
-
-//                FluentValidation.ValidationException ex => (
-//HttpStatusCode.UnprocessableEntity,
-//ApiResponse<object>.ValidationFail(
-//   ex.Errors.Select(e => e.ErrorMessage).ToList(),
-//   "Validation failed.")),
+                     "فشل التحقق من البيانات.")),
 
                 UnauthorizedException ex => (
                     HttpStatusCode.Unauthorized,
@@ -60,17 +56,11 @@ namespace E_Commerce.Api.Middleware
                     HttpStatusCode.BadRequest,
                     ApiResponse<object>.Fail(ex.Message, (int)HttpStatusCode.BadRequest)),
 
-                //_ => (
-                //    HttpStatusCode.InternalServerError,
-                //    ApiResponse<object>.Fail(
-                //        "An unexpected error occurred. Please try again later.",
-                //        (int)HttpStatusCode.InternalServerError))
-
-                        _ => (
-    HttpStatusCode.InternalServerError,
-    ApiResponse<object>.Fail(
-        exception.ToString(),
-        (int)HttpStatusCode.InternalServerError))
+                _ => (
+                    HttpStatusCode.InternalServerError,
+                    ApiResponse<object>.Fail(
+                        isDevelopment ? exception.ToString() : "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+                        (int)HttpStatusCode.InternalServerError))
             };
 
             context.Response.ContentType = "application/json";

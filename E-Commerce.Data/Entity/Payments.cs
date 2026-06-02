@@ -1,13 +1,12 @@
-﻿using E_Commerce.Data.Status;
+using E_Commerce.Data.Status;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_Commerce.Data.Entity
 {
     public class Payment : BaseEntity
     {
-
-        public Guid OrderId { get; private set; }
-        public Order Order { get; private set; } = null!;
+        public Guid OrderSubOrderId { get; private set; }
+        public OrderSubOrder OrderSubOrder { get; private set; } = null!;
 
         public decimal Amount { get; private set; }
         public string Currency { get; private set; } = "EGP";
@@ -26,19 +25,32 @@ namespace E_Commerce.Data.Entity
         public string? CardLast4 { get; private set; }
         public string? CardBrand { get; private set; }
 
+        // Paymob-specific fields
+        public long? PaymobOrderId { get; private set; }
+        public string? PaymobToken { get; private set; }
+        public string? IdempotencyKey { get; private set; }
+
         private Payment() { }
 
-        public static Payment Create(Guid orderId, decimal amount,
-            PaymentMethod method, string currency = "EGP")
+        public static Payment Create(Guid orderSubOrderId, decimal amount,
+            PaymentMethod method, string currency = "EGP", string? idempotencyKey = null)
         {
             if (amount <= 0) throw new ArgumentException("Payment amount must be positive.");
             return new Payment
             {
-                OrderId = orderId,
+                OrderSubOrderId = orderSubOrderId,
                 Amount = amount,
                 Method = method,
-                Currency = currency.ToUpper()
+                Currency = currency.ToUpper(),
+                IdempotencyKey = idempotencyKey
             };
+        }
+
+        public void SetPaymobDetails(long paymobOrderId, string paymobToken)
+        {
+            PaymobOrderId = paymobOrderId;
+            PaymobToken = paymobToken;
+            MarkAsUpdated();
         }
 
         public void MarkPaid(string gatewayTransactionId, string? gatewayRef = null,

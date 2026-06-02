@@ -1,6 +1,7 @@
 ﻿using E_Commerce.Core.Features.ProductReview;
 using E_Commerce.Core.Features.ProductReview.Commands.Models;
 using E_Commerce.Core.Features.ProductReview.Queries.Models;
+using E_Commerce.Core.Features.ReviewHelpfulVotes.Commands.Models;
 using E_Commerce.Core.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -45,7 +46,7 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateReviewDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new CreateReviewCommand(dto.ProductId, dto.Rating, dto.Title, dto.Comment), ct);
+                new CreateReviewCommand(dto.ProductId, dto.Rating, dto.Title, dto.Comment, dto.ImageUrls), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -56,7 +57,7 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReviewDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new UpdateReviewCommand(id, dto.Rating, dto.Title, dto.Comment), ct);
+                new UpdateReviewCommand(id, dto.Rating, dto.Title, dto.Comment, dto.ImageUrls), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -77,6 +78,40 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Reply(Guid id, [FromBody] SupplierReplyDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(new ReplyToReviewCommand(id, dto.Reply), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Get my reviews (Buyer only).</summary>
+        [HttpGet("my")]
+        [Authorize(Roles = "Buyer")]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<ProductReviewDto>>), 200)]
+        public async Task<IActionResult> GetMyReviews(
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetMyReviewsQuery(page, pageSize), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Get reviews on my products (Seller only).</summary>
+        [HttpGet("seller")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<ProductReviewDto>>), 200)]
+        public async Task<IActionResult> GetSellerReviews(
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetSellerReviewsQuery(page, pageSize), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Toggle helpful vote on a review (Buyer only).</summary>
+        [HttpPost("{id:guid}/helpful")]
+        [Authorize(Roles = "Buyer")]
+        [ProducesResponseType(typeof(ApiResponse<object>), 200)]
+        public async Task<IActionResult> ToggleHelpfulVote(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new ToggleReviewHelpfulVoteCommand(id), ct);
             return StatusCode(r.StatusCode, r);
         }
     }

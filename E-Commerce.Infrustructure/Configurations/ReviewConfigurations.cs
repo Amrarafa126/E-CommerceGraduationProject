@@ -15,9 +15,9 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(r => r.Comment).IsRequired().HasMaxLength(2000);
             builder.Property(r => r.SupplierReply).HasMaxLength(1000);
 
-            builder.HasOne(r => r.Product).WithMany()
-                .HasForeignKey(r => r.ProductId).
-                OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(r => r.Product).WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(r => r.Buyer).WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.BuyerId).OnDelete(DeleteBehavior.Restrict);           
@@ -25,6 +25,11 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.HasIndex(r => new { r.ProductId, r.BuyerId }).IsUnique();
 
             builder.HasQueryFilter(r => !r.IsDeleted);
+
+            builder.HasMany(r => r.HelpfulVotes)
+                .WithOne(hv => hv.Review)
+                .HasForeignKey(hv => hv.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

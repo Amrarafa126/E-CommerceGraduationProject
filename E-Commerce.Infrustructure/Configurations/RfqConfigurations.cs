@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using E_Commerce.Data.Entity;
+using E_Commerce.Data.Status;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
-{ 
-       public class RfqConfigurations : IEntityTypeConfiguration<RfqRequest>
+{
+    public class RfqConfigurations : IEntityTypeConfiguration<RfqRequest>
+    {
+        public void Configure(EntityTypeBuilder<RfqRequest> builder)
         {
-            public void Configure(EntityTypeBuilder<RfqRequest> builder)
-            {
-
             builder.ToTable("RfqRequests");
             builder.HasKey(r => r.Id);
 
@@ -22,7 +17,14 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(r => r.Currency).IsRequired().HasMaxLength(3);
             builder.Property(r => r.TargetPrice).HasMaxLength(100);
             builder.Property(r => r.ShippingCountry).HasMaxLength(100);
+            builder.Property(r => r.DestinationCity).HasMaxLength(100);
+            builder.Property(r => r.DestinationCountry).HasMaxLength(100);
+            builder.Property(r => r.PaymentTerms).HasMaxLength(500);
+            builder.Property(r => r.RequiredCertifications).HasMaxLength(1000);
+            builder.Property(r => r.SupplierRequirements).HasMaxLength(1000);
             builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
+            builder.Property(r => r.UnitOfMeasure).HasConversion<string>().HasMaxLength(50);
+            builder.Property(r => r.PreferredShippingMethod).HasConversion<string?>().HasMaxLength(50).IsRequired(false);
 
             builder.HasOne(r => r.Buyer)
                 .WithMany()
@@ -32,7 +34,14 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.HasOne(r => r.SellerCompany)
                 .WithMany()
                 .HasForeignKey(r => r.SellerCompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            builder.HasOne(r => r.Category)
+                .WithMany()
+                .HasForeignKey(r => r.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
 
             builder.HasOne(r => r.Product)
                 .WithMany()
@@ -47,7 +56,9 @@ namespace E_Commerce.Infrustructure.Configurations
 
             builder.HasIndex(r => r.BuyerId);
             builder.HasIndex(r => r.SellerCompanyId);
+            builder.HasIndex(r => r.CategoryId);
             builder.HasIndex(r => r.Status);
+            builder.HasIndex(r => r.IsPublic);
         }
     }
- }
+}

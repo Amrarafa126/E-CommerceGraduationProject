@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.RFQ.Queries.Models;
 using E_Commerce.Core.Wrappers;
@@ -7,13 +7,14 @@ using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
 
-
 namespace E_Commerce.Core.Features.RFQ.Queries.Handlers
 {
-    public class RFQHandlerQueries(IUnitOfWork uow, IMapper mapper , ICurrentUserService cu)
+    public class RFQHandlerQueries(IUnitOfWork uow, IMapper mapper, ICurrentUserService cu)
     : IRequestHandler<GetRfqByIdQuery, ApiResponse<RfqRequestDto>>,
       IRequestHandler<GetMyRfqsQuery, ApiResponse<PaginatedResult<RfqRequestDto>>>,
-      IRequestHandler<GetSellerRfqsQuery, ApiResponse<PaginatedResult<RfqRequestDto>>>
+      IRequestHandler<GetSellerRfqsQuery, ApiResponse<PaginatedResult<RfqRequestDto>>>,
+      IRequestHandler<GetRfqMarketplaceQuery, ApiResponse<PaginatedResult<RfqRequestDto>>>,
+      IRequestHandler<GetRfqMarketplaceByIdQuery, ApiResponse<RfqRequestDto>>
     {
         public async Task<ApiResponse<RfqRequestDto>> Handle(GetRfqByIdQuery req, CancellationToken ct)
         {
@@ -26,11 +27,12 @@ namespace E_Commerce.Core.Features.RFQ.Queries.Handlers
             bool isSeller = cu.OwnedCompanyId != null && rfq.SellerCompanyId == cu.OwnedCompanyId.Value;
             bool isAdmin = cu.Role == "Admin";
 
-            if (!isBuyer && !isSeller && !isAdmin)
+            if (!isBuyer && !isSeller && !isAdmin && !rfq.IsPublic)
                 throw new ForbiddenException("You are not authorized to view this RFQ.");
 
             return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
         }
+
         public async Task<ApiResponse<PaginatedResult<RfqRequestDto>>> Handle(
        GetMyRfqsQuery req, CancellationToken ct)
         {
@@ -52,5 +54,33 @@ namespace E_Commerce.Core.Features.RFQ.Queries.Handlers
                 PaginatedResult<RfqRequestDto>.Success(dtos, total, req.Page, req.PageSize));
         }
 
+        public async Task<ApiResponse<PaginatedResult<RfqRequestDto>>> Handle(
+            GetRfqMarketplaceQuery req, CancellationToken ct)
+        {
+            if (cu.OwnedCompanyId == null) throw new ForbiddenException("Only sellers can browse the RFQ marketplace.");
+
+            var (items, total) = await uow.RfqRequest.GetMarketplaceAsync(
+                req.Page,
+                req.PageSize,
+                req.Search,
+                req.CategoryId,
+                req.Country,
+                req.Status,
+                ct);
+
+            var dtos = mapper.Map<IEnumerable<RfqRequestDto>>(items);
+            return ApiResponse<PaginatedResult<RfqRequestDto>>.Ok(
+                PaginatedResult<RfqRequestDto>.Success(dtos, total, req.Page, req.PageSize));
+        }
+
+        public async Task<ApiResponse<RfqRequestDto>> Handle(GetRfqMarketplaceByIdQuery req, CancellationToken ct)
+        {
+            if (cu.OwnedCompanyId == null) throw new ForbiddenException("Only sellers can view marketplace RFQ details.");
+
+            var rfq = await uow.RfqRequest.GetMarketplaceByIdAsync(req.RfqId, ct)
+                ?? throw new NotFoundException(nameof(RfqRequest), req.RfqId);
+
+            return ApiResponse<RfqRequestDto>.Ok(mapper.Map<RfqRequestDto>(rfq));
+        }
     }
 }

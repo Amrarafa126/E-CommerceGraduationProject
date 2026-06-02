@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductVariants.Commands.Models;
+using E_Commerce.Core.Features.ProductVariants.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.ProductVariants.Commands.Vaildations
 {
@@ -13,23 +8,23 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Vaildations
         public UpdateProductVariantValidator()
         {
             RuleFor(x => x.ProductId)
-                .NotEmpty().WithMessage("ProductId is required.");
+                .NotEmpty().WithMessage("معرف المنتج مطلوب.");
 
             RuleFor(x => x.VariantId)
-                .NotEmpty().WithMessage("VariantId is required.");
+                .NotEmpty().WithMessage("معرف المتغير مطلوب.");
 
             RuleFor(x => x.SKU)
-                .NotEmpty().WithMessage("SKU is required.")
-                .MaximumLength(50).WithMessage("SKU must not exceed 50 characters.");
+                .NotEmpty().WithMessage("رمز SKU مطلوب.")
+                .MaximumLength(50).WithMessage("رمز SKU لا يجب أن يتجاوز 50 حرف.");
 
             RuleFor(x => x.Price)
-                .GreaterThanOrEqualTo(0).WithMessage("Price must be zero or greater.");
+                .GreaterThanOrEqualTo(0).WithMessage("السعر يجب أن يكون صفر أو أكبر.");
 
             RuleFor(x => x.StockQuantity)
-                .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
+                .GreaterThanOrEqualTo(0).WithMessage("المخزون لا يمكن أن يكون سالباً.");
 
             RuleFor(x => x.OptionValueIds)
-                .NotNull().WithMessage("OptionValueIds is required.");
+                .NotNull().WithMessage("قيم الخيارات مطلوبة.");
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using E_Commerce.Core.Features.AdminDashboard.Commands.Models;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
+using E_Commerce.Core.Features.Payment.Commands.Models;
+using E_Commerce.Core.Features.Payment.Queries.Models;
 using E_Commerce.Data.Status;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -110,6 +112,33 @@ namespace E_Commerce.Api.Controllers
             CancellationToken ct = default)
         {
             var r = await mediator.Send(new GetAllOrdersQuery(search, status, from, to, page, pageSize), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        // ── Payout Management ───────────────────────────────────────────
+        [HttpGet("payouts")]
+        public async Task<IActionResult> GetPayouts(
+            [FromQuery] int? status,
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetAllPayoutsQuery(status, page, pageSize), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpPost("payouts/{payoutId:guid}/approve")]
+        public async Task<IActionResult> ApprovePayout(
+            Guid payoutId, [FromBody] ApprovePayoutBody dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new ApprovePayoutCommand(payoutId, dto.ExternalReference), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpPost("payouts/{payoutId:guid}/reject")]
+        public async Task<IActionResult> RejectPayout(
+            Guid payoutId, [FromBody] RejectPayoutBody dto, CancellationToken ct)
+        {
+            var r = await mediator.Send(new RejectPayoutCommand(payoutId, dto.Reason), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -251,6 +280,8 @@ namespace E_Commerce.Api.Controllers
     public record ManageCompanyDto(CompanyAdminAction Action, string? Reason);
     public record AdjustPointsDto(Guid BuyerId, int Delta, string Reason);
     public record UpdateCouponBody(string Description, decimal? MaxDiscountAmount, DateTime? ExpiresAt, int? MaxUsageCount);
+    public record ApprovePayoutBody(string? ExternalReference);
+    public record RejectPayoutBody(string Reason);
 
 }
 

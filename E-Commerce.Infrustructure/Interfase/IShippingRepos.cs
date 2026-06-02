@@ -1,16 +1,11 @@
-﻿using E_Commerce.Data.Entity;
+using E_Commerce.Data.Entity;
 using E_Commerce.Infrustructure.InfrustructureBases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Infrustructure.Interfase
 {
     public interface IShippingRepos : IGenericRepositoryAsync<Shipping>
     {
-        Task<Shipping?> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default);
+        Task<Shipping?> GetByOrderSubOrderIdAsync(Guid orderSubOrderId, CancellationToken ct = default);
         Task<Shipping?> GetWithEventsAsync(Guid shipmentId, CancellationToken ct = default);
     }
 }

@@ -16,12 +16,15 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         ICategoryRepos Category { get; }
         IProductRepos Products { get; }
         IOrderRepos Orders { get; }
+        IGenericRepositoryAsync<OrderSubOrder> OrderSubOrders { get; }
         IOrderItemRepos orderItemRepos { get; }
         IWalletRepos Wallets { get; } 
         IRfqRequestRepos RfqRequest { get; }
         IRfqQuotationRepos RfqQuotation { get; }
         IConversationRepos Conversations { get; }
         IMessageRepos Messages { get; }
+        IGenericRepositoryAsync<MessageAttachment> MessageAttachments { get; }
+        IGenericRepositoryAsync<MessageReadReceipt> MessageReadReceipts { get; }
         IProductReviewRepos Reviews { get; }
         IShippingRepos shipping {  get; }
         IPaymentRepos payment { get; }
@@ -30,6 +33,11 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         //   IDashboardRepository Dashboard { get; }
         IGenericRepositoryAsync<ProductPriceTier> PriceTiers { get; }
         IGenericRepositoryAsync<ProductImage> ProductImages { get; }
+        IGenericRepositoryAsync<ProductSpecification> Specifications { get; }
+        IGenericRepositoryAsync<ProductCertificate> Certificates { get; }
+        IGenericRepositoryAsync<ProductVideo> Videos { get; }
+        IGenericRepositoryAsync<ProductTag> Tags { get; }
+        IGenericRepositoryAsync<ReviewHelpfulVote> ReviewHelpfulVotes { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
         Task BeginTransactionAsync(CancellationToken ct = default);
         Task CommitTransactionAsync(CancellationToken ct = default);

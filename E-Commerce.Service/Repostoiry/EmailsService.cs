@@ -1,65 +1,49 @@
-﻿using E_Commerce.Data.Helpers;
+using E_Commerce.Data.Helpers;
 using E_Commerce.Service.Interfase;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace E_Commerce.Service.Repostoiry
 {
     public class EmailsService : IEmailsService
     {
-        public Task<string> SendEmail(string email, string Message, string? reason)
+        private readonly EmailSettings _emailSettings;
+
+        public EmailsService(IOptions<EmailSettings> emailSettings)
         {
-            throw new NotImplementedException();
+            _emailSettings = emailSettings.Value;
+        }
+
+        public async Task<string> SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.FromEmail));
+                message.To.Add(MailboxAddress.Parse(toEmail));
+                message.Subject = subject;
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = isHtml ? body : null,
+                    TextBody = isHtml ? null : body,
+                };
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+                await client.AuthenticateAsync(_emailSettings.FromEmail, _emailSettings.Password);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                return $"Failed: {ex.Message}";
+            }
         }
     }
-    //{
-    //    #region Fields
-    //    private readonly EmailSettings _emailSettings;
-    //    #endregion
-    //    #region Constructors
-    //    public EmailsService(EmailSettings emailSettings)
-    //    {
-    //        _emailSettings = emailSettings;
-    //    }
-
-    //    #endregion
-    //    #region Handle Functions
-    //    public async Task<string> SendEmail(string email, string Message, string? reason)
-    //    {
-    //        try
-    //        {
-    //            //sending the Message of passwordResetLink
-    //            using (var client = new SmtpClient())
-    //            {
-    //                await client.ConnectAsync(_emailSettings.Host, _emailSettings.Port, true);
-    //                client.Authenticate(_emailSettings.FromEmail, _emailSettings.Password);
-    //                var bodybuilder = new BodyBuilder
-    //                {
-    //                    HtmlBody = $"{Message}",
-    //                    TextBody = "wellcome",
-    //                };
-    //                var message = new MimeMessage
-    //                {
-    //                    Body = bodybuilder.ToMessageBody()
-    //                };
-    //                message.From.Add(new MailboxAddress("Future Team", _emailSettings.FromEmail));
-    //                message.To.Add(new MailboxAddress("testing", email));
-    //                message.Subject = reason == null ? "No Submitted" : reason;
-    //                await client.SendAsync(message);
-    //                await client.DisconnectAsync(true);
-    //            }
-    //            //end of sending email
-    //            return "Success";
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            return "Failed";
-    //        }
-    //    }
-    //    #endregion
-
 }

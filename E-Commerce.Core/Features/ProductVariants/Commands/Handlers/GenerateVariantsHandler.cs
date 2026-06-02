@@ -27,7 +27,28 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             if (product.productVariants.Any(v => v.SKU == req.SKU))
                 throw new ConflictException($"SKU '{req.SKU}' already exists in this product.");
 
-            var variant = ProductVariant.Create(product.Id, req.SKU, req.Price, req.StockQuantity);
+            // Validate all option value IDs belong to this product
+            var validValueIds = product.ProductOptions
+                .SelectMany(o => o.Values)
+                .Select(v => v.Id)
+                .ToHashSet();
+
+            foreach (var optionValueId in req.OptionValueIds)
+            {
+                if (!validValueIds.Contains(optionValueId))
+                    throw new BusinessException($"Option value '{optionValueId}' does not belong to this product.");
+            }
+
+            // Validate unique combination
+            var existingCombinations = product.productVariants
+                .Select(v => v.OptionValues.Select(ov => ov.ProductOptionValueId).OrderBy(id => id).ToList())
+                .ToList();
+
+            var newCombination = req.OptionValueIds.OrderBy(id => id).ToList();
+            if (existingCombinations.Any(c => c.SequenceEqual(newCombination)))
+                throw new ConflictException("A variant with the same option value combination already exists.");
+
+            var variant = ProductVariant.Create(product.Id, req.SKU, req.Price, req.StockQuantity, req.Barcode, req.ImageUrl);
 
             foreach (var optionValueId in req.OptionValueIds)
             {
@@ -60,9 +81,33 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Handlers
             variant.UpdateSku(req.SKU); 
             variant.UpdatePrice(req.Price);
             variant.UpdateStock(req.StockQuantity);
+            variant.UpdateBarcode(req.Barcode);
+            variant.UpdateImageUrl(req.ImageUrl);
 
             if (req.IsActive) variant.Activate();
             else variant.Deactivate();
+
+            // Validate all option value IDs belong to this product
+            var validValueIds = product.ProductOptions
+                .SelectMany(o => o.Values)
+                .Select(v => v.Id)
+                .ToHashSet();
+
+            foreach (var optionValueId in req.OptionValueIds)
+            {
+                if (!validValueIds.Contains(optionValueId))
+                    throw new BusinessException($"Option value '{optionValueId}' does not belong to this product.");
+            }
+
+            // Validate unique combination (excluding current variant)
+            var existingCombinations = product.productVariants
+                .Where(v => v.Id != req.VariantId)
+                .Select(v => v.OptionValues.Select(ov => ov.ProductOptionValueId).OrderBy(id => id).ToList())
+                .ToList();
+
+            var newCombination = req.OptionValueIds.OrderBy(id => id).ToList();
+            if (existingCombinations.Any(c => c.SequenceEqual(newCombination)))
+                throw new ConflictException("A variant with the same option value combination already exists.");
 
             variant.OptionValues.Clear();
             foreach (var optionValueId in req.OptionValueIds)

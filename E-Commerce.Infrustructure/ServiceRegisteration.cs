@@ -2,6 +2,7 @@
 using E_Commerce.Data.Helpers;
 using E_Commerce.Data.Identity;
 using E_Commerce.Infrustructure.Context;
+using E_Commerce.Infrustructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -33,7 +34,10 @@ namespace E_Commerce.Infrustructure
 
                 opts.SignIn.RequireConfirmedEmail = false;
 
-            }).AddEntityFrameworkStores<AppDBContext>().AddDefaultTokenProviders();
+            })
+            .AddEntityFrameworkStores<AppDBContext>()
+            .AddDefaultTokenProviders()
+            .AddErrorDescriber<ArabicIdentityErrorDescriber>();
             var jwtSecret = configuration["JwtSettings:Secret"]
                       ?? throw new InvalidOperationException("JwtSettings:Secret is not configured.");
 
@@ -64,6 +68,13 @@ namespace E_Commerce.Infrustructure
 
                     opts.Events = new JwtBearerEvents
                     {
+                        OnMessageReceived = ctx =>
+                        {
+                            var accessToken = ctx.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(accessToken))
+                                ctx.Token = accessToken;
+                            return Task.CompletedTask;
+                        },
                         OnAuthenticationFailed = ctx =>
                         {
                             if (ctx.Exception is SecurityTokenExpiredException)

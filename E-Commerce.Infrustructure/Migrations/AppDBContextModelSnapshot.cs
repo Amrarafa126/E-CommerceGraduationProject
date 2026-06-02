@@ -137,6 +137,18 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<DateTime?>("LastMessageAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("RelatedOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RelatedProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RelatedRfqId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -156,9 +168,9 @@ namespace E_Commerce.Infrustructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AttachmentUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Property<string>("CardDataJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -171,6 +183,10 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -179,6 +195,9 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReplyToMessageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uniqueidentifier");
@@ -193,11 +212,95 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationId");
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("[IdempotencyKey] IS NOT NULL");
+
+                    b.HasIndex("ReplyToMessageId");
 
                     b.HasIndex("SenderId");
 
+                    b.HasIndex("ConversationId", "SenderId", "CreatedAt");
+
                     b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.MessageAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MimeType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("messageAttachments");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.MessageReadReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("messageReadReceipts");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Order", b =>
@@ -213,9 +316,8 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("CancellationReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<Guid?>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -225,6 +327,10 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -233,31 +339,14 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SellerCompanyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ShipmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("ShippingCost")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("OverallStatus")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
-                    b.Property<decimal>("SubTotal")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("PoNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 4)
@@ -270,10 +359,14 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasIndex("BuyerId");
 
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("[IdempotencyKey] IS NOT NULL");
+
                     b.HasIndex("OrderNumber")
                         .IsUnique();
-
-                    b.HasIndex("SellerCompanyId");
 
                     b.ToTable("Orders", (string)null);
                 });
@@ -290,11 +383,37 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<decimal?>("NegotiatedUnitPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<Guid>("OrderSubOrderId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("OriginalBasePrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<bool>("PriceTierApplied")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("PriceTierMinQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductCategoryName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ProductDescription")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProductMainImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
@@ -304,8 +423,16 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<Guid?>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ProductVariantName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("SellerCompanyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 4)
@@ -320,7 +447,7 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderSubOrderId");
 
                     b.HasIndex("ProductId");
 
@@ -346,7 +473,7 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("OrderSubOrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
@@ -359,9 +486,104 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderSubOrderId");
 
                     b.ToTable("OrderStatusHistory", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.OrderSubOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("BalanceDue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<decimal?>("DepositAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<bool>("DepositPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PaymentTerms")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("RfqQuoteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SellerCompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ShipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("SubOrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("SellerCompanyId");
+
+                    b.HasIndex("SubOrderNumber")
+                        .IsUnique();
+
+                    b.ToTable("OrderSubOrders", (string)null);
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Payment", b =>
@@ -410,6 +632,10 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -418,11 +644,18 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("OrderSubOrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<long?>("PaymobOrderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PaymobToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("RefundedAt")
                         .HasColumnType("datetime2");
@@ -439,7 +672,7 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasIndex("GatewayTransactionId");
 
-                    b.HasIndex("OrderId")
+                    b.HasIndex("OrderSubOrderId")
                         .IsUnique();
 
                     b.ToTable("Payments", (string)null);
@@ -512,6 +745,10 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<string>("Brand")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -534,22 +771,86 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int>("LeadTimeDays")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LeadTimeDaysSample")
+                        .HasColumnType("int");
+
                     b.Property<string>("MainImageUrl")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MetaTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("MinimumOrderQuantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ModelNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("OriginCountry")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PackagingDetails")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("PaymentTerms")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PortOfLoading")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("ReviewCount")
                         .HasColumnType("int");
 
+                    b.Property<bool>("SampleAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("SampleMoq")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("SamplePrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SupplyAbility")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TradeTerms")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("UnitOfMeasure")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -563,7 +864,69 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasIndex("CompanyId");
 
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
+
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductCertificate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssuedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductCertificates", (string)null);
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.ProductImage", b =>
@@ -732,16 +1095,22 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("HelpfulCount")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsVerifiedPurchase")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
 
-                    b.Property<Guid?>("ProductId1")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Rating")
@@ -766,12 +1135,86 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasIndex("BuyerId");
 
-                    b.HasIndex("ProductId1");
-
                     b.HasIndex("ProductId", "BuyerId")
                         .IsUnique();
 
                     b.ToTable("ProductReviews", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductSpecification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GroupName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHighlight")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductSpecifications", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductTag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "Tag")
+                        .IsUnique();
+
+                    b.ToTable("ProductTags", (string)null);
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.ProductVariant", b =>
@@ -780,8 +1223,16 @@ namespace E_Commerce.Infrustructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Barcode")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -845,7 +1296,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.ToTable("ProductVariantOptionValues", (string)null);
                 });
 
-            modelBuilder.Entity("E_Commerce.Data.Entity.ReviewImage", b =>
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductVideo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -857,8 +1308,96 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductVideos", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ReviewHelpfulVote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ReviewId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ReviewerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewerId");
+
+                    b.HasIndex("ReviewId", "ReviewerId")
+                        .IsUnique();
+
+                    b.ToTable("ReviewHelpfulVotes", (string)null);
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ReviewImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<Guid>("ReviewId")
                         .HasColumnType("uniqueidentifier");
@@ -868,7 +1407,8 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
@@ -904,6 +1444,9 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("LeadTimeDays")
+                        .HasColumnType("int");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -916,6 +1459,12 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<Guid>("RfqRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("SampleAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SellerCompanyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitPrice")
@@ -935,6 +1484,8 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasIndex("RfqRequestId");
 
+                    b.HasIndex("SellerCompanyId");
+
                     b.ToTable("RfqQuotes", (string)null);
                 });
 
@@ -948,6 +1499,9 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("BuyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -966,8 +1520,27 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(3000)
                         .HasColumnType("nvarchar(3000)");
 
+                    b.Property<string>("DestinationCity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DestinationCountry")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PaymentTerms")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PreferredShippingMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -975,7 +1548,11 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SellerCompanyId")
+                    b.Property<string>("RequiredCertifications")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("SellerCompanyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ShippingCountry")
@@ -987,6 +1564,10 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("SupplierRequirements")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("TargetPrice")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -996,12 +1577,21 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("UnitOfMeasure")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BuyerId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("IsPublic");
 
                     b.HasIndex("ProductId");
 
@@ -1062,6 +1652,14 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("BostaShipmentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("BostaTrackingNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("CarrierName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -1095,7 +1693,7 @@ namespace E_Commerce.Infrustructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("OrderSubOrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PhoneNumber")
@@ -1139,7 +1737,7 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
+                    b.HasIndex("OrderSubOrderId")
                         .IsUnique();
 
                     b.ToTable("Shipments", (string)null);
@@ -1279,6 +1877,12 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTime?>("MagicLinkExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MagicLinkToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -1571,7 +2175,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Buyer");
@@ -1584,8 +2188,13 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Conversation", "Conversation")
                         .WithMany("Messages")
                         .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("E_Commerce.Data.Entity.Message", "ReplyToMessage")
+                        .WithMany()
+                        .HasForeignKey("ReplyToMessageId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("E_Commerce.Data.Identity.User", "Sender")
                         .WithMany()
@@ -1595,7 +2204,39 @@ namespace E_Commerce.Infrustructure.Migrations
 
                     b.Navigation("Conversation");
 
+                    b.Navigation("ReplyToMessage");
+
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.MessageAttachment", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Message", "Message")
+                        .WithMany("Attachments")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.MessageReadReceipt", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Message", "Message")
+                        .WithMany("ReadReceipts")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_Commerce.Data.Identity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Order", b =>
@@ -1606,23 +2247,19 @@ namespace E_Commerce.Infrustructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("E_Commerce.Data.Entity.Company", "SellerCompany")
+                    b.HasOne("E_Commerce.Data.Entity.Company", null)
                         .WithMany("ReceivedOrders")
-                        .HasForeignKey("SellerCompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("CompanyId");
 
                     b.Navigation("Buyer");
-
-                    b.Navigation("SellerCompany");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.OrderItem", b =>
                 {
-                    b.HasOne("E_Commerce.Data.Entity.Order", "Order")
+                    b.HasOne("E_Commerce.Data.Entity.OrderSubOrder", "OrderSubOrder")
                         .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("OrderSubOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
@@ -1634,9 +2271,9 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Order");
+                    b.Navigation("OrderSubOrder");
 
                     b.Navigation("Product");
 
@@ -1645,24 +2282,43 @@ namespace E_Commerce.Infrustructure.Migrations
 
             modelBuilder.Entity("E_Commerce.Data.Entity.OrderStatusHistory", b =>
                 {
-                    b.HasOne("E_Commerce.Data.Entity.Order", "Order")
+                    b.HasOne("E_Commerce.Data.Entity.OrderSubOrder", "OrderSubOrder")
                         .WithMany("StatusHistory")
+                        .HasForeignKey("OrderSubOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OrderSubOrder");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.OrderSubOrder", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Order", "Order")
+                        .WithMany("SubOrders")
                         .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_Commerce.Data.Entity.Company", "SellerCompany")
+                        .WithMany()
+                        .HasForeignKey("SellerCompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
+
+                    b.Navigation("SellerCompany");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Payment", b =>
                 {
-                    b.HasOne("E_Commerce.Data.Entity.Order", "Order")
+                    b.HasOne("E_Commerce.Data.Entity.OrderSubOrder", "OrderSubOrder")
                         .WithOne("Payment")
-                        .HasForeignKey("E_Commerce.Data.Entity.Payment", "OrderId")
+                        .HasForeignKey("E_Commerce.Data.Entity.Payment", "OrderSubOrderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("OrderSubOrder");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Payout", b =>
@@ -1670,7 +2326,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Company", "Company")
                         .WithMany("Payouts")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -1687,7 +2343,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Company", "Company")
                         .WithMany("Products")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1695,12 +2351,23 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductCertificate", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Product", "Product")
+                        .WithMany("Certificates")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("E_Commerce.Data.Entity.ProductImage", b =>
                 {
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -1711,7 +2378,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
                         .WithMany("ProductOptions")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -1722,7 +2389,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.ProductOption", "ProductOption")
                         .WithMany("Values")
                         .HasForeignKey("ProductOptionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ProductOption");
@@ -1733,7 +2400,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
                         .WithMany("PriceTiers")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -1748,17 +2415,34 @@ namespace E_Commerce.Infrustructure.Migrations
                         .IsRequired();
 
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("E_Commerce.Data.Entity.Product", null)
-                        .WithMany("Reviews")
-                        .HasForeignKey("ProductId1")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Buyer");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductSpecification", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Product", "Product")
+                        .WithMany("Specifications")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductTag", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Product", "Product")
+                        .WithMany("Tags")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -1768,7 +2452,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
                         .WithMany("productVariants")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -1785,7 +2469,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.ProductVariant", "ProductVariant")
                         .WithMany("OptionValues")
                         .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ProductOptionValue");
@@ -1793,12 +2477,42 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("E_Commerce.Data.Entity.ProductVideo", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.Product", "Product")
+                        .WithMany("Videos")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.ReviewHelpfulVote", b =>
+                {
+                    b.HasOne("E_Commerce.Data.Entity.ProductReview", "Review")
+                        .WithMany("HelpfulVotes")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_Commerce.Data.Identity.User", "Reviewer")
+                        .WithMany()
+                        .HasForeignKey("ReviewerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("Reviewer");
+                });
+
             modelBuilder.Entity("E_Commerce.Data.Entity.ReviewImage", b =>
                 {
                     b.HasOne("E_Commerce.Data.Entity.ProductReview", "Review")
                         .WithMany("Images")
                         .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Review");
@@ -1809,10 +2523,18 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.RfqRequest", "RfqRequest")
                         .WithMany("Quotes")
                         .HasForeignKey("RfqRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_Commerce.Data.Entity.Company", "SellerCompany")
+                        .WithMany()
+                        .HasForeignKey("SellerCompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("RfqRequest");
+
+                    b.Navigation("SellerCompany");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.RfqRequest", b =>
@@ -1823,18 +2545,24 @@ namespace E_Commerce.Infrustructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("E_Commerce.Data.Entity.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("E_Commerce.Data.Entity.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("E_Commerce.Data.Entity.Company", "SellerCompany")
                         .WithMany()
                         .HasForeignKey("SellerCompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Buyer");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Product");
 
@@ -1843,13 +2571,13 @@ namespace E_Commerce.Infrustructure.Migrations
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Shipping", b =>
                 {
-                    b.HasOne("E_Commerce.Data.Entity.Order", "Order")
+                    b.HasOne("E_Commerce.Data.Entity.OrderSubOrder", "OrderSubOrder")
                         .WithOne("Shipment")
-                        .HasForeignKey("E_Commerce.Data.Entity.Shipping", "OrderId")
+                        .HasForeignKey("E_Commerce.Data.Entity.Shipping", "OrderSubOrderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("OrderSubOrder");
                 });
 
             modelBuilder.Entity("E_Commerce.Data.Entity.ShippingEvent", b =>
@@ -1857,7 +2585,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Shipping", "Shipment")
                         .WithMany("Events")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Shipment");
@@ -1868,7 +2596,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Company", "Company")
                         .WithOne("Wallet")
                         .HasForeignKey("E_Commerce.Data.Entity.Wallet", "CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -1879,7 +2607,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1888,7 +2616,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1897,7 +2625,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1906,13 +2634,13 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Entity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("E_Commerce.Data.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1921,7 +2649,7 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.HasOne("E_Commerce.Data.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1949,7 +2677,19 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("E_Commerce.Data.Entity.Message", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("ReadReceipts");
+                });
+
             modelBuilder.Entity("E_Commerce.Data.Entity.Order", b =>
+                {
+                    b.Navigation("SubOrders");
+                });
+
+            modelBuilder.Entity("E_Commerce.Data.Entity.OrderSubOrder", b =>
                 {
                     b.Navigation("Items");
 
@@ -1962,6 +2702,8 @@ namespace E_Commerce.Infrustructure.Migrations
 
             modelBuilder.Entity("E_Commerce.Data.Entity.Product", b =>
                 {
+                    b.Navigation("Certificates");
+
                     b.Navigation("Images");
 
                     b.Navigation("PriceTiers");
@@ -1969,6 +2711,12 @@ namespace E_Commerce.Infrustructure.Migrations
                     b.Navigation("ProductOptions");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("Specifications");
+
+                    b.Navigation("Tags");
+
+                    b.Navigation("Videos");
 
                     b.Navigation("productVariants");
                 });
@@ -1985,6 +2733,8 @@ namespace E_Commerce.Infrustructure.Migrations
 
             modelBuilder.Entity("E_Commerce.Data.Entity.ProductReview", b =>
                 {
+                    b.Navigation("HelpfulVotes");
+
                     b.Navigation("Images");
                 });
 

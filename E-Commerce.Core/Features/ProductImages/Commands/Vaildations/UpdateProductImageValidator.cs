@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.ProductImages.Commands.Models;
+using E_Commerce.Core.Features.ProductImages.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.ProductImages.Commands.Vaildations
 {
@@ -15,15 +10,16 @@ namespace E_Commerce.Core.Features.ProductImages.Commands.Vaildations
 
         public UpdateProductImageValidator()
         {
-            RuleFor(x => x.ProductId).NotEmpty();
-            RuleFor(x => x.ImageId).NotEmpty();
+            RuleFor(x => x.ProductId).NotEmpty().WithMessage("معرف المنتج مطلوب.");
+            RuleFor(x => x.ImageId).NotEmpty().WithMessage("معرف الصورة مطلوب.");
 
             When(x => x.File != null, () => {
-                RuleFor(x => x.File!.Length).LessThanOrEqualTo(MaxBytes)
-                    .WithMessage("File size must not exceed 5MB.");
+                RuleFor(x => x.File!.Length)
+                    .LessThanOrEqualTo(MaxBytes)
+                    .WithMessage("حجم الملف لا يجب أن يتجاوز 5 ميجابايت.");
                 RuleFor(x => x.File!.ContentType)
                     .Must(t => AllowedTypes.Contains(t?.ToLower()))
-                    .WithMessage("Only JPG, PNG, and WebP allowed.");
+                    .WithMessage("يُسمح فقط بصيغ JPG و PNG و WebP.");
             });
         }
     }

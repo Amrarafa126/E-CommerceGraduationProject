@@ -1,4 +1,4 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using E_Commerce.Data.Identity;
@@ -9,19 +9,17 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 {
     public class GetAdminOverviewHandler(
     AppDBContext db,
-    UserManager<User> userManager,
     ICurrentUserService cu)
     : IRequestHandler<GetAdminOverviewQuery, ApiResponse<AdminOverviewDto>>
     {
         public async Task<ApiResponse<AdminOverviewDto>> Handle(
        GetAdminOverviewQuery req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var now = DateTime.UtcNow;
             var today = now.Date;
@@ -31,8 +29,8 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 
             // ── Users ──────────────────────────────────────────────
             var totalUsers = await db.Users.CountAsync(u => !u.IsDeleted, ct);
-            var totalSellers = (await userManager.GetUsersInRoleAsync("Seller")).Count;
-            var totalBuyers = (await userManager.GetUsersInRoleAsync("Buyer")).Count;
+            var totalSellers = await db.Users.CountAsync(u => !u.IsDeleted && u.Role == UserRole.Seller, ct);
+            var totalBuyers = await db.Users.CountAsync(u => !u.IsDeleted && u.Role == UserRole.Buyer, ct);
             var newUsersToday = await db.Users.CountAsync(u => u.CreatedAt >= today && !u.IsDeleted, ct);
             var newUsersMonth = await db.Users.CountAsync(u => u.CreatedAt >= thisMonth && !u.IsDeleted, ct);
 
@@ -51,29 +49,29 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
             var totalOrders = await db.orders.CountAsync(o => !o.IsDeleted, ct);
             var ordersToday = await db.orders.CountAsync(o => o.CreatedAt >= today && !o.IsDeleted, ct);
             var ordersMonth = await db.orders.CountAsync(o => o.CreatedAt >= thisMonth && !o.IsDeleted, ct);
-            var pendingOrders = await db.orders.CountAsync(o => o.Status == OrderStatus.Pending && !o.IsDeleted, ct);
+            var pendingOrders = await db.orderSubOrders.CountAsync(s => s.Status == OrderStatus.Pending && !s.IsDeleted, ct);
 
             // ── Revenue ────────────────────────────────────────────
-            var revenueTotal = await db.orders
-                .Where(o => o.Status == OrderStatus.Completed && !o.IsDeleted)
-                .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
+            var revenueTotal = await db.orderSubOrders
+                .Where(s => s.Status == OrderStatus.Completed && !s.IsDeleted)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0;
 
-            var revenueToday = await db.orders
-                .Where(o => o.Status == OrderStatus.Completed && o.CreatedAt >= today && !o.IsDeleted)
-                .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
+            var revenueToday = await db.orderSubOrders
+                .Where(s => s.Status == OrderStatus.Completed && s.CreatedAt >= today && !s.IsDeleted)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0;
 
-            var revenueMonth = await db.orders
-                .Where(o => o.Status == OrderStatus.Completed && o.CreatedAt >= thisMonth && !o.IsDeleted)
-                .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
+            var revenueMonth = await db.orderSubOrders
+                .Where(s => s.Status == OrderStatus.Completed && s.CreatedAt >= thisMonth && !s.IsDeleted)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0;
 
-            var revenueLastMonth = await db.orders
-                .Where(o => o.Status == OrderStatus.Completed
-                    && o.CreatedAt >= lastMonth && o.CreatedAt < thisMonth && !o.IsDeleted)
-                .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
+            var revenueLastMonth = await db.orderSubOrders
+                .Where(s => s.Status == OrderStatus.Completed
+                    && s.CreatedAt >= lastMonth && s.CreatedAt < thisMonth && !s.IsDeleted)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0;
 
-            var revenueYear = await db.orders
-                .Where(o => o.Status == OrderStatus.Completed && o.CreatedAt >= thisYear && !o.IsDeleted)
-                .SumAsync(o => (decimal?)o.TotalAmount, ct) ?? 0;
+            var revenueYear = await db.orderSubOrders
+                .Where(s => s.Status == OrderStatus.Completed && s.CreatedAt >= thisYear && !s.IsDeleted)
+                .SumAsync(s => (decimal?)s.TotalAmount, ct) ?? 0;
 
             var totalReviews = await db.productReviews.CountAsync(r => !r.IsDeleted, ct);
             var avgRating = await db.productReviews.Where(r => !r.IsDeleted)

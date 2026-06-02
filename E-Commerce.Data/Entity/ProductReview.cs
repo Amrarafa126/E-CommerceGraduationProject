@@ -20,8 +20,11 @@ namespace E_Commerce.Data.Entity
         public bool IsVerifiedPurchase { get; private set; }
         public string? SupplierReply { get; private set; }
         public DateTime? RepliedAt { get; private set; }
+        public bool IsVisible { get; private set; } = true;
+        public bool IsApproved { get; private set; } = true;
+        public int HelpfulCount { get; private set; }
         public ICollection<ReviewImage> Images { get; private set; } = new List<ReviewImage>();
-
+        public ICollection<ReviewHelpfulVote> HelpfulVotes { get; private set; } = new List<ReviewHelpfulVote>();
 
         private ProductReview() { }
 
@@ -56,5 +59,20 @@ namespace E_Commerce.Data.Entity
             RepliedAt = DateTime.UtcNow;
             MarkAsUpdated();
         }
+
+        public void SetVisibility(bool visible)
+        {
+            IsVisible = visible;
+            MarkAsUpdated();
+        }
+
+        public void SetApproved(bool approved)
+        {
+            IsApproved = approved;
+            MarkAsUpdated();
+        }
+
+        public void IncrementHelpful() { HelpfulCount++; MarkAsUpdated(); }
+        public void DecrementHelpful() { if (HelpfulCount > 0) HelpfulCount--; MarkAsUpdated(); }
     }
 }

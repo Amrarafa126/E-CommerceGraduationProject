@@ -1,9 +1,12 @@
 
 using E_Commerce.Api.Middleware;
 using E_Commerce.Core;
+using E_Commerce.Data.Helpers;
 using E_Commerce.Infrustructure;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service;
+using E_Commerce.Service.Payment;
+using E_Commerce.Service.Shipping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -17,11 +20,16 @@ namespace E_Commerce.Api
 
 
             builder.Services.AddControllers();
+            builder.Services.AddSignalR();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<AppDBContext>(op =>
             op.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.Configure<PaymobOptions>(builder.Configuration.GetSection("Paymob"));
+            builder.Services.Configure<BostaOptions>(builder.Configuration.GetSection("Bosta"));
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection("GoogleAuthSettings"));
             builder.Services.AddInfrustructureDependencies().AddServiceDependencies().AddCoreDependencies().AddServiceRegisteration(builder.Configuration);
             builder.Services.AddHttpContextAccessor();
 
@@ -30,7 +38,11 @@ namespace E_Commerce.Api
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                    policy
+                        .SetIsOriginAllowed(_ => true)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
             });
             builder.Services.AddSwaggerGen(c =>
             {
@@ -94,6 +106,7 @@ namespace E_Commerce.Api
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<E_Commerce.Core.Features.Chats.Hubs.ChatHub>("/hubs/chat");
 
             app.Run();
         }

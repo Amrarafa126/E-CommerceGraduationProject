@@ -15,5 +15,6 @@ namespace E_Commerce.Infrustructure.Interfase
         Task<(IEnumerable<Conversation> Items, int Total)> GetByBuyerAsync(Guid buyerId, int page, int pageSize, CancellationToken ct = default);
         Task<(IEnumerable<Conversation> Items, int Total)> GetByCompanyAsync(Guid companyId, int page, int pageSize, CancellationToken ct = default);
         Task<int> CountUnreadAsync(Guid conversationId, Guid receiverId, CancellationToken ct = default);
+        Task<Dictionary<Guid, int>> CountUnreadBatchAsync(IEnumerable<Guid> conversationIds, Guid receiverId, CancellationToken ct = default);
     }
 }

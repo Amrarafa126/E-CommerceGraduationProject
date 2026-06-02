@@ -14,6 +14,8 @@ namespace E_Commerce.Data.Entity
         public decimal Price { get; private set; }
         public int StockQuantity { get; private set; }
         public bool IsActive { get; private set; } = true;
+        public string? Barcode { get; private set; }
+        public string? ImageUrl { get; private set; }
         public Guid ProductId { get; private set; }
         public Product Product { get; private set; } = null!;
         public ICollection<ProductVariantOptionValue> OptionValues { get; private set; } = new List<ProductVariantOptionValue>();
@@ -21,7 +23,7 @@ namespace E_Commerce.Data.Entity
         private ProductVariant() { }
 
         public static ProductVariant Create(Guid productId, string sku, decimal price,
-            int stock)
+            int stock, string? barcode = null, string? imageUrl = null)
         {
             if (price < 0) throw new ArgumentException("Price cannot be negative.");
             if (stock < 0) throw new ArgumentException("Stock cannot be negative.");
@@ -31,6 +33,8 @@ namespace E_Commerce.Data.Entity
                 SKU = sku,
                 Price = price,
                 StockQuantity = stock,
+                Barcode = barcode,
+                ImageUrl = imageUrl,
             };
         }
         public void UpdateSku(string sku)
@@ -45,6 +49,8 @@ namespace E_Commerce.Data.Entity
             StockQuantity += delta; MarkAsUpdated();
         }
         public void UpdatePrice(decimal price) { Price = price; MarkAsUpdated(); }
+        public void UpdateBarcode(string? barcode) { Barcode = barcode; MarkAsUpdated(); }
+        public void UpdateImageUrl(string? imageUrl) { ImageUrl = imageUrl; MarkAsUpdated(); }
         public void Activate() { IsActive = true; MarkAsUpdated(); }
         public void Deactivate() { IsActive = false; MarkAsUpdated(); }
     }

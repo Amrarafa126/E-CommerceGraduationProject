@@ -12,7 +12,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
     {
         public async Task<ApiResponse<object>> Handle(AdminManageCompanyCommand req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var company = await uow.Companies.GetByIdAsync(req.CompanyId, ct)
                 ?? throw new NotFoundException(nameof(Company), req.CompanyId);
@@ -34,7 +34,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
             uow.Companies.Update(company);
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok($"Company {req.Action} applied.");
+            return ApiResponse<object>.Ok($"تم تطبيق إجراء {req.Action} على الشركة.");
         }
     }
 }

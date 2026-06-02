@@ -20,7 +20,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
     {
         public async Task<ApiResponse<object>> Handle(AdminManageUserCommand req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var user = await userManager.FindByIdAsync(req.UserId.ToString())
                 ?? throw new NotFoundException(nameof(User), req.UserId);
@@ -49,7 +49,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Commands.Handlers
             if (!result.Succeeded)
                 throw new BusinessException(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-            return ApiResponse<object>.Ok($"User {req.Action} applied successfully.");
+            return ApiResponse<object>.Ok($"تم تطبيق إجراء {req.Action} على المستخدم بنجاح.");
         }
     }
 

@@ -17,6 +17,7 @@ namespace E_Commerce.Infrustructure.Repository
             Guid conversationId, int page, int pageSize, CancellationToken ct = default)
         {
             var conversation = await Context.conversations
+                .AsNoTracking()
                 .Include(c => c.Buyer)
                 .Include(c => c.Company)
                 .FirstOrDefaultAsync(c => c.Id == conversationId, ct);
@@ -24,13 +25,21 @@ namespace E_Commerce.Infrustructure.Repository
             if (conversation == null) return null;
 
             var messages = await Context.messages
+                .AsSplitQuery()
+                .AsNoTracking()
                 .Include(m => m.Sender)
+                .Include(m => m.Attachments)
+                .Include(m => m.ReadReceipts).ThenInclude(r => r.User)
+                .Include(m => m.ReplyToMessage).ThenInclude(rm => rm!.Sender)
+                .Include(m => m.ReplyToMessage).ThenInclude(rm => rm!.Attachments)
                 .Where(m => m.ConversationId == conversationId)
-                .OrderByDescending (m => m.CreatedAt)
+                .OrderByDescending(m => m.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(ct);
 
+            // Clear any existing messages to prevent duplicates from EF change tracker
+            conversation.Messages.Clear();
             foreach (var msg in messages)
                 conversation.Messages.Add(msg);
 
@@ -48,8 +57,12 @@ namespace E_Commerce.Infrustructure.Repository
         {
             var query = Context.conversations
                 .AsNoTracking()
+                .Include(c => c.Buyer)
                 .Include(c => c.Company)
                 .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                    .ThenInclude(m => m!.Sender)
+                .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                    .ThenInclude(m => m!.Attachments)
                 .Where(c => c.BuyerId == buyerId && !c.IsBuyerArchived);
 
             var total = await query.CountAsync(ct);
@@ -68,7 +81,11 @@ namespace E_Commerce.Infrustructure.Repository
             var query = Context.conversations
                 .AsNoTracking()
                 .Include(c => c.Buyer)
+                .Include(c => c.Company)
                 .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                    .ThenInclude(m => m!.Sender)
+                .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+                    .ThenInclude(m => m!.Attachments)
                 .Where(c => c.CompanyId == companyId && !c.IsCompanyArchived);
 
             var total = await query.CountAsync(ct);
@@ -88,6 +105,18 @@ namespace E_Commerce.Infrustructure.Repository
                     m.ConversationId == conversationId &&
                     m.SenderId != receiverId &&
                     !m.IsRead, ct);
+
+        public async Task<Dictionary<Guid, int>> CountUnreadBatchAsync(
+            IEnumerable<Guid> conversationIds, Guid receiverId, CancellationToken ct = default)
+        {
+            var ids = conversationIds.ToList();
+            if (!ids.Any()) return new Dictionary<Guid, int>();
+
+            return await Context.messages
+                .Where(m => ids.Contains(m.ConversationId) && m.SenderId != receiverId && !m.IsRead)
+                .GroupBy(m => m.ConversationId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count(), ct);
+        }
     }
 }
 

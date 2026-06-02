@@ -1,10 +1,5 @@
-﻿using E_Commerce.Core.Features.Orders.Commands.Models;
+using E_Commerce.Core.Features.Orders.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Orders.Commands.Vaildations
 {
@@ -12,8 +7,10 @@ namespace E_Commerce.Core.Features.Orders.Commands.Vaildations
     {
         public CancelOrderValidator()
         {
-            RuleFor(x => x.OrderId).NotEmpty();
-            RuleFor(x => x.Reason).NotEmpty().MaximumLength(500);
+            RuleFor(x => x.OrderId).NotEmpty().WithMessage("معرف الطلب مطلوب.");
+            RuleFor(x => x.Reason)
+                .NotEmpty().WithMessage("سبب الإلغاء مطلوب.")
+                .MaximumLength(500).WithMessage("سبب الإلغاء لا يجب أن يتجاوز 500 حرف.");
         }
     }
 }

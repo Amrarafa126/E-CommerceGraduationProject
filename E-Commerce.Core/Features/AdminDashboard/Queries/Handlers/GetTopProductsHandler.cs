@@ -1,14 +1,9 @@
-﻿using E_Commerce.Core.Exceptions;
+using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.AdminDashboard.Queries.Models;
 using E_Commerce.Infrustructure.Context;
 using E_Commerce.Service.Interfase;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
 {
@@ -18,10 +13,10 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
         public async Task<ApiResponse<List<TopProductDto>>> Handle(
             GetTopProductsQuery req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
 
             var result = await db.orderItems
-                .Where(i => !i.Order.IsDeleted)
+                .Where(i => !i.OrderSubOrder.IsDeleted)
                 .GroupBy(i => new { i.ProductId, i.ProductName, i.Product.MainImageUrl, i.Product.Company.CompanyName })
                 .Select(g => new
                 {
@@ -44,5 +39,4 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
             return ApiResponse<List<TopProductDto>>.Ok(dtos);
         }
     }
-
 }

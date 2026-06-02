@@ -10,6 +10,8 @@ public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVaria
         builder.HasKey(v => v.Id);
         builder.Property(v => v.SKU).IsRequired().HasMaxLength(100);
         builder.Property(v => v.Price).HasPrecision(18, 4);
+        builder.Property(v => v.Barcode).HasMaxLength(100);
+        builder.Property(v => v.ImageUrl).HasMaxLength(1000);
 
         builder.HasIndex(v => new { v.ProductId, v.SKU }).IsUnique();
 

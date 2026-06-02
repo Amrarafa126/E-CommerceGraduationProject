@@ -1,10 +1,9 @@
-﻿using E_Commerce.Data.Entity;
+using E_Commerce.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-   
     public class ShippingConfigurations : IEntityTypeConfiguration<Shipping>
     {
         public void Configure(EntityTypeBuilder<Shipping> builder)
@@ -26,11 +25,13 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(s => s.CarrierName).HasMaxLength(100);
             builder.Property(s => s.TrackingNumber).HasMaxLength(100);
             builder.Property(s => s.TrackingUrl).HasMaxLength(500);
+            builder.Property(s => s.BostaTrackingNumber).HasMaxLength(100);
+            builder.Property(s => s.BostaShipmentId).HasMaxLength(100);
 
-            builder.HasOne(s => s.Order)
-              .WithOne(o => o.Shipment)
-              .HasForeignKey<Shipping>(s => s.OrderId)
-              .HasPrincipalKey<Order>(o => o.Id)
+            builder.HasOne(s => s.OrderSubOrder)
+              .WithOne(so => so.Shipment)
+              .HasForeignKey<Shipping>(s => s.OrderSubOrderId)
+              .HasPrincipalKey<OrderSubOrder>(so => so.Id)
               .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(s => s.Events)

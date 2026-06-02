@@ -15,5 +15,7 @@ namespace E_Commerce.Infrustructure.Interfase
             Guid buyerId, int page, int pageSize, CancellationToken ct = default);
         Task<(IEnumerable<Order> Items, int Total)> GetBySellerPagedAsync(
             Guid companyId, int page, int pageSize, CancellationToken ct = default);
+        Task<(IEnumerable<OrderSubOrder> Items, int Total)> GetSubOrdersBySellerPagedAsync(
+            Guid companyId, int page, int pageSize, CancellationToken ct = default);
     }
 }

@@ -20,7 +20,7 @@ namespace E_Commerce.Core.Features.Companies.Commands.Handlers
             ?? throw new NotFoundException(nameof(Company), req.CompanyId);
 
             if (company.OwnerUserId != cu.UserId && cu.Role != "Admin")
-                throw new ForbiddenException("Only the company owner or an Admin can update company info.");
+                throw new ForbiddenException("يمكن لصاحب الشركة أو المسؤول فقط تحديث بيانات الشركة.");
 
             var address = new Address(req.Street, req.City, req.State, req.Country, req.PostalCode);
             var contact = new ContactInfo(req.ContactEmail, req.ContactPhone);

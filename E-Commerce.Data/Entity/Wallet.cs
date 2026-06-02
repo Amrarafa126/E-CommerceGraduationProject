@@ -42,11 +42,28 @@ namespace E_Commerce.Data.Entity
             MarkAsUpdated();
         }
 
+        public void ReversePending(decimal amount)
+        {
+            if (amount <= 0) throw new ArgumentException("Amount must be positive.");
+            if (amount > PendingBalance)
+                throw new InvalidOperationException("Cannot reverse more than pending balance.");
+            PendingBalance -= amount;
+            TotalEarned -= amount;
+            MarkAsUpdated();
+        }
+
         public void DebitAvailable(decimal amount)
         {
             if (amount > AvailableBalance)
                 throw new InvalidOperationException("Insufficient available balance.");
             AvailableBalance -= amount;
+            MarkAsUpdated();
+        }
+
+        public void CreditAvailable(decimal amount)
+        {
+            if (amount <= 0) throw new ArgumentException("Amount must be positive.");
+            AvailableBalance += amount;
             MarkAsUpdated();
         }
 

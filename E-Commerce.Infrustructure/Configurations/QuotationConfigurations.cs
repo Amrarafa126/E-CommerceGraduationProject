@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using E_Commerce.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_Commerce.Infrustructure.Configurations
 {
-  
     public class QuotationConfigurations : IEntityTypeConfiguration<RfqQuotation>
-        {
-         public void Configure(EntityTypeBuilder<RfqQuotation> builder)
+    {
+        public void Configure(EntityTypeBuilder<RfqQuotation> builder)
         {
             builder.ToTable("RfqQuotes");
             builder.HasKey(q => q.Id);
@@ -23,8 +17,18 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(q => q.PaymentTerms).HasMaxLength(500);
             builder.Property(q => q.DeliveryTerms).HasMaxLength(500);
 
+            builder.HasOne(q => q.RfqRequest)
+                .WithMany(r => r.Quotes)
+                .HasForeignKey(q => q.RfqRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(q => q.SellerCompany)
+                .WithMany()
+                .HasForeignKey(q => q.SellerCompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(q => q.RfqRequestId);
+            builder.HasIndex(q => q.SellerCompanyId);
         }
-      
     }
- }
+}

@@ -1,10 +1,10 @@
-﻿using E_Commerce.Core.Features.RFQ;
+using E_Commerce.Core.Features.RFQ;
 using E_Commerce.Core.Features.RFQ.Commands.Models;
 using E_Commerce.Core.Features.RFQ.Queries.Models;
 using E_Commerce.Core.Wrappers;
+using E_Commerce.Data.Status;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
@@ -50,8 +50,37 @@ namespace E_Commerce.Api.Controllers
         }
 
         /// <summary>
-        /// Buyer sends a Request for Quotation to a seller company.
-        /// Optionally link to a specific product and set a target price.
+        /// Browse public RFQ marketplace (sellers only).
+        /// </summary>
+        [HttpGet("marketplace")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<PaginatedResult<RfqRequestDto>>), 200)]
+        public async Task<IActionResult> GetMarketplace(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null,
+            [FromQuery] Guid? categoryId = null,
+            [FromQuery] string? country = null,
+            [FromQuery] int? status = null,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetRfqMarketplaceQuery(page, pageSize, search, categoryId, country, status), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>Get a public marketplace RFQ detail (sellers only).</summary>
+        [HttpGet("marketplace/{id:guid}")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
+        public async Task<IActionResult> GetMarketplaceById(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new GetRfqMarketplaceByIdQuery(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        /// <summary>
+        /// Buyer sends a Request for Quotation.
+        /// Seller company is optional; if omitted the RFQ is published to the public marketplace.
         /// </summary>
         [HttpPost]
         [Authorize(Roles = "Buyer")]
@@ -59,9 +88,25 @@ namespace E_Commerce.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateRfqDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(new CreateRfqCommand(
-                dto.Title, dto.Description, dto.Quantity, dto.SellerCompanyId,
-                dto.Currency, dto.TargetPrice, dto.ShippingCountry,
-                dto.DeadlineDate, dto.ProductId), ct);
+                dto.Title,
+                dto.Description,
+                dto.Quantity,
+                dto.SellerCompanyId,
+                dto.Currency ?? "EGP",
+                (UnitOfMeasure)dto.UnitOfMeasure,
+                dto.CategoryId,
+                dto.TargetPrice,
+                dto.ShippingCountry,
+                dto.DestinationCity,
+                dto.DestinationCountry,
+                (ShippingMethod?)dto.PreferredShippingMethod,
+                dto.PaymentTerms,
+                dto.RequiredCertifications,
+                dto.SupplierRequirements,
+                dto.DeadlineDate,
+                dto.ProductId,
+                dto.Attachments,
+                dto.IsPublic), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -75,6 +120,15 @@ namespace E_Commerce.Api.Controllers
             return StatusCode(r.StatusCode, r);
         }
 
+        [HttpPost("{id:guid}/decline")]
+        [Authorize(Roles = "Seller")]
+        [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
+        public async Task<IActionResult> DeclineRfq(Guid id, CancellationToken ct)
+        {
+            var r = await mediator.Send(new DeclineRfqCommand(id), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
         [HttpPost("{id:guid}/quote")]
         [Authorize(Roles = "Seller")]
         [ProducesResponseType(typeof(ApiResponse<RfqQuoteDto>), 201)]
@@ -82,8 +136,17 @@ namespace E_Commerce.Api.Controllers
             Guid id, [FromBody] SubmitQuoteRequest req, CancellationToken ct)
         {
             var r = await mediator.Send(new SubmitQuoteCommand(
-                id, req.UnitPrice, req.Quantity, req.Currency,
-                req.Notes, req.PaymentTerms, req.DeliveryTerms, req.ValidityDays), ct);
+                id,
+                req.SellerCompanyId,
+                req.UnitPrice,
+                req.Quantity,
+                req.Currency,
+                req.Notes,
+                req.PaymentTerms,
+                req.DeliveryTerms,
+                req.ValidityDays,
+                req.LeadTimeDays,
+                req.SampleAvailable), ct);
             return StatusCode(r.StatusCode, r);
         }
 
@@ -95,11 +158,26 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new AcceptQuoteCommand(quoteId), ct);
             return StatusCode(r.StatusCode, r);
         }
+
+        [HttpPost("quotes/{quoteId:guid}/decline")]
+        [Authorize(Roles = "Buyer")]
+        [ProducesResponseType(typeof(ApiResponse<RfqRequestDto>), 200)]
+        public async Task<IActionResult> DeclineQuote(Guid quoteId, CancellationToken ct)
+        {
+            var r = await mediator.Send(new DeclineQuoteCommand(quoteId), ct);
+            return StatusCode(r.StatusCode, r);
+        }
     }
 
     public record SubmitQuoteRequest(
-        decimal UnitPrice, int Quantity, string Currency = "EGP",
-        string? Notes = null, string? PaymentTerms = null,
-        string? DeliveryTerms = null, int ValidityDays = 7);
+        Guid SellerCompanyId,
+        decimal UnitPrice,
+        int Quantity,
+        string Currency = "EGP",
+        string? Notes = null,
+        string? PaymentTerms = null,
+        string? DeliveryTerms = null,
+        int ValidityDays = 7,
+        int? LeadTimeDays = null,
+        bool SampleAvailable = false);
 }
-

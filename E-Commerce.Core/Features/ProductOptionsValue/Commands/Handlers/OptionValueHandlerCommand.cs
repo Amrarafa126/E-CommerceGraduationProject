@@ -27,7 +27,7 @@ namespace E_Commerce.Core.Features.ProductOptionsValue.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You are not allowed to modify this product.");
+                throw new ForbiddenException("غير مسموح لك بتعديل هذا المنتج.");
 
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
@@ -55,7 +55,7 @@ namespace E_Commerce.Core.Features.ProductOptionsValue.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You are not allowed to modify this product.");
+                throw new ForbiddenException("غير مسموح لك بتعديل هذا المنتج.");
 
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
@@ -89,7 +89,7 @@ namespace E_Commerce.Core.Features.ProductOptionsValue.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You are not allowed to modify this product.");
+                throw new ForbiddenException("غير مسموح لك بتعديل هذا المنتج.");
 
             var option = product.ProductOptions.FirstOrDefault(o => o.Id == req.OptionId)
                 ?? throw new NotFoundException(nameof(ProductOption), req.OptionId);
@@ -104,13 +104,13 @@ namespace E_Commerce.Core.Features.ProductOptionsValue.Commands.Handlers
             if (variantsUseValue)
                 return ApiResponse<object>.Fail(
                     "Cannot delete this value because one or more variants are linked to it. " +
-                    "Delete the related variants first.", 409);
+                    "احذف المتغيرات المرتبطة أولاً.", 409);
 
             option.Values.Remove(value);
             uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok("Option value deleted successfully.");
+            return ApiResponse<object>.Ok("تم حذف قيمة الخيار بنجاح.");
         }
     }
 }

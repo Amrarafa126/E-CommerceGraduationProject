@@ -1,24 +1,19 @@
-﻿using E_Commerce.Core.Features.Payment.Commands.Models;
+using E_Commerce.Core.Features.Payment.Commands.Models;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Core.Features.Payment.Commands.Validation
 {
-
     public class InitiatePaymentValidator : AbstractValidator<InitiatePaymentCommand>
     {
         public InitiatePaymentValidator()
         {
-            RuleFor(x => x.OrderId).NotEmpty();
-            RuleFor(x => x.PaymentMethod).InclusiveBetween(0, 3)
-                .WithMessage("PaymentMethod must be 0 (Card), 1 (Wallet), 2 (CashOnDelivery), or 3 (BankTransfer).");
+            RuleFor(x => x.OrderId).NotEmpty().WithMessage("معرف الطلب مطلوب.");
+            RuleFor(x => x.PaymentMethod)
+                .InclusiveBetween(0, 3)
+                .WithMessage("طريقة الدفع يجب أن تكون 0 (بطاقة)، 1 (محفظة)، 2 (نقداً عند الاستلام)، أو 3 (تحويل بنكي).");
             RuleFor(x => x.CardToken)
-                .NotEmpty().When(x => x.PaymentMethod == 0)
-                .WithMessage("CardToken is required for card payments.");
+                .NotEmpty().WithMessage("رمز البطاقة مطلوب عند الدفع بالبطاقة.")
+                .When(x => x.PaymentMethod == 0);
         }
     }
 }

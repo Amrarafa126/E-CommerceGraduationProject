@@ -22,13 +22,20 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only add price tiers of your own products.");
+                throw new ForbiddenException("يمكنك إضافة مستويات أسعار منتجاتك فقط.");
+
+            bool hasOverlap = product.PriceTiers
+                .Any(t =>
+                    req.MinQuantity <= (t.MaxQuantity ?? int.MaxValue) &&
+                    (req.MaxQuantity ?? int.MaxValue) >= t.MinQuantity);
+
+            if (hasOverlap)
+                return ApiResponse<PriceTierDto>.Fail(
+                    "The quantity range overlaps with an existing price tier.", 409);
 
             var tier = ProductPriceTier.Create(product.Id, req.MinQuantity, req.UnitPrice, req.MaxQuantity);
 
             await uow.PriceTiers.AddAsync(tier, ct);
-
-
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<PriceTierDto>.Created(mapper.Map<PriceTierDto>(tier));
@@ -42,7 +49,7 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only edit price tiers of your own products.");
+                throw new ForbiddenException("يمكنك تعديل مستويات أسعار منتجاتك فقط.");
 
             var tier = product.PriceTiers!.FirstOrDefault(t => t.Id == req.TierId)
                 ?? throw new NotFoundException(nameof(ProductPriceTier), req.TierId);
@@ -69,7 +76,7 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
                 ?? throw new NotFoundException(nameof(Product), req.ProductId);
 
             if (cu.OwnedCompanyId != product.CompanyId && cu.Role != "Admin")
-                throw new ForbiddenException("You can only delete price tiers of your own products.");
+                throw new ForbiddenException("يمكنك حذف مستويات أسعار منتجاتك فقط.");
 
             var tier = product.PriceTiers!.FirstOrDefault(t => t.Id == req.TierId)
                 ?? throw new NotFoundException(nameof(ProductPriceTier), req.TierId);
@@ -78,7 +85,7 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
 
             await uow.SaveChangesAsync(ct);
 
-            return ApiResponse<object>.Ok("Price tier deleted successfully.");
+            return ApiResponse<object>.Ok("تم حذف مستوى السعر بنجاح.");
         }
     }
 }

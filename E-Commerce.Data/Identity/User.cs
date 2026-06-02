@@ -16,6 +16,8 @@ namespace E_Commerce.Data.Identity
 
         public string? RefreshToken { get; private set; }
         public DateTime? RefreshTokenExpiryTime { get; private set; }
+        public string? MagicLinkToken { get; private set; }
+        public DateTime? MagicLinkExpiry { get; private set; }
         public Guid? OwnedCompanyId { get; private set; }
         public Company? OwnedCompany { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
@@ -109,11 +111,27 @@ namespace E_Commerce.Data.Identity
 
         public void SetAvatar(string url) { AvatarUrl = url; MarkAsUpdated(); }
 
-        public void UpdateProfile(string firstName, string lastName, string? phone)
+        public void UpdateProfile(string firstName, string lastName, string? phone, string? avatarUrl = null)
         {
             FirstName = firstName;
             LastName = lastName;
             PhoneNumber = phone;
+            if (avatarUrl != null)
+                AvatarUrl = avatarUrl;
+            MarkAsUpdated();
+        }
+
+        public void SetMagicLinkToken(string token, DateTime expiry)
+        {
+            MagicLinkToken = token;
+            MagicLinkExpiry = expiry;
+            MarkAsUpdated();
+        }
+
+        public void ClearMagicLinkToken()
+        {
+            MagicLinkToken = null;
+            MagicLinkExpiry = null;
             MarkAsUpdated();
         }
 

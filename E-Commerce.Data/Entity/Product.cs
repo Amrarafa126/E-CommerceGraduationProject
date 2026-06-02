@@ -20,8 +20,27 @@ namespace E_Commerce.Data.Entity
         public double AverageRating { get; private set; }
         public int ReviewCount { get; private set; }
         public int MinimumOrderQuantity { get; set; }
+        public int StockQuantity { get; private set; }
         public ProductStatus Status { get; private set; } = ProductStatus.Draft;
 
+        // ─── B2B Fields ───
+        public string? Brand { get; set; }
+        public string? ModelNumber { get; set; }
+        public string? OriginCountry { get; set; }
+        public UnitOfMeasure UnitOfMeasure { get; set; } = UnitOfMeasure.Piece;
+        public int LeadTimeDays { get; set; }
+        public int? LeadTimeDaysSample { get; set; }
+        public string? SupplyAbility { get; set; }
+        public string? TradeTerms { get; set; }
+        public string? PortOfLoading { get; set; }
+        public string? PaymentTerms { get; set; }
+        public string? PackagingDetails { get; set; }
+        public bool SampleAvailable { get; set; }
+        public decimal? SamplePrice { get; set; }
+        public int? SampleMoq { get; set; }
+        public string? MetaTitle { get; set; }
+        public string? MetaDescription { get; set; }
+        public string? Slug { get; set; }
 
         public Guid CompanyId { get; set; }
         [ForeignKey("CompanyId")]
@@ -36,13 +55,20 @@ namespace E_Commerce.Data.Entity
         public ICollection<ProductVariant> productVariants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
 
+        // New collections
+        public ICollection<ProductSpecification> Specifications { get; set; } = new List<ProductSpecification>();
+        public ICollection<ProductCertificate> Certificates { get; set; } = new List<ProductCertificate>();
+        public ICollection<ProductVideo> Videos { get; set; } = new List<ProductVideo>();
+        public ICollection<ProductTag> Tags { get; set; } = new List<ProductTag>();
+
         private Product() { }
 
         public static Product Create(string name, string description, Guid companyId,
-            Guid categoryId, int moq, decimal basePrice , string currency)
+            Guid categoryId, int moq, decimal basePrice, string currency, int stockQuantity = 0)
         {
             if (moq <= 0) throw new ArgumentException("MOQ must be > 0.");
-           if (basePrice < 0) throw new ArgumentException("Price cannot be negative.");
+            if (basePrice < 0) throw new ArgumentException("Price cannot be negative.");
+            if (stockQuantity < 0) throw new ArgumentException("Stock quantity cannot be negative.");
 
             return new Product
             {
@@ -53,16 +79,30 @@ namespace E_Commerce.Data.Entity
                 MinimumOrderQuantity = moq,
                 BasePrice = basePrice,
                 Currency = currency,
-         
+                StockQuantity = stockQuantity
             };
         }
         public void Update(string name, string description, Guid categoryId,
-            int moq, decimal basePrice)
+            int moq, decimal basePrice, int stockQuantity)
         {
             Name = name; Description = description; CategoryId = categoryId;
             MinimumOrderQuantity = moq; BasePrice = basePrice;
+            StockQuantity = stockQuantity;
             MarkAsUpdated();
 
+        }
+
+        public void SetStock(int quantity)
+        {
+            StockQuantity = quantity;
+            MarkAsUpdated();
+        }
+
+        public void AdjustStock(int delta)
+        {
+            StockQuantity += delta;
+            if (StockQuantity < 0) StockQuantity = 0;
+            MarkAsUpdated();
         }
 
         public void AddImage(ProductImage image)
@@ -103,10 +143,24 @@ namespace E_Commerce.Data.Entity
         public decimal GetPriceForQuantity(int quantity)
         {
             var tier = PriceTiers
-               .Where(t => quantity >= t.MinQuantity)
+               .Where(t => quantity >= t.MinQuantity && (!t.MaxQuantity.HasValue || quantity <= t.MaxQuantity.Value))
                .OrderByDescending(t => t.MinQuantity)
                .FirstOrDefault();
             return tier?.UnitPrice ?? BasePrice;
+        }
+
+        public bool HasOverlappingTiers()
+        {
+            var activeTiers = PriceTiers.OrderBy(t => t.MinQuantity).ToList();
+            for (int i = 0; i < activeTiers.Count - 1; i++)
+            {
+                var current = activeTiers[i];
+                var next = activeTiers[i + 1];
+                var currentMax = current.MaxQuantity ?? int.MaxValue;
+                if (currentMax >= next.MinQuantity)
+                    return true;
+            }
+            return false;
         }
 
         public void UpdateRatingStats(double avgRating, int reviewCount)

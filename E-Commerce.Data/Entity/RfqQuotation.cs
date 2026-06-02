@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Commerce.Data.Entity
 {
@@ -11,6 +6,9 @@ namespace E_Commerce.Data.Entity
     {
         public Guid RfqRequestId { get; private set; }
         public RfqRequest RfqRequest { get; private set; } = null!;
+
+        public Guid SellerCompanyId { get; private set; }
+        public Company SellerCompany { get; private set; } = null!;
 
         public decimal UnitPrice { get; private set; }
         public int Quantity { get; private set; }
@@ -22,18 +20,22 @@ namespace E_Commerce.Data.Entity
         public string? DeliveryTerms { get; private set; }
         public int ValidityDays { get; private set; } = 7;
         public DateTime ValidUntil { get; private set; }
+        public int? LeadTimeDays { get; private set; }
+        public bool SampleAvailable { get; private set; }
         public bool IsAccepted { get; private set; }
         public bool IsDeclined { get; private set; }
 
         private RfqQuotation() { }
 
         public static RfqQuotation Create(
-            Guid rfqRequestId, decimal unitPrice, int quantity,
+            Guid rfqRequestId, Guid sellerCompanyId, decimal unitPrice, int quantity,
             string currency = "EGP",
             string? notes = null,
             string? paymentTerms = null,
             string? deliveryTerms = null,
-            int validityDays = 7)
+            int validityDays = 7,
+            int? leadTimeDays = null,
+            bool sampleAvailable = false)
         {
             if (unitPrice < 0) throw new ArgumentException("Unit price cannot be negative.");
             if (quantity <= 0) throw new ArgumentException("Quantity must be positive.");
@@ -41,6 +43,7 @@ namespace E_Commerce.Data.Entity
             return new RfqQuotation
             {
                 RfqRequestId = rfqRequestId,
+                SellerCompanyId = sellerCompanyId,
                 UnitPrice = unitPrice,
                 Quantity = quantity,
                 Currency = currency.ToUpper(),
@@ -48,12 +51,15 @@ namespace E_Commerce.Data.Entity
                 PaymentTerms = paymentTerms,
                 DeliveryTerms = deliveryTerms,
                 ValidityDays = validityDays,
-                ValidUntil = DateTime.UtcNow.AddDays(validityDays)
+                ValidUntil = DateTime.UtcNow.AddDays(validityDays),
+                LeadTimeDays = leadTimeDays,
+                SampleAvailable = sampleAvailable
             };
         }
 
         public void Accept() { IsAccepted = true; MarkAsUpdated(); }
         public void Decline() { IsDeclined = true; MarkAsUpdated(); }
+
         [NotMapped]
         public bool IsExpired => DateTime.UtcNow > ValidUntil;
     }

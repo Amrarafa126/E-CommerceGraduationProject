@@ -4,7 +4,6 @@ using E_Commerce.Core.Features.Companies.Queries.Models;
 using E_Commerce.Core.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce.Api.Controllers
@@ -14,7 +13,6 @@ namespace E_Commerce.Api.Controllers
     [Produces("application/json")]
     public class CompanyController(ISender mediator) : ControllerBase
     {
-
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<CompanySummaryDto>>), 200)]
         public async Task<IActionResult> GetAll(
@@ -25,7 +23,6 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new GetCompaniesQuery(search, page, pageSize), ct);
             return StatusCode(r.StatusCode, r);
         }
-
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
@@ -33,7 +30,6 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new GetCompanyByIdQuery(id), ct);
             return StatusCode(r.StatusCode, r);
         }
-
         [HttpGet("my-company")]
         [Authorize(Roles = "Seller")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
@@ -42,7 +38,6 @@ namespace E_Commerce.Api.Controllers
             var r = await mediator.Send(new GetMyCompanyQuery(), ct);
             return StatusCode(r.StatusCode, r);
         }
-
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Seller,Admin")]
         [ProducesResponseType(typeof(ApiResponse<CompanyDto>), 200)]
@@ -55,6 +50,5 @@ namespace E_Commerce.Api.Controllers
                 dto.YearEstablished, dto.EmployeesCount), ct);
             return StatusCode(r.StatusCode, r);
         }
-
     }
 }

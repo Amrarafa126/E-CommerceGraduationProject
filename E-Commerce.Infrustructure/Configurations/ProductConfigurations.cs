@@ -1,4 +1,4 @@
-﻿
+
 using E_Commerce.Data.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -19,6 +19,22 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(p => p.BasePrice).HasPrecision(18, 4);
             builder.Property(p => p.Status)
                 .HasConversion<string>().HasMaxLength(20);
+
+            // B2B scalar fields
+            builder.Property(p => p.Brand).HasMaxLength(100);
+            builder.Property(p => p.ModelNumber).HasMaxLength(100);
+            builder.Property(p => p.OriginCountry).HasMaxLength(100);
+            builder.Property(p => p.UnitOfMeasure).HasConversion<string>().HasMaxLength(20);
+            builder.Property(p => p.SupplyAbility).HasMaxLength(200);
+            builder.Property(p => p.TradeTerms).HasMaxLength(200);
+            builder.Property(p => p.PortOfLoading).HasMaxLength(200);
+            builder.Property(p => p.PaymentTerms).HasMaxLength(500);
+            builder.Property(p => p.PackagingDetails).HasMaxLength(2000);
+            builder.Property(p => p.SamplePrice).HasPrecision(18, 4);
+            builder.Property(p => p.MetaTitle).HasMaxLength(200);
+            builder.Property(p => p.MetaDescription).HasMaxLength(500);
+            builder.Property(p => p.Slug).HasMaxLength(300);
+            builder.HasIndex(p => p.Slug).IsUnique();
 
             builder.HasOne(p => p.Category)
                 .WithMany(c => c.Products)
@@ -41,6 +57,26 @@ namespace E_Commerce.Infrustructure.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(p => p.PriceTiers)
+                .WithOne(t => t.Product)
+                .HasForeignKey(t => t.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(p => p.Specifications)
+                .WithOne(s => s.Product)
+                .HasForeignKey(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(p => p.Certificates)
+                .WithOne(c => c.Product)
+                .HasForeignKey(c => c.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(p => p.Videos)
+                .WithOne(v => v.Product)
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(p => p.Tags)
                 .WithOne(t => t.Product)
                 .HasForeignKey(t => t.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);

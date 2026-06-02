@@ -14,6 +14,8 @@ namespace E_Commerce.Core.Features.ProductVariants.Commands.Models
      decimal Price,
      int StockQuantity,
      bool IsActive,
-     List<Guid> OptionValueIds)
+     List<Guid> OptionValueIds,
+     string? Barcode = null,
+     string? ImageUrl = null)
      : IRequest<ApiResponse<ProductVariantDto>>;
 }

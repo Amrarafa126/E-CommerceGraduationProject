@@ -13,7 +13,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
         public async Task<ApiResponse<List<ActivityItemDto>>> Handle(
             GetRecentActivityQuery req, CancellationToken ct)
         {
-            if (cu.Role != "Admin") throw new ForbiddenException("Admin only.");
+            if (cu.Role != "Admin") throw new ForbiddenException("مسموح فقط للمسؤول.");
             var lim = Math.Clamp(req.Limit, 5, 50);
 
             var activities = new List<ActivityItemDto>();
@@ -24,8 +24,8 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Where(o => !o.IsDeleted)
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(lim).Select(o => new ActivityItemDto(
-                    "order", "New Order",
-                    $"{o.Buyer.FullName} placed an order worth {o.TotalAmount:C}",
+                    "order", "طلب جديد",
+                    $"{o.Buyer.FullName} قدم طلباً بقيمة {o.TotalAmount:C}",
                     "📦", o.CreatedAt, o.Id, null, null))
                 .ToListAsync(ct);
 
@@ -34,8 +34,8 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Where(u => !u.IsDeleted)
                 .OrderByDescending(u => u.CreatedAt)
                 .Take(lim).Select(u => new ActivityItemDto(
-                    "user", "New User",
-                    $"{u.FirstName} {u.LastName} registered as {u.Role}",
+                    "user", "مستخدم جديد",
+                    $"{u.FirstName} {u.LastName} سجّل كـ {u.Role}",
                     "👤", u.CreatedAt, null, u.Id, null))
                 .ToListAsync(ct);
 
@@ -44,8 +44,8 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.CreatedAt)
                 .Take(lim).Select(c => new ActivityItemDto(
-                    "company", "New Company",
-                    $"{c.CompanyName} registered as a seller",
+                    "company", "شركة جديدة",
+                    $"{c.CompanyName} سجّل كـ a seller",
                     "🏢", c.CreatedAt, null, null, c.Id))
                 .ToListAsync(ct);
 
@@ -56,7 +56,7 @@ namespace E_Commerce.Core.Features.AdminDashboard.Queries.Handlers
                 .Where(r => !r.IsDeleted)
                 .OrderByDescending(r => r.CreatedAt)
                 .Take(lim).Select(r => new ActivityItemDto(
-                    "review", "New Review",
+                    "review", "تقييم جديد",
                     $"{r.Buyer.FullName} rated \"{r.Product.Name}\" {r.Rating}★",
                     "⭐", r.CreatedAt, null, null, null))
                 .ToListAsync(ct);
