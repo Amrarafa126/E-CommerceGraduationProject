@@ -33,15 +33,6 @@ namespace E_Commerce.Core.Features.ProductPriceTiers.Commands.Handlers
                 return ApiResponse<PriceTierDto>.Fail(
                     "The quantity range overlaps with an existing price tier.", 409);
 
-            bool hasOverlap = product.PriceTiers
-                .Any(t =>
-                    req.MinQuantity <= (t.MaxQuantity ?? int.MaxValue) &&
-                    (req.MaxQuantity ?? int.MaxValue) >= t.MinQuantity);
-
-            if (hasOverlap)
-                return ApiResponse<PriceTierDto>.Fail(
-                    "The quantity range overlaps with an existing price tier.", 409);
-
             var tier = ProductPriceTier.Create(product.Id, req.MinQuantity, req.UnitPrice, req.MaxQuantity);
 
             await uow.PriceTiers.AddAsync(tier, ct);

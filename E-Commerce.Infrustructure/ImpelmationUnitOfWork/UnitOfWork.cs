@@ -19,6 +19,7 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
         private IGenericRepositoryAsync<ProductVideo>? _videos;
         private IGenericRepositoryAsync<ProductTag>? _tags;
         private IGenericRepositoryAsync<ReviewHelpfulVote>? _reviewHelpfulVotes;
+        private IGenericRepositoryAsync<ShippingRate>? _shippingRates;
         private IDbContextTransaction? _transaction;
         private IUserRepos? _users;
         private ICompanyRepos? _companies;
@@ -57,6 +58,8 @@ namespace E_Commerce.Infrustructure.ImpelmationUnitOfWork
             => _tags ??= new GenericRepositoryAsync<ProductTag>(context);
         public IGenericRepositoryAsync<ReviewHelpfulVote> ReviewHelpfulVotes
             => _reviewHelpfulVotes ??= new GenericRepositoryAsync<ReviewHelpfulVote>(context);
+        public IGenericRepositoryAsync<ShippingRate> ShippingRates
+            => _shippingRates ??= new GenericRepositoryAsync<ShippingRate>(context);
         public IUserRepos Users => _users ??= new UserRepos(context);
         public ICompanyRepos Companies => _companies ??= new CompanyRepos(context);
         public IProductRepos Products => _products ??= new ProductRepos(context);

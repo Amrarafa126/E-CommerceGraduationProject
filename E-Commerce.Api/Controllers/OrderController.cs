@@ -53,7 +53,8 @@ namespace E_Commerce.Api.Controllers
             [FromBody] CreateOrderDto dto, CancellationToken ct)
         {
             var r = await mediator.Send(
-                new CreateOrderCommand(dto.SellerCompanyId, dto.Notes, dto.Currency, dto.Items, dto.IdempotencyKey, dto.PoNumber), ct);
+                new CreateOrderCommand(dto.SellerCompanyId, dto.Notes, dto.Currency, dto.Items,
+                    dto.ShippingAddress, dto.ShippingMethod, dto.IdempotencyKey, dto.PoNumber), ct);
             return StatusCode(r.StatusCode, r);
         }
 

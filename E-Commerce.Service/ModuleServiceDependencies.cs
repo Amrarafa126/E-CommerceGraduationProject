@@ -24,6 +24,7 @@ namespace E_Commerce.Service
             service.AddTransient<IFileStorageService, LocalFileStorageService>();
             service.AddTransient<IPaymentGateway, PaymobPaymentGateway>();
             service.AddTransient<IBostaShippingService, BostaShippingService>();
+            service.AddTransient<IShippingRateService, BostaShippingRateService>();
             service.AddHttpClient<IPaymobClient, PaymobClient>();
             service.AddHttpClient<IBostaClient, BostaClient>();
 

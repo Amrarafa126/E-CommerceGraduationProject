@@ -29,6 +29,19 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.HasMany(o => o.SubOrders)
                 .WithOne(s => s.Order).HasForeignKey(s => s.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.OwnsOne(o => o.ShippingAddress, address =>
+            {
+                address.ToTable("OrderShippingAddresses");
+                address.Property(a => a.RecipientName).IsRequired().HasMaxLength(200);
+                address.Property(a => a.PhoneNumber).IsRequired().HasMaxLength(50);
+                address.Property(a => a.AddressLine1).IsRequired().HasMaxLength(500);
+                address.Property(a => a.AddressLine2).HasMaxLength(500);
+                address.Property(a => a.City).IsRequired().HasMaxLength(100);
+                address.Property(a => a.State).IsRequired().HasMaxLength(100);
+                address.Property(a => a.Country).IsRequired().HasMaxLength(100);
+                address.Property(a => a.PostalCode).HasMaxLength(20);
+            });
         }
     }
 }

@@ -3,6 +3,7 @@ using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Orders.Commands.Models;
 using E_Commerce.Data.Entity;
 using E_Commerce.Data.Status;
+using E_Commerce.Data.ValueObjects;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
@@ -12,7 +13,8 @@ namespace E_Commerce.Core.Features.Orders.Commands.Handlers
     public class CreateOrderHandler(
         IUnitOfWork uow,
         ICurrentUserService cu,
-        IMapper mapper)
+        IMapper mapper,
+        E_Commerce.Service.Shipping.IShippingRateService rateService)
         : IRequestHandler<CreateOrderCommand, ApiResponse<OrderDto>>
     {
         public async Task<ApiResponse<OrderDto>> Handle(CreateOrderCommand req, CancellationToken ct)
@@ -128,6 +130,36 @@ namespace E_Commerce.Core.Features.Orders.Commands.Handlers
                 }
 
                 order.AddSubOrder(subOrder);
+
+                // Validate and apply shipping details
+                var shippingMethod = (ShippingMethod)(req.ShippingMethod + 1);
+                if (!Enum.IsDefined(typeof(ShippingMethod), shippingMethod))
+                    throw new ValidationException("طريقة الشحن غير صالحة.");
+
+                var addr = req.ShippingAddress;
+                if (string.IsNullOrWhiteSpace(addr?.RecipientName) ||
+                    string.IsNullOrWhiteSpace(addr.PhoneNumber) ||
+                    string.IsNullOrWhiteSpace(addr.AddressLine1) ||
+                    string.IsNullOrWhiteSpace(addr.City) ||
+                    string.IsNullOrWhiteSpace(addr.Country))
+                    throw new ValidationException("عنوان الشحن غير مكتمل.");
+
+                var sellerCompany = await uow.Companies.GetByIdAsync(req.SellerCompanyId, ct)
+                    ?? throw new NotFoundException(nameof(Company), req.SellerCompanyId);
+
+                var pickupCity = sellerCompany.Address?.City ?? addr.City;
+                var pickupState = sellerCompany.Address?.State ?? addr.State;
+
+                var rateEstimate = await rateService.EstimateAsync(
+                    addr.Country, addr.City, addr.State,
+                    pickupCity, pickupState,
+                    shippingMethod, ct);
+
+                subOrder.SetShippingDetails(shippingMethod, rateEstimate.Cost);
+                order.SetShippingAddress(new ShippingAddress(
+                    addr.RecipientName, addr.PhoneNumber, addr.AddressLine1,
+                    addr.City, addr.State, addr.Country, addr.PostalCode, addr.AddressLine2));
+                order.RecalculateTotals();
 
                 await uow.Orders.AddAsync(order, ct);
                 await uow.SaveChangesAsync(ct);

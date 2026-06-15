@@ -11,6 +11,7 @@ namespace E_Commerce.Infrustructure.Repository
     {
         public Task<Order?> GetWithFullDetailsAsync(Guid id, CancellationToken ct = default)
        => Db.orders
+           .Include(o => o.ShippingAddress)
            .Include(o => o.Buyer)
            .Include(o => o.SubOrders)
                .ThenInclude(s => s.SellerCompany)
@@ -33,6 +34,7 @@ namespace E_Commerce.Infrustructure.Repository
             Guid buyerId, int page, int pageSize, CancellationToken ct = default)
         {
             var q = Db.orders.AsNoTracking()
+                .Include(o => o.ShippingAddress)
                 .Include(o => o.SubOrders)
                     .ThenInclude(s => s.SellerCompany)
                 .Include(o => o.SubOrders)
@@ -50,6 +52,7 @@ namespace E_Commerce.Infrustructure.Repository
             Guid companyId, int page, int pageSize, CancellationToken ct = default)
         {
             var q = Db.orders.AsNoTracking()
+                .Include(o => o.ShippingAddress)
                 .Include(o => o.Buyer)
                 .Include(o => o.SubOrders)
                     .ThenInclude(s => s.Payment)

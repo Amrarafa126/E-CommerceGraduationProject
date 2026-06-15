@@ -11,6 +11,7 @@ namespace E_Commerce.Service.Shipping
         Task<BostaCreateDeliveryResponse> CreateDeliveryAsync(BostaCreateDeliveryRequest request, CancellationToken ct = default);
         Task<BostaDeliveryResponse?> GetDeliveryAsync(string trackingNumber, CancellationToken ct = default);
         Task<byte[]> GetAwbAsync(string trackingNumber, CancellationToken ct = default);
+        Task<BostaPriceResponse?> GetDeliveryPriceAsync(BostaPriceRequest request, CancellationToken ct = default);
     }
 
     public class BostaClient : IBostaClient
@@ -69,6 +70,18 @@ namespace E_Commerce.Service.Shipping
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsByteArrayAsync(ct);
         }
+
+        public async Task<BostaPriceResponse?> GetDeliveryPriceAsync(BostaPriceRequest request, CancellationToken ct = default)
+        {
+            // Note: Bosta's public pricing endpoint shape is not documented in the current integration.
+            // This method attempts the standard path and falls back to the internal rate table if unavailable.
+            var response = await _httpClient.PostAsJsonAsync("/api/v2/pricing", request, ct);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var content = await response.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<BostaPriceResponse>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
     }
 
     // Request/Response DTOs
@@ -95,6 +108,16 @@ namespace E_Commerce.Service.Shipping
         string _id,
         string trackingNumber,
         string state);
+
+    public record BostaPriceRequest(
+        BostaAddress pickupAddress,
+        BostaAddress dropOffAddress,
+        BostaSpecs specs,
+        string? cod = null);
+
+    public record BostaPriceResponse(
+        decimal deliveryFees,
+        int estimatedDays);
 
     public record BostaDeliveryResponse(
         string _id,

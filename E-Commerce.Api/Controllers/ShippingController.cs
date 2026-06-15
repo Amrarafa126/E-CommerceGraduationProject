@@ -2,8 +2,8 @@
 using E_Commerce.Core.Features.Shippings.Commands.Models;
 using E_Commerce.Core.Features.Shippings.Queries.Models;
 using E_Commerce.Service.Shipping;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +23,23 @@ namespace E_Commerce.Api.Controllers
                 dto.City, dto.State, dto.Country, dto.PostalCode,
                 dto.Method, dto.ShippingCost, dto.AddressLine2,
                 dto.PhoneNumber, dto.EstimatedDeliveryDate), ct);
+            return StatusCode(r.StatusCode, r);
+        }
+
+        [HttpGet("rates")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<ShippingRateEstimate>), 200)]
+        public async Task<IActionResult> GetRate(
+            [FromQuery] string city,
+            [FromQuery] int method,
+            [FromQuery] string? state = null,
+            [FromQuery] string country = "Egypt",
+            [FromQuery] string? pickupCity = null,
+            [FromQuery] string? pickupState = null,
+            [FromQuery] Guid? sellerCompanyId = null,
+            CancellationToken ct = default)
+        {
+            var r = await mediator.Send(new GetShippingRateQuery(city, state, country, method, pickupCity, pickupState, sellerCompanyId), ct);
             return StatusCode(r.StatusCode, r);
         }
 

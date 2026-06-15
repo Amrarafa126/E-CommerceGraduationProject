@@ -7,6 +7,7 @@ using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
 using MediatR;
+using System.Text;
 
 namespace E_Commerce.Core.Features.Products.Commands.Handlers
 {
@@ -56,7 +57,7 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
             product.SampleMoq = req.SampleMoq;
             product.MetaTitle = req.MetaTitle;
             product.MetaDescription = req.MetaDescription;
-            product.Slug = req.Slug;
+            product.Slug = await EnsureUniqueSlugAsync(req.Slug, req.Name, null, ct);
 
             await uow.Products.AddAsync(product, ct);
             await uow.SaveChangesAsync(ct);
@@ -96,13 +97,71 @@ namespace E_Commerce.Core.Features.Products.Commands.Handlers
             product.SampleMoq = req.SampleMoq;
             product.MetaTitle = req.MetaTitle;
             product.MetaDescription = req.MetaDescription;
-            product.Slug = req.Slug;
+            product.Slug = await EnsureUniqueSlugAsync(req.Slug, req.Name, product.Id, ct);
 
             uow.Products.Update(product);
             await uow.SaveChangesAsync(ct);
 
             return ApiResponse<ProductDto>.Ok(ProductMapper.Map(product));
         }
+
+        private async Task<string?> EnsureUniqueSlugAsync(string? slug, string name, Guid? excludeProductId, CancellationToken ct)
+        {
+            var candidate = string.IsNullOrWhiteSpace(slug) ? GenerateSlug(name) : slug.Trim().ToLowerInvariant();
+
+            if (string.IsNullOrWhiteSpace(candidate))
+                return null;
+
+            const int maxLength = 300;
+            if (candidate.Length > maxLength)
+                candidate = candidate[..maxLength];
+
+            var baseSlug = candidate;
+            int suffix = 2;
+
+            while (excludeProductId.HasValue
+                ? await uow.Products.ExistsAsync(p => p.Slug == candidate && p.Id != excludeProductId.Value, ct)
+                : await uow.Products.ExistsAsync(p => p.Slug == candidate, ct))
+            {
+                var suffixText = $"-{suffix}";
+                candidate = baseSlug.Length + suffixText.Length > maxLength
+                    ? baseSlug[..(maxLength - suffixText.Length)] + suffixText
+                    : baseSlug + suffixText;
+                suffix++;
+            }
+
+            return candidate;
+        }
+
+        private static string GenerateSlug(string name)
+        {
+            var allowed = name
+                .Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-')
+                .ToArray();
+
+            var sb = new StringBuilder();
+            bool lastWasHyphen = false;
+
+            foreach (var c in allowed)
+            {
+                if (char.IsWhiteSpace(c) || c == '-')
+                {
+                    if (!lastWasHyphen)
+                    {
+                        sb.Append('-');
+                        lastWasHyphen = true;
+                    }
+                }
+                else
+                {
+                    sb.Append(char.ToLowerInvariant(c));
+                    lastWasHyphen = false;
+                }
+            }
+
+            return sb.ToString().Trim('-');
+        }
+
         public async Task<ApiResponse<object>> Handle(DeleteProductCommand req, CancellationToken ct)
         {
             if (cu.UserId == null) throw new UnauthorizedException();

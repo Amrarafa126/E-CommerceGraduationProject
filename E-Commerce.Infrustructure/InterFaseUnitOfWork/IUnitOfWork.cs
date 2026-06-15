@@ -38,6 +38,7 @@ namespace E_Commerce.Infrustructure.InterFaseUnitOfWork
         IGenericRepositoryAsync<ProductVideo> Videos { get; }
         IGenericRepositoryAsync<ProductTag> Tags { get; }
         IGenericRepositoryAsync<ReviewHelpfulVote> ReviewHelpfulVotes { get; }
+        IGenericRepositoryAsync<ShippingRate> ShippingRates { get; }
         Task<int> SaveChangesAsync(CancellationToken ct = default);
         Task BeginTransactionAsync(CancellationToken ct = default);
         Task CommitTransactionAsync(CancellationToken ct = default);

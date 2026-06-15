@@ -10,6 +10,7 @@ namespace E_Commerce.Core.Features.Orders
         public string Currency { get; init; } = "EGP";
         public string? BuyerNotes { get; init; }
         public string? PoNumber { get; init; }
+        public ShippingAddressDto? ShippingAddress { get; init; }
         public Guid BuyerId { get; init; }
         public string BuyerName { get; init; } = string.Empty;
         public DateTime CreatedAt { get; init; }
@@ -27,6 +28,7 @@ namespace E_Commerce.Core.Features.Orders
         public int Status { get; init; }
         public decimal SubTotal { get; init; }
         public decimal ShippingCost { get; init; }
+        public int ShippingMethod { get; init; }
         public decimal TaxAmount { get; init; }
         public decimal TotalAmount { get; init; }
         public string Currency { get; init; } = string.Empty;
@@ -73,11 +75,23 @@ namespace E_Commerce.Core.Features.Orders
         public DateTime CreatedAt { get; init; }
     }
 
+    public record ShippingAddressDto(
+        string RecipientName,
+        string PhoneNumber,
+        string AddressLine1,
+        string City,
+        string State,
+        string Country,
+        string PostalCode,
+        string? AddressLine2 = null);
+
     public record CreateOrderDto(
         Guid SellerCompanyId,
         string? Notes,
         string Currency,
         List<CreateOrderItemDto> Items,
+        ShippingAddressDto ShippingAddress,
+        int ShippingMethod,
         string? IdempotencyKey = null,
         string? PoNumber = null);
 
@@ -85,4 +99,11 @@ namespace E_Commerce.Core.Features.Orders
         Guid ProductId,
         Guid? ProductVariantId,
         int Quantity);
+
+    public record ShippingMethodDto(
+        int Method,
+        string Label,
+        decimal Cost,
+        string Currency,
+        int EstimatedDays);
 }

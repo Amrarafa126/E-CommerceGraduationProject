@@ -1,5 +1,6 @@
 ﻿using E_Commerce.Data.Entity;
 using E_Commerce.Data.Identity;
+using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -90,6 +91,23 @@ namespace E_Commerce.Infrustructure
                     await db.categories.AddRangeAsync(subs);
                     await db.SaveChangesAsync();
                     logger.LogInformation("Seeded {Count} categories.", subs.Length + 6);
+                }
+
+                if (!await db.shippingRates.AnyAsync())
+                {
+                    var rates = new[]
+                    {
+                        ShippingRate.Create("Cairo", ShippingMethod.Standard, 45m, estimatedDays: 3),
+                        ShippingRate.Create("Cairo", ShippingMethod.Express, 85m, estimatedDays: 1),
+                        ShippingRate.Create("Cairo", ShippingMethod.Overnight, 150m, estimatedDays: 1),
+                        ShippingRate.Create("Alexandria", ShippingMethod.Standard, 55m, estimatedDays: 4),
+                        ShippingRate.Create("Alexandria", ShippingMethod.Express, 95m, estimatedDays: 2),
+                        ShippingRate.Create("Giza", ShippingMethod.Standard, 45m, estimatedDays: 3),
+                        ShippingRate.Create("Giza", ShippingMethod.Express, 85m, estimatedDays: 1),
+                    };
+                    await db.shippingRates.AddRangeAsync(rates);
+                    await db.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} fallback shipping rates.", rates.Length);
                 }
 
                 logger.LogInformation("Database seeding completed successfully.");

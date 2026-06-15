@@ -2,6 +2,7 @@ using AutoMapper;
 using E_Commerce.Core.Exceptions;
 using E_Commerce.Core.Features.Shippings.Commands.Models;
 using E_Commerce.Data.Entity;
+using E_Commerce.Data.ValueObjects;
 using E_Commerce.Data.Status;
 using E_Commerce.Infrustructure.InterFaseUnitOfWork;
 using E_Commerce.Service.Interfase;
@@ -42,11 +43,21 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
             await uow.BeginTransactionAsync(ct);
             try
             {
+                var savedAddress = order.ShippingAddress;
+                var recipientName = !string.IsNullOrWhiteSpace(req.RecipientName) ? req.RecipientName : savedAddress?.RecipientName ?? "";
+                var addressLine1 = !string.IsNullOrWhiteSpace(req.AddressLine1) ? req.AddressLine1 : savedAddress?.AddressLine1 ?? "";
+                var addressLine2 = !string.IsNullOrWhiteSpace(req.AddressLine2) ? req.AddressLine2 : savedAddress?.AddressLine2;
+                var city = !string.IsNullOrWhiteSpace(req.City) ? req.City : savedAddress?.City ?? "";
+                var state = !string.IsNullOrWhiteSpace(req.State) ? req.State : savedAddress?.State ?? "";
+                var country = !string.IsNullOrWhiteSpace(req.Country) ? req.Country : savedAddress?.Country ?? "";
+                var postalCode = !string.IsNullOrWhiteSpace(req.PostalCode) ? req.PostalCode : savedAddress?.PostalCode ?? "";
+                var phone = !string.IsNullOrWhiteSpace(req.PhoneNumber) ? req.PhoneNumber : savedAddress?.PhoneNumber;
+
                 var shipment = Data.Entity.Shipping.Create(
-                    subOrder.Id, req.RecipientName,
-                    req.AddressLine1, req.City, req.State, req.Country, req.PostalCode,
+                    subOrder.Id, recipientName,
+                    addressLine1, city, state, country, postalCode,
                     method, req.ShippingCost, "EGP",
-                    req.AddressLine2, req.PhoneNumber, req.EstimatedDeliveryDate);
+                    addressLine2, phone, req.EstimatedDeliveryDate);
 
                 // Get seller company for pickup address
                 var sellerCompany = await uow.Companies.GetByIdAsync(subOrder.SellerCompanyId, ct)
@@ -55,13 +66,13 @@ namespace E_Commerce.Core.Features.Shippings.Commands.Handlers
                 // Create Bosta delivery
                 var codAmount = subOrder.Payment?.Method == PaymentMethod.CashOnDelivery ? subOrder.TotalAmount : 0;
                 var bostaResult = await bosta.CreateShipmentAsync(
-                    req.RecipientName,
-                    req.AddressLine1,
-                    req.City,
-                    req.State,
-                    req.Country,
-                    req.PostalCode,
-                    req.PhoneNumber,
+                    recipientName,
+                    addressLine1,
+                    city,
+                    state,
+                    country,
+                    postalCode,
+                    phone,
                     codAmount,
                     pickupAddressLine1: sellerCompany.Address?.Street,
                     pickupCity: sellerCompany.Address?.City,

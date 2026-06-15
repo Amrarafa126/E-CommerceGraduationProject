@@ -18,6 +18,15 @@ namespace E_Commerce.Core.Features.Orders.Commands.Vaildations
                 item.RuleFor(i => i.ProductId).NotEmpty().WithMessage("معرف المنتج مطلوب.");
                 item.RuleFor(i => i.Quantity).GreaterThan(0).WithMessage("الكمية يجب أن تكون أكبر من صفر.");
             });
+
+            RuleFor(x => x.ShippingAddress).NotNull().WithMessage("عنوان الشحن مطلوب.");
+            RuleFor(x => x.ShippingAddress.RecipientName).NotEmpty().WithMessage("اسم المستلم مطلوب.");
+            RuleFor(x => x.ShippingAddress.PhoneNumber).NotEmpty().WithMessage("رقم تليفون المستلم مطلوب.");
+            RuleFor(x => x.ShippingAddress.AddressLine1).NotEmpty().WithMessage("عنوان الشحن مطلوب.");
+            RuleFor(x => x.ShippingAddress.City).NotEmpty().WithMessage("المدينة مطلوبة.");
+            RuleFor(x => x.ShippingAddress.Country).NotEmpty().WithMessage("الدولة مطلوبة.");
+            RuleFor(x => x.ShippingMethod)
+                .InclusiveBetween(0, 3).WithMessage("طريقة الشحن غير صالحة.");
         }
     }
 }

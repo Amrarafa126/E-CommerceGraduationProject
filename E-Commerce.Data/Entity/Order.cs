@@ -1,5 +1,6 @@
 using E_Commerce.Data.Identity;
 using E_Commerce.Data.Status;
+using E_Commerce.Data.ValueObjects;
 
 namespace E_Commerce.Data.Entity
 {
@@ -12,6 +13,7 @@ namespace E_Commerce.Data.Entity
         public string? BuyerNotes { get; private set; }
         public string? PoNumber { get; private set; }
         public string? IdempotencyKey { get; private set; }
+        public ShippingAddress ShippingAddress { get; private set; } = null!;
 
         public Guid BuyerId { get; private set; }
         public User Buyer { get; private set; } = null!;
@@ -36,6 +38,12 @@ namespace E_Commerce.Data.Entity
         public void SetIdempotencyKey(string key)
         {
             IdempotencyKey = key;
+        }
+
+        public void SetShippingAddress(ShippingAddress address)
+        {
+            ShippingAddress = address;
+            MarkAsUpdated();
         }
 
         public void AddSubOrder(OrderSubOrder subOrder)

@@ -18,6 +18,7 @@ namespace E_Commerce.Infrustructure.Configurations
             builder.Property(s => s.Currency).IsRequired().HasMaxLength(3);
             builder.Property(s => s.CancellationReason).HasMaxLength(500);
             builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
+            builder.Property(s => s.ShippingMethod).HasConversion<string>().HasMaxLength(20);
             builder.Property(s => s.PaymentTerms).HasMaxLength(50);
             builder.Property(s => s.DepositAmount).HasPrecision(18, 4);
             builder.Property(s => s.BalanceDue).HasPrecision(18, 4);

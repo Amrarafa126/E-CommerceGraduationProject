@@ -1,4 +1,5 @@
 using E_Commerce.Data.Status;
+using E_Commerce.Data.ValueObjects;
 
 namespace E_Commerce.Data.Entity
 {
@@ -11,6 +12,7 @@ namespace E_Commerce.Data.Entity
         public decimal TaxAmount { get; private set; }
         public decimal TotalAmount { get; private set; }
         public string Currency { get; private set; } = "EGP";
+        public ShippingMethod ShippingMethod { get; private set; } = ShippingMethod.Standard;
         public string? CancellationReason { get; private set; }
         public string? PaymentTerms { get; private set; }
         public decimal? DepositAmount { get; private set; }
@@ -49,8 +51,17 @@ namespace E_Commerce.Data.Entity
                 SubOrderNumber = GenerateSubOrderNumber(),
                 Currency = currency.ToUpper(),
                 PaymentTerms = paymentTerms,
-                RfqQuoteId = rfqQuoteId
+                RfqQuoteId = rfqQuoteId,
+                ShippingMethod = ShippingMethod.Standard
             };
+        }
+
+        public void SetShippingDetails(ShippingMethod method, decimal shippingCost)
+        {
+            ShippingMethod = method;
+            ShippingCost = shippingCost;
+            RecalculateTotals();
+            MarkAsUpdated();
         }
 
         public void AddItem(OrderItem item)
